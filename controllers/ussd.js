@@ -1,5 +1,10 @@
 const axios = require("axios");
 const { wallet, getWalletBalance } = require("../functions/wallet.js");
+const {
+  useMatchEthAmountEntered,
+  useMatchNumberEntered,
+} = require("../regex/ussdRegex.js");
+const { sendEther } = require("../utils/sendEther.js");
 
 const fetchCoin = async name => {
   try {
@@ -126,6 +131,15 @@ const markets = async (req, res) => {
     response += `2. Sell\n`;
   }
 
+  if (useMatchEthAmountEntered(text)) {
+    response = `CON Please enter the number of reciever\n`;
+  }
+  if (useMatchNumberEntered(text)) {
+    await sendEther(text);
+    response = `END ETH payment initiated\n`;
+    response += `Wait for an SMS confirmation\n`;
+  }
+
   console.log(text);
   // Send the response back to the API
   res.set("Content-Type: text/plain");
@@ -174,3 +188,14 @@ module.exports = {
   markets,
   createWallet,
 };
+
+// regexes
+// function useRegex(input) {
+//   let regex = /[0-9]*\.[0-9]+/i;
+//   return regex.test(input);
+// }
+
+// function useRegex(input) {
+//   let regex = /[0-9]+/i;
+//   return regex.test(input);
+// }
