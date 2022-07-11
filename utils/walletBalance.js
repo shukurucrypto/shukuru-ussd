@@ -21,17 +21,19 @@ async function walletBalance(phoneNumber) {
 
   try {
     const currentUser = await User.findOne({ phoneNumber });
+    let userBalance;
+
     if (currentUser) {
       const balance = await provider.getBalance(currentUser.address);
-      const etherBalance = ethers.utils.formatEther(balance);
-      // console.log("User already exists", etherBalance);
+
+      userBalance = ethers.utils.formatEther(balance);
       // update the wallet balance in the db
-      currentUser.balance = etherBalance;
+      currentUser.balance = userBalance;
       await currentUser.save();
 
       await sendSMS(
-        `Your wallet balance is ${etherBalance} ETH`,
-        "+256704719619"
+        `Your wallet ${currentUser.address} balance is ${userBalance} ETH`,
+        phoneNumber
       );
     } else {
       console.log("User does not exist");

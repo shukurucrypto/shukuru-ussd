@@ -75,6 +75,11 @@ const markets = async (req, res) => {
     getWalletBalance(phoneNumber);
     response = `END Success\n`;
     response += `Wait for an SMS confirmation\n`;
+  } else if (useMatchEthAmountEntered(text)) {
+    response = `CON Please enter the number of reciever\n`;
+  } else if (useMatchNumberEntered(text)) {
+    const txResponse = await sendEther(text, phoneNumber);
+    response = txResponse;
   } else if (text === "2") {
     // Showing all the markets menu
     response = `CON Shukuru Top cryptocurrencies\n`;
@@ -131,16 +136,7 @@ const markets = async (req, res) => {
     response += `2. Sell\n`;
   }
 
-  if (useMatchEthAmountEntered(text)) {
-    response = `CON Please enter the number of reciever\n`;
-  }
-  if (useMatchNumberEntered(text)) {
-    await sendEther(text);
-    response = `END ETH payment initiated\n`;
-    response += `Wait for an SMS confirmation\n`;
-  }
-
-  console.log(text);
+  // console.log(text);
   // Send the response back to the API
   res.set("Content-Type: text/plain");
   res.send(response);

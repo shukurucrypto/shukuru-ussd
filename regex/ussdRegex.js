@@ -25,13 +25,27 @@ function extractPhoneNumber(text) {
       // console.log(`Found match, group ${groupIndex}: ${match}`);
       myNumber = match;
     });
-    console.log("DEBUG HERE -------------------->", myNumber);
     return myNumber;
   }
+}
+
+async function getUserPaymentAmount(text) {
+  let words = text.match(/[.\d]+/g);
+  let price = words[words.length - 2];
+  console.log(price);
+  return price;
+}
+
+async function getUserToPayPhoneNumber(text) {
+  let words = text.match(/[.\d]+/g);
+  let number = words[words.length - 1];
+  return number;
 }
 
 module.exports = {
   useMatchEthAmountEntered,
   useMatchNumberEntered,
   extractPhoneNumber,
+  getUserPaymentAmount,
+  getUserToPayPhoneNumber,
 };

@@ -34,8 +34,8 @@ async function createWalletSigner(userText, phoneNumber) {
       console.log("privateKey:", wallet.privateKey);
 
       const salt = await bcrypt.genSalt(saltRounds);
-      const encryptedMnemonic = await encrypt(wallet.privateKey);
-      const encryptedPassKey = await encrypt(wallet.mnemonic.phrase);
+      const encryptedPassKey = await encrypt(wallet.privateKey);
+      const encryptedMnemonic = await encrypt(wallet.mnemonic.phrase);
 
       // // save the wallet to the database
       const user = new User({
