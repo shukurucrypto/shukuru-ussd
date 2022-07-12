@@ -72,9 +72,8 @@ const markets = async (req, res) => {
     response = `CON Please enter amount of USDT to pay\n`;
   } else if (text === "1*4") {
     // ============================= OPTION 1/4 WALLET BALANCE =============================
-    getWalletBalance(phoneNumber);
-    response = `END Success\n`;
-    response += `Wait for an SMS confirmation\n`;
+    const txResponse = await getWalletBalance(phoneNumber);
+    response = txResponse;
   } else if (useMatchEthAmountEntered(text)) {
     response = `CON Please enter the number of reciever\n`;
   } else if (useMatchNumberEntered(text)) {
@@ -163,9 +162,8 @@ const createWallet = async (req, res) => {
   }
 
   if (text.includes("*")) {
-    wallet(text, phoneNumber);
-    response = `END Your wallet has been initiated.\n`;
-    response += `Please wait for a confirmation message.\n`;
+    const txResponse = await wallet(text, phoneNumber);
+    response = txResponse;
   }
 
   // if(text !== '') {

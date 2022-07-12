@@ -42,10 +42,29 @@ async function getUserToPayPhoneNumber(text) {
   return number;
 }
 
+async function getCreateUserWalletInfo(text) {
+  let words = text.match(/\w+|\((.*?)\)/g);
+  let name = words[0];
+  let walletPin = words[words.length - 1];
+
+  return {
+    name,
+    walletPin,
+  };
+}
+
+function truncateAddress(address) {
+  // Clear out that junk in your trunk
+  const newAddress = address.slice(0, 3) + "..." + address.slice(-3);
+  return newAddress;
+}
+
 module.exports = {
   useMatchEthAmountEntered,
   useMatchNumberEntered,
   extractPhoneNumber,
   getUserPaymentAmount,
   getUserToPayPhoneNumber,
+  getCreateUserWalletInfo,
+  truncateAddress,
 };

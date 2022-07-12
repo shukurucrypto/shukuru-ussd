@@ -7,14 +7,14 @@ const {
   extractPhoneNumber,
   getUserPaymentAmount,
   getUserToPayPhoneNumber,
+  truncateAddress,
 } = require("../regex/ussdRegex.js");
 require("dotenv").config();
 
-const provider = new ethers.providers.JsonRpcProvider(
-  process.env.RINKEBY_RPC_URL
-);
-
-//
+// const provider = new ethers.providers.JsonRpcProvider(
+//   process.env.RINKEBY_RPC_URL
+// );
+const provider = new ethers.providers.JsonRpcProvider(process.env.HARDHAT_RPC);
 
 const sendEther = async (userText, phoneNumber) => {
   /* 
@@ -22,6 +22,7 @@ const sendEther = async (userText, phoneNumber) => {
     Using the phoneNumber, we query the db and get the user's info and decrypt the pk using the crypto library
      
    */
+  let response;
   try {
     // console.log("User Text is: ", userText);
     // Get the current user / payer
@@ -44,8 +45,9 @@ const sendEther = async (userText, phoneNumber) => {
     const reciever = await User.findOne({ phoneNumber: paidUserPhone });
 
     if (!reciever) {
-      console.log("The reciver is not a Shukuru user");
-      return;
+      response = `END Payment Failed\n`;
+      response += `Make sure you have enough ETH in your wallet\n`;
+      return response;
     }
 
     // Get the current user / payer passkey
@@ -85,8 +87,9 @@ const sendEther = async (userText, phoneNumber) => {
     const convertedBalance = await ethers.utils.formatEther(walletBalance);
 
     if (convertedBalance === 0.0) {
-      console.log("User has no balance to pay");
-      return;
+      response = `END Payment Failed\n`;
+      response += `Make sure you have enough ETH in your wallet\n`;
+      return response;
     }
 
     // send
@@ -96,12 +99,16 @@ const sendEther = async (userText, phoneNumber) => {
 
     if (txRecipt.status === 1 || txRecipt.status === "1") {
       await sendSMS(
-        `You have received ${amount} ETH from ${currentUser.phoneNumber}`,
+        `You have successfully sent ${amount} ETH to ${
+          currentUser.phoneNumber
+        }. Address: ${truncateAddress(recieverAddress)}`,
         currentUser.phoneNumber
       );
 
       await sendSMS(
-        `You have sent ${amount} ETH to ${paidUserPhone}`,
+        `You have recived ${amount} ETH from ${
+          currentUser.phoneNumber
+        }. Address: ${truncateAddress(currentUser.address)}`,
         paidUserPhone
       );
     } else {
@@ -110,13 +117,35 @@ const sendEther = async (userText, phoneNumber) => {
         currentUser.phoneNumber
       );
     }
+
+    // update both the users wallet balances in the db
+    const payerNewBalance = await provider.getBalance(currentUser.address);
+    const payerNewBalanceFormatted = await ethers.utils.formatEther(
+      payerNewBalance
+    );
+    await User.findOneAndUpdate(
+      { phoneNumber: currentUser.phoneNumber },
+      { balance: payerNewBalanceFormatted }
+    );
+    const recieverNewBalance = await provider.getBalance(reciever.address);
+    const recieverNewBalanceFormatted = await ethers.utils.formatEther(
+      recieverNewBalance
+    );
+    await User.findOneAndUpdate(
+      { phoneNumber: paidUserPhone },
+      { balance: recieverNewBalanceFormatted }
+    );
+
     // console.log("Wallet balance --------------", txRecipt);
 
-    let response = `END ETH payment to ${paidUserPhone} has been initiated\n`;
+    response = `END ETH payment to ${paidUserPhone} has been initiated\n`;
     response += `Wait for an SMS confirmation\n`;
     return response;
   } catch (error) {
-    console.log(error.message);
+    response = `END Payment Failed\n`;
+    response += `Make sure you have enough ETH in your wallet\n`;
+    // console.log(error);
+    return response;
   }
 };
 

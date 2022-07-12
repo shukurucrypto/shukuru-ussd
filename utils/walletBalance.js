@@ -2,26 +2,22 @@ const ethers = require("ethers");
 const User = require("../models/User.js");
 const sendSMS = require("../SMS/smsFunctions.js");
 const bcrypt = require("bcrypt");
+const { fundTestWallets } = require("./fundTestWallets.js");
+const { truncateAddress } = require("../regex/ussdRegex.js");
 require("dotenv").config();
-// const provider = ethers.getDefaultProvider();
 
-// const credentials = {
-//   apiKey: process.env.AFRICA_TALKING_API_KEY,
-//   username: process.env.AFRICA_TALKING_APP_USERNAME,
-// };
+// const provider = new ethers.providers.JsonRpcProvider(
+//   process.env.RINKEBY_RPC_URL
+// );
+const provider = new ethers.providers.JsonRpcProvider(process.env.HARDHAT_RPC);
 
 async function walletBalance(phoneNumber) {
-  // const provider = new ethers.providers.InfuraProvider(
-  //   "rinkeby",
-  //   process.env.INFURA_SECRET
-  // );
-  const provider = new ethers.providers.JsonRpcProvider(
-    process.env.RINKEBY_RPC_URL
-  );
-
+  let response;
   try {
     const currentUser = await User.findOne({ phoneNumber });
     let userBalance;
+
+    // await fundTestWallets(currentUser.address); // uncomment this to fund test wallet
 
     if (currentUser) {
       const balance = await provider.getBalance(currentUser.address);
@@ -32,15 +28,21 @@ async function walletBalance(phoneNumber) {
       await currentUser.save();
 
       await sendSMS(
-        `Your wallet ${currentUser.address} balance is ${userBalance} ETH`,
+        `Your wallet ${truncateAddress(
+          currentUser.address
+        )} balance is ${userBalance} ETH`,
         phoneNumber
       );
+
+      response = `END Your wallet balance is ${userBalance} ETH`;
+      return response;
     } else {
-      console.log("User does not exist");
-      return;
+      response = `END You do not have a wallet yet`;
+      return response;
     }
   } catch (err) {
-    console.log(err.message);
+    response = `END An error occurred`;
+    return response;
   }
   // get user from the database
 }
