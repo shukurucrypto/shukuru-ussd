@@ -12,7 +12,7 @@ require('dotenv').config()
 // );
 const provider = new ethers.providers.JsonRpcProvider(providerRPCURL)
 
-async function walletBalance(phoneNumber) {
+async function sendWalletInfo(phoneNumber) {
   let response
   try {
     const currentUser = await User.findOne({ phoneNumber })
@@ -29,25 +29,24 @@ async function walletBalance(phoneNumber) {
       await currentUser.save()
 
       await sendSMS(
-        `Your wallet ${truncateAddress(
-          currentUser.address
-        )} balance is ${userBalance} ETH`,
+        `  Your wallet address is ${currentUser.address}
+                Balance is ${userBalance} ETH
+            `,
         phoneNumber
       )
 
-      response = `END Your wallet balance is ${userBalance} ETH`
+      response = `END We have sent you an SMS showing your wallet info \n`
       return response
     } else {
-      response = `END You do not have a wallet yet`
+      response = `END You do not have a Shukuru wallet yet`
       return response
     }
   } catch (err) {
     response = `END An error occurred`
     return response
   }
-  // get user from the database
 }
 
 module.exports = {
-  walletBalance,
+  sendWalletInfo,
 }

@@ -1,20 +1,22 @@
-const ethers = require("ethers");
-const User = require("../models/User.js");
-const bcrypt = require("bcrypt");
-const { decrypt } = require("../security/encrypt.js");
-const sendSMS = require("../SMS/smsFunctions.js");
+const ethers = require('ethers')
+const User = require('../models/User.js')
+const Transaction = require('../models/Transaction.js')
+const bcrypt = require('bcrypt')
+const { decrypt } = require('../security/encrypt.js')
+const sendSMS = require('../SMS/smsFunctions.js')
 const {
   extractPhoneNumber,
   getUserPaymentAmount,
   getUserToPayPhoneNumber,
   truncateAddress,
-} = require("../regex/ussdRegex.js");
-require("dotenv").config();
+} = require('../regex/ussdRegex.js')
+const { providerRPCURL } = require('../settings/settings.js')
+require('dotenv').config()
 
 // const provider = new ethers.providers.JsonRpcProvider(
 //   process.env.RINKEBY_RPC_URL
 // );
-const provider = new ethers.providers.JsonRpcProvider(process.env.HARDHAT_RPC);
+const provider = new ethers.providers.JsonRpcProvider(providerRPCURL)
 
 const sendEther = async (userText, phoneNumber) => {
   /* 
@@ -22,42 +24,45 @@ const sendEther = async (userText, phoneNumber) => {
     Using the phoneNumber, we query the db and get the user's info and decrypt the pk using the crypto library
      
    */
-  let response;
+  let response
   try {
     // console.log("User Text is: ", userText);
     // Get the current user / payer
-    const currentUser = await User.findOne({ phoneNumber });
+
+    const currentUser = await User.findOne({ phoneNumber })
 
     // get the reciver's contact from the userText
-    const paidUserPhoneNumber = await extractPhoneNumber(userText);
+    const paidUserPhoneNumber = await extractPhoneNumber(userText)
 
     // get the amount to be paid
-    const amount = await getUserPaymentAmount(userText);
-    const userPhone = await getUserToPayPhoneNumber(userText);
+    const amount = await getUserPaymentAmount(userText)
+    // console.log('Amount is: ', amount)
+    const userPhone = await getUserToPayPhoneNumber(userText)
+    // console.log("User Phone is: ", userPhone);
 
     // Format the return phone and append a country code to it
-    const convertedPhone = userPhone.toString();
-    const paidUserPhone = convertedPhone.replace(/^0+/, "+256");
+    const convertedPhone = userPhone.toString()
+    const paidUserPhone = convertedPhone.replace(/^0+/, '+256')
 
     // console.log("AMOUNT: ", paidUserPhone);
 
     // First get reciever's data thats in the db
-    const reciever = await User.findOne({ phoneNumber: paidUserPhone });
+    const reciever = await User.findOne({ phoneNumber: paidUserPhone })
 
     if (!reciever) {
-      response = `END Payment Failed\n`;
-      response += `Make sure you have enough ETH in your wallet\n`;
-      return response;
+      response = `END Payment Failed\n`
+      response += `Make sure you have enough ETH in your wallet\n`
+      return response
     }
 
     // Get the current user / payer passkey
-    const dbPrivateKey = currentUser.passKey;
+    const dbPrivateKey = currentUser.passKey
 
     // Decrypt the passKey
-    const privateKey = await decrypt(dbPrivateKey);
+    const privateKey = await decrypt(dbPrivateKey)
 
     // Get the reciever's address from db
-    const recieverAddress = reciever.address;
+    const recieverAddress = reciever.address
 
     // create their wallet
     // console.log("PAYER'S DECRYPTED KEY: ", privateKey);
@@ -70,85 +75,98 @@ const sendEther = async (userText, phoneNumber) => {
     const tx = {
       to: recieverAddress,
       value: ethers.utils.parseEther(amount),
-    };
+    }
 
     // payer's wallet
-    const wallet = await new ethers.Wallet(privateKey);
+    const wallet = await new ethers.Wallet(privateKey)
 
     // sign the tx
-    await wallet.signTransaction(tx);
+    await wallet.signTransaction(tx)
 
     // connect to the provider
-    const signedWallet = await wallet.connect(provider);
+    const signedWallet = await wallet.connect(provider)
 
     // get wallet balance
-    const walletBalance = await signedWallet.getBalance();
+    const walletBalance = await signedWallet.getBalance()
 
-    const convertedBalance = await ethers.utils.formatEther(walletBalance);
+    const convertedBalance = await ethers.utils.formatEther(walletBalance)
 
-    if (convertedBalance === 0.0) {
-      response = `END Payment Failed\n`;
-      response += `Make sure you have enough ETH in your wallet\n`;
-      return response;
+    if (convertedBalance === 0.0 || convertedBalance === 0) {
+      response = `END Payment Failed\n`
+      response += `Make sure you have enough ETH in your wallet\n`
+      return response
     }
 
     // send
-    const result = await signedWallet.sendTransaction(tx);
+    const result = await signedWallet.sendTransaction(tx)
 
-    const txRecipt = await result.wait(1);
+    const txRecipt = await result.wait(1)
 
-    if (txRecipt.status === 1 || txRecipt.status === "1") {
+    if (txRecipt.status === 1 || txRecipt.status === '1') {
       await sendSMS(
         `You have successfully sent ${amount} ETH to ${
           currentUser.phoneNumber
         }. Address: ${truncateAddress(recieverAddress)}`,
         currentUser.phoneNumber
-      );
+      )
 
       await sendSMS(
         `You have recived ${amount} ETH from ${
           currentUser.phoneNumber
         }. Address: ${truncateAddress(currentUser.address)}`,
         paidUserPhone
-      );
+      )
     } else {
       await sendSMS(
         `You dont have enough balance to pay ${amount} ETH to ${paidUserPhone}`,
         currentUser.phoneNumber
-      );
+      )
     }
 
     // update both the users wallet balances in the db
-    const payerNewBalance = await provider.getBalance(currentUser.address);
+    const payerNewBalance = await provider.getBalance(currentUser.address)
     const payerNewBalanceFormatted = await ethers.utils.formatEther(
       payerNewBalance
-    );
+    )
     await User.findOneAndUpdate(
       { phoneNumber: currentUser.phoneNumber },
       { balance: payerNewBalanceFormatted }
-    );
-    const recieverNewBalance = await provider.getBalance(reciever.address);
+    )
+    const recieverNewBalance = await provider.getBalance(reciever.address)
     const recieverNewBalanceFormatted = await ethers.utils.formatEther(
       recieverNewBalance
-    );
+    )
     await User.findOneAndUpdate(
       { phoneNumber: paidUserPhone },
       { balance: recieverNewBalanceFormatted }
-    );
+    )
 
-    // console.log("Wallet balance --------------", txRecipt);
+    const gasPrice = await ethers.utils.formatEther(txRecipt.gasUsed.toString())
 
-    response = `END ETH payment to ${paidUserPhone} has been initiated\n`;
-    response += `Wait for an SMS confirmation\n`;
-    return response;
+    // Create a Transaction model for the transaction
+    const newTransaction = new Transaction({
+      sender: currentUser.phoneNumber.toString(),
+      receiver: paidUserPhone.toString(),
+      amount: amount,
+      coin: 'ETH',
+      gasUsed: gasPrice,
+      txHash: txRecipt.transactionHash,
+      blockNumber: txRecipt.blockNumber,
+    })
+
+    await newTransaction.save()
+
+    response = `END ETH payment to ${paidUserPhone} has been initiated\n`
+    response += `Wait for an SMS confirmation\n`
+    return response
   } catch (error) {
-    response = `END Payment Failed\n`;
-    response += `Make sure you have enough ETH in your wallet\n`;
-    // console.log(error);
-    return response;
+    response = `END Payment Failed\n`
+    response += `Make sure you have enough ETH in your wallet\n`
+    // console.log(error.message)
+    return response
   }
-};
+}
 
 module.exports = {
   sendEther,
-};
+}
