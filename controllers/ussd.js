@@ -202,7 +202,7 @@ const createWallet = async (req, res) => {
   //     response += ` We're going to send you a link to secure your account\n`;
   // }
 
-  // console.log(text);
+  // console.log(text)
   //   console.log(text, phoneNumber, serviceCode, sessionId);
   // Send the response back to the API
   res.set('Content-Type: text/plain')

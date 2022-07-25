@@ -20,6 +20,7 @@ const provider = new ethers.providers.JsonRpcProvider(providerRPCURL)
 async function createWalletSigner(userText, phoneNumber) {
   let response
   try {
+    // console.log('Test number is: ' + phoneNumber)
     const currentUser = await User.findOne({ phoneNumber })
     if (currentUser) {
       response = `END Hi, ${currentUser.name}!\n`

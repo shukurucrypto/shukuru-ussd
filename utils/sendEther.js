@@ -38,20 +38,26 @@ const sendEther = async (userText, phoneNumber) => {
     const amount = await getUserPaymentAmount(userText)
     // console.log('Amount is: ', amount)
     const userPhone = await getUserToPayPhoneNumber(userText)
-    // console.log("User Phone is: ", userPhone);
 
     // Format the return phone and append a country code to it
-    const convertedPhone = userPhone.toString()
-    const paidUserPhone = convertedPhone.replace(/^0+/, '+256')
+    // const convertedPhone = userPhone.toString()
+    // const paidUserPhone = convertedPhone.replace(/^0+/, '')
+    // const paidUserPhone = convertedPhone.replace(/^0+/, '+256')
+    // const convertedPhone = userPhone.toString()
+    const paidUserPhone = userPhone.replace(/^0+/, '')
 
     // console.log("AMOUNT: ", paidUserPhone);
+    const convertedPhoneToNumber = Number(paidUserPhone)
 
     // First get reciever's data thats in the db
-    const reciever = await User.findOne({ phoneNumber: paidUserPhone })
+    // const reciever = await User.findOne({ phoneNumber: paidUserPhone })
+    const reciever = await User.findOne({
+      phoneNumber: { $regex: convertedPhoneToNumber, $options: 'i' },
+    })
 
     if (!reciever) {
       response = `END Payment Failed\n`
-      response += `Make sure you have enough ETH in your wallet\n`
+      response += `The user does not have a Shukuru Wallet\n`
       return response
     }
 
@@ -105,7 +111,7 @@ const sendEther = async (userText, phoneNumber) => {
     if (txRecipt.status === 1 || txRecipt.status === '1') {
       await sendSMS(
         `You have successfully sent ${amount} ETH to ${
-          currentUser.phoneNumber
+          reciever.phoneNumber
         }. Address: ${truncateAddress(recieverAddress)}`,
         currentUser.phoneNumber
       )
@@ -114,7 +120,7 @@ const sendEther = async (userText, phoneNumber) => {
         `You have recived ${amount} ETH from ${
           currentUser.phoneNumber
         }. Address: ${truncateAddress(currentUser.address)}`,
-        paidUserPhone
+        reciever.phoneNumber
       )
     } else {
       await sendSMS(
