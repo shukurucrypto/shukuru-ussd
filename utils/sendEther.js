@@ -152,7 +152,7 @@ const sendEther = async (userText, phoneNumber) => {
     // Create a Transaction model for the transaction
     const newTransaction = new Transaction({
       sender: currentUser.phoneNumber.toString(),
-      receiver: paidUserPhone.toString(),
+      receiver: reciever.phoneNumber.toString(),
       amount: amount,
       coin: 'ETH',
       gasUsed: gasPrice,
