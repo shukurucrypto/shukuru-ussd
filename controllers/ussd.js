@@ -196,6 +196,7 @@ const createWallet = async (req, res) => {
     let response = ''
 
     const user = await User.findOne({ phoneNumber })
+
     if (user) {
       // User exists
       response = `END A user with this phone already exists.\n`
@@ -218,10 +219,10 @@ const createWallet = async (req, res) => {
       response = txResponse
     }
 
-    if (text !== '') {
-      response = `END Your wallet has been created successfully\n`
-      response += ` We're going to send you a link to secure your account\n`
-    }
+    // if (text !== '') {
+    //   response = `END Your wallet has been created successfully\n`
+    //   response += ` We're going to send you a link to secure your account\n`
+    // }
 
     // console.log(text)
     //   console.log(text, phoneNumber, serviceCode, sessionId);
