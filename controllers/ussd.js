@@ -8,6 +8,7 @@ const {
   getUserPaymentAmount,
   getUserPaymentAmountBefore,
   useRejectGasFees,
+  useSelectedBTCToBuy,
 } = require('../regex/ussdRegex.js')
 const { getGasEstimates } = require('../utils/getGasEstimates.js')
 const { sendWalletInfo } = require('../utils/getWalletInfo.js')
@@ -52,35 +53,38 @@ const markets = async (req, res) => {
     response = walletResponse
   } else if (text === '1*2') {
     // ============================= OPTION 1/2 BUY =============================
+    response = `END Buy crypto coming soon to Shukuru`
     // Showing coins to buy
-    response = `CON Select coin to buy\n`
-    response += `1. BTC - Bitcoin\n`
-    response += `2. ETH - Ethereum\n`
-    response += `3. USDT - Tether\n`
-  } else if (text === '1*2*1') {
-    // Selected buy option 1
-    response = `CON Please enter amount to buy BTC\n`
-  } else if (text === '1*2*2') {
-    // Selected buy option 2
-    response = `CON Please enter amount to buy ETH\n`
-  } else if (text === '1*2*3') {
-    // Selected buy option 3
-    response = `CON Please enter amount to buy USDT\n`
+    //   response = `CON Select coin to buy\n`
+    //   response += `1. BTC - Bitcoin\n`
+    //   response += `2. ETH - Ethereum\n`
+    //   response += `3. USDT - Tether\n`
+    // } else if (text === '1*2*1') {
+    //   // Selected buy option 1 Buy BTC
+    //   response = `CON Please enter amount to buy BTC\n`
+    // } else if (text === '1*2*2') {
+    //   // Selected buy option 2 Buy ETH
+    //   response = `CON Please enter amount to buy ETH\n`
+    // } else if (text === '1*2*3') {
+    //   // Selected buy option 3 Buy USDT
+    //   response = `CON Please enter amount to buy USDT\n`
   } else if (text === '1*1') {
     // ============================= OPTION 1/3 MAKE CRYPTO PAYMENTS =============================
     response = `CON Select the coin to pay using\n`
     response += `1. BTC - Bitcoin\n`
-    response += `2. ETH - Ethereum *\n`
+    response += `2. ETH - Ethereum*\n`
     response += `3. USDT - Tether\n`
   } else if (text === '1*1*1') {
-    // Selected payment option 1
-    response = `CON Please enter amount of BTC to pay\n`
+    // Selected payment option 1 use BTC
+    // response = `CON Please enter amount of BTC to pay\n`
+    response = `END BTC coming soon to Shukuru`
   } else if (text === '1*1*2') {
-    // Selected payment option 2
+    // Selected payment option 2 use ETH
     response = `CON Please enter amount of ETH to pay\n`
   } else if (text === '1*1*3') {
-    // Selected payment option 3
-    response = `CON Please enter amount of USDT to pay\n`
+    // Selected payment option 3 use USDT
+    // response = `CON Please enter amount of USDT to pay\n`
+    response = `END USDT coming soon to Shukuru`
   } else if (text === '1*4') {
     // ============================= OPTION 1/4 WALLET BALANCE =============================
     const txResponse = await getWalletBalance(phoneNumber)
@@ -116,14 +120,14 @@ const markets = async (req, res) => {
     response += `1. BTC - Bitcoin\n`
     response += `2. ETH - Ethereum\n`
     response += `3. USDT - Tether\n`
+    // } else if (text === '2*1') {
+    //   // Showing BTC coin options
+    //   response = `CON BTC - Bitcoin\n`
+    //   response += `1. Buy\n`
+    //   response += `2. Sell\n`
+    //   response += `3. Check balance\n`
+    //   response += `4. Market Stats`
   } else if (text === '2*1') {
-    // Showing BTC coin options
-    response = `CON BTC - Bitcoin\n`
-    response += `1. Buy\n`
-    response += `2. Sell\n`
-    response += `3. Check balance\n`
-    response += `4. Market Stats`
-  } else if (text === '2*1*4') {
     // Option 4 to check the BTC market
     const coin = await fetchCoin('bitcoin')
     response = `END ${
@@ -132,14 +136,14 @@ const markets = async (req, res) => {
     response += ` Up ${coin.market_data.ath_change_percentage.btc}% last 24hr\n`
     // response += `1. Buy\n`
     // response += `2. Sell\n`
+    // } else if (text === '2*2') {
+    //   // Business logic for first level response
+    //   response = `CON ETH - Ethereum\n`
+    //   response += `1. Buy\n`
+    //   response += `2. Sell\n`
+    //   response += `3. Check balance\n`
+    //   response += `4. Market`
   } else if (text === '2*2') {
-    // Business logic for first level response
-    response = `CON ETH - Ethereum\n`
-    response += `1. Buy\n`
-    response += `2. Sell\n`
-    response += `3. Check balance\n`
-    response += `4. Market`
-  } else if (text === '2*2*4') {
     // Option 4 to check the ETH market
     const coin = await fetchCoin('ethereum')
     response = `END ${
@@ -148,14 +152,14 @@ const markets = async (req, res) => {
     response += ` ${coin.market_data.ath_change_percentage.eth}% last 24hr\n`
     // response += `1. Buy\n`
     // response += `2. Sell\n`
+    // } else if (text === '2*3') {
+    //   // Business logic for first level response
+    //   response = `CON USDT - Tether\n`
+    //   response += `1. Buy\n`
+    //   response += `2. Sell\n`
+    //   response += `3. Check balance\n`
+    //   response += `4. Market`
   } else if (text === '2*3') {
-    // Business logic for first level response
-    response = `CON USDT - Tether\n`
-    response += `1. Buy\n`
-    response += `2. Sell\n`
-    response += `3. Check balance\n`
-    response += `4. Market`
-  } else if (text === '2*3*4') {
     // Option 4 to check the USDT market
     const coin = await fetchCoin('tether')
     response = `END ${
@@ -166,7 +170,12 @@ const markets = async (req, res) => {
     // response += `2. Sell\n`
   }
 
+  // if (useSelectedBTCToBuy(text)) {
+  //   response = `END Buy crypto coming soon to Shukuru`
+  // }
+
   // console.log(text)
+  // console.log(serviceCode)
   // Send the response back to the API
   res.set('Content-Type: text/plain')
   res.send(response)
@@ -213,14 +222,3 @@ module.exports = {
   markets,
   createWallet,
 }
-
-// regexes
-// function useRegex(input) {
-//   let regex = /[0-9]*\.[0-9]+/i;
-//   return regex.test(input);
-// }
-
-// function useRegex(input) {
-//   let regex = /[0-9]+/i;
-//   return regex.test(input);
-// }

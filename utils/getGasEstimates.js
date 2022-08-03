@@ -15,7 +15,7 @@ const getGasEstimates = async (userPhone, text) => {
     // get user amount
     const amount = await getUserPaymentAmountForGasFees(text)
 
-    // const estimate = await provider.getGasPrice()
+    // const gasPriceFetch = await provider.getGasPrice()
     const estimate = await provider.estimateGas({
       to: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
       value: ethers.utils.parseEther(amount),

@@ -42,8 +42,13 @@ function extractPhoneNumber(text) {
 async function getUserPaymentAmountBefore(text) {
   let words = text.match(/[.\d]+/g)
   let price = words[words.length - 2]
-
   return price
+}
+
+async function useSelectedBTCToBuy(text) {
+  let regex = /^1\*2\*1\*[0-9]*\.[0-9]+$/is
+  let buyBTC = regex.test(text)
+  return buyBTC
 }
 
 async function getUserPaymentAmount(text) {
@@ -95,4 +100,5 @@ module.exports = {
   getUserPaymentAmountBefore,
   getUserPaymentAmountForGasFees,
   useRejectGasFees,
+  useSelectedBTCToBuy,
 }

@@ -102,11 +102,13 @@ const sendEther = async (userText, phoneNumber) => {
       response += `Make sure you have enough ETH in your wallet\n`
       return response
     }
-
+    let txRecipt
     // send
     const result = await signedWallet.sendTransaction(tx)
 
-    const txRecipt = await result.wait(1)
+    txRecipt = await result.wait(1)
+
+    // console.log('TX RECIPT: ------------------', txRecipt)
 
     if (txRecipt.status === 1 || txRecipt.status === '1') {
       await sendSMS(
@@ -147,28 +149,29 @@ const sendEther = async (userText, phoneNumber) => {
       { balance: recieverNewBalanceFormatted }
     )
 
-    const gasPrice = await ethers.utils.formatEther(txRecipt.gasUsed.toString())
+    // const gasPrice = await ethers.utils.formatEther(txRecipt.gasUsed.toString())
 
     // Create a Transaction model for the transaction
-    const newTransaction = new Transaction({
-      sender: currentUser.phoneNumber.toString(),
-      receiver: reciever.phoneNumber.toString(),
-      amount: amount,
-      coin: 'ETH',
-      gasUsed: gasPrice,
-      txHash: txRecipt.transactionHash,
-      blockNumber: txRecipt.blockNumber,
-    })
+    // const newTransaction = new Transaction({
+    //   sender: currentUser.phoneNumber.toString(),
+    //   receiver: reciever.phoneNumber.toString(),
+    //   amount: amount,
+    //   coin: 'ETH',
+    //   gasUsed: gasPrice,
+    //   txHash: txRecipt.transactionHash,
+    //   blockNumber: txRecipt.blockNumber,
+    // })
 
-    await newTransaction.save()
+    // await newTransaction.save()
 
     response = `END ETH payment to ${paidUserPhone} has been initiated\n`
     response += `Wait for an SMS confirmation\n`
     return response
   } catch (error) {
+    console.log('DEBUG HERE: -------------------------', error.message)
+
     response = `END Payment Failed\n`
     response += `Make sure you have enough ETH in your wallet\n`
-    // console.log(error.message)
     return response
   }
 }
