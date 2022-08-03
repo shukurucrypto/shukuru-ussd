@@ -70,6 +70,11 @@ const sendEther = async (userText, phoneNumber) => {
     // Get the reciever's address from db
     const recieverAddress = reciever.address
 
+    const gasPrice = await provider.getGasPrice()
+    const ethGasPrice = ethers.utils.hexlify(gasPrice)
+
+    console.log(`Current gas price: ${ethGasPrice}`)
+
     // create their wallet
     // console.log("PAYER'S DECRYPTED KEY: ", privateKey);
     // console.log("PAYER'S ADDRESS: ", currentUser);
@@ -79,6 +84,7 @@ const sendEther = async (userText, phoneNumber) => {
 
     // tx object
     const tx = {
+      from: currentUser.address,
       to: recieverAddress,
       value: ethers.utils.parseEther(amount),
     }
@@ -152,17 +158,17 @@ const sendEther = async (userText, phoneNumber) => {
     // const gasPrice = await ethers.utils.formatEther(txRecipt.gasUsed.toString())
 
     // Create a Transaction model for the transaction
-    // const newTransaction = new Transaction({
-    //   sender: currentUser.phoneNumber.toString(),
-    //   receiver: reciever.phoneNumber.toString(),
-    //   amount: amount,
-    //   coin: 'ETH',
-    //   gasUsed: gasPrice,
-    //   txHash: txRecipt.transactionHash,
-    //   blockNumber: txRecipt.blockNumber,
-    // })
+    const newTransaction = new Transaction({
+      sender: currentUser.phoneNumber.toString(),
+      receiver: reciever.phoneNumber.toString(),
+      amount: amount,
+      coin: 'ETH',
+      gasUsed: gasPrice,
+      txHash: txRecipt.transactionHash,
+      blockNumber: txRecipt.blockNumber,
+    })
 
-    // await newTransaction.save()
+    await newTransaction.save()
 
     response = `END ETH payment to ${paidUserPhone} has been initiated\n`
     response += `Wait for an SMS confirmation\n`

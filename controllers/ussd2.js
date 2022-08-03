@@ -27,7 +27,7 @@ const fetchCoin = async (name) => {
   }
 }
 
-const markets = async (req, res) => {
+const otherMarkets = async (req, res) => {
   console.log(`Markets called....`)
   try {
     const { sessionId, serviceCode, phoneNumber, text } = req.body
@@ -188,46 +188,50 @@ const markets = async (req, res) => {
   }
 }
 
-const createWallet = async (req, res) => {
-  console.log(`Create wallet called....`)
+const createOtherWallet = async (req, res) => {
+  console.log(`Create wallet called....`, req)
   try {
-    const { sessionId, serviceCode, phoneNumber, text } = req.body
+    const { sessionId, serviceCode, phoneNumber, userInput } = req.body
     // Check to see if a user with the phone number exists
     let response = ''
-
-    const user = await User.findOne({ phoneNumber })
-    if (user) {
-      // User exists
-      response = `END A user with this phone already exists.\n`
-      res.set('Content-Type: text/plain')
-      res.send(response)
-      return
+    let rep = {
+      sessionId: '15794051211',
+      message: `Welcome to Shukuru App\n Enter your name to create a crypto wallet\n`,
+      ContinueSession: '1',
     }
 
-    if (text === '') {
-      response += `CON Welcome to Shukuru App\n`
-      response += `Enter your name to create a crypto wallet\n`
-    }
+    // const user = await User.findOne({ phoneNumber });
+    // if (user) {
+    //   // User exists
+    //   response = `END A user with this phone already exists.\n`;
+    // }
 
-    if (text !== '') {
-      response += `CON Enter your wallet PIN\n`
-    }
+    // if (text === '') {
+    //   response += `CON Welcome to Shukuru App\n`
+    //   response += `Enter your name to create a crypto wallet\n`
+    // }
 
-    if (text.includes('*')) {
-      const txResponse = await wallet(text, phoneNumber)
-      response = txResponse
-    }
+    // if (text !== '') {
+    //   response += `CON Enter your wallet PIN\n`
+    // }
 
-    if (text !== '') {
-      response = `END Your wallet has been created successfully\n`
-      response += ` We're going to send you a link to secure your account\n`
-    }
+    // if (text.includes('*')) {
+    //   const txResponse = await wallet(text, phoneNumber)
+    //   response = txResponse
+    // }
+
+    // if(text !== '') {
+    //     response = `END Your wallet has been created successfully\n`;
+    //     response += ` We're going to send you a link to secure your account\n`;
+    // }
 
     // console.log(text)
     //   console.log(text, phoneNumber, serviceCode, sessionId);
     // Send the response back to the API
-    res.set('Content-Type: text/plain')
-    res.send(response)
+    // res.set('Content-Type: text/plain')
+    res.set('Content-Type: application/json')
+    // res.send(response)
+    res.send(rep)
   } catch (err) {
     console.log(err.message)
     res.send(err.message)
@@ -235,6 +239,6 @@ const createWallet = async (req, res) => {
 }
 
 module.exports = {
-  markets,
-  createWallet,
+  otherMarkets,
+  createOtherWallet,
 }

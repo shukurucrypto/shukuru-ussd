@@ -18,6 +18,7 @@ require('dotenv').config()
 const provider = new ethers.providers.JsonRpcProvider(providerRPCURL)
 
 async function createWalletSigner(userText, phoneNumber) {
+  console.log(`Create wallet called....`)
   let response
   try {
     // console.log('Test number is: ' + phoneNumber)
