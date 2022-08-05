@@ -1,5 +1,6 @@
 const ethers = require('ethers')
 const User = require('../models/User.js')
+const Assets = require('../models/Assets.js')
 
 const { encrypt } = require('../security/encrypt.js')
 const {
@@ -54,8 +55,27 @@ async function createWalletSigner(userText, phoneNumber) {
         passKey: encryptedPassKey,
         mnemonic: encryptedMnemonic,
       })
+
       const res = await user.save()
+
       if (res) {
+        // create BTC and USDT assets for the user
+        const btcAsset = new Assets({
+          user: res._id,
+          name: 'Bitcoin',
+          symbol: 'BTC',
+          balance: 0.0,
+        })
+        const usdtAsset = new Assets({
+          user: res._id,
+          name: 'Tether',
+          symbol: 'USDT',
+          balance: 0.0,
+        })
+
+        await btcAsset.save()
+        await usdtAsset.save()
+
         await sendSMS(
           `Welcome to Shukuru ${name}, your crypto wallet of address ${truncateAddress(
             createdWallet.address

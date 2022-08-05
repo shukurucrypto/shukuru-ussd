@@ -14,6 +14,8 @@ node scripts/sample-script.js
 npx hardhat help
 ```
 
+https://shukuru-crypto-app.herokuapp.com/
+
 Hi, are you doing some sort of maintainance on the USSD feature?
 
 I've been using ngrok for my app all along when testing and the callback was working smoothly, but for some reason today its not connecting at all

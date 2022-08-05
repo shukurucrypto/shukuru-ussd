@@ -3,6 +3,11 @@ function useMatchEthAmountEntered(input) {
   return regex.test(input)
 }
 
+async function useMatchUSDTAmountEntered(input) {
+  let regex = /^1\*3\*3\*[0-9]*\.[0-9]+$/is
+  return regex.test(input)
+}
+
 function useMatchAcceptGasFees(input) {
   let regex = /1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+\*1/is
   return regex.test(input)
@@ -10,6 +15,11 @@ function useMatchAcceptGasFees(input) {
 
 function useRejectGasFees(input) {
   let regex = /1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+\*2/is
+  return regex.test(input)
+}
+
+async function useMatchNumberUsdtEntered(input) {
+  let regex = /^1\*1\*3\*\d\.\d\*[0-9]+$/is
   return regex.test(input)
 }
 
@@ -101,4 +111,6 @@ module.exports = {
   getUserPaymentAmountForGasFees,
   useRejectGasFees,
   useSelectedBTCToBuy,
+  useMatchUSDTAmountEntered,
+  useMatchNumberUsdtEntered,
 }

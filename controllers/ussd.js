@@ -10,6 +10,8 @@ const {
   getUserPaymentAmountBefore,
   useRejectGasFees,
   useSelectedBTCToBuy,
+  useMatchUSDTAmountEntered,
+  useMatchNumberUsdtEntered,
 } = require('../regex/ussdRegex.js')
 const { getGasEstimates } = require('../utils/getGasEstimates.js')
 const { sendWalletInfo } = require('../utils/getWalletInfo.js')
@@ -28,7 +30,7 @@ const fetchCoin = async (name) => {
 }
 
 const markets = async (req, res) => {
-  console.log(`Markets called....`)
+  // console.log(`Markets called....`)
   try {
     const { sessionId, serviceCode, phoneNumber, text } = req.body
 
@@ -47,7 +49,7 @@ const markets = async (req, res) => {
       response = `CON Would you like to \n`
       // response = `CON Now ${coins[0].market_data.current_price.usd.toLocaleString()}(${coins[0].symbol.toUpperCase()}), ${coins[1].market_data.current_price.usd.toLocaleString()}(${coins[1].symbol.toUpperCase()})\n`
       response += `1. Make crypto payment \n`
-      response += `2. Buy crypto \n`
+      response += `2. Topup crypto \n`
       response += `3. Wallet info \n`
       response += `4. Wallet Balance \n`
     } else if (text === '1*3') {
@@ -56,7 +58,9 @@ const markets = async (req, res) => {
       response = walletResponse
     } else if (text === '1*2') {
       // ============================= OPTION 1/2 BUY =============================
-      response = `END Buy crypto coming soon to Shukuru`
+      // response = `END Buy crypto coming soon to Shukuru`
+      response += `END Thank you for being an early testor \n`
+      response += `Test ETH will be sent to your wallet`
       // Showing coins to buy
       //   response = `CON Select coin to buy\n`
       //   response += `1. BTC - Bitcoin\n`
@@ -86,14 +90,27 @@ const markets = async (req, res) => {
       response = `CON Please enter amount of ETH to pay\n`
     } else if (text === '1*1*3') {
       // Selected payment option 3 use USDT
-      // response = `CON Please enter amount of USDT to pay\n`
-      response = `END USDT coming soon to Shukuru`
+      response = `CON Please enter amount of USDT to pay\n`
+      // response = `END USDT coming soon to Shukuru`
+    } else if (useMatchUSDTAmountEntered(text)) {
+      // Enter the number of user to recieve the USDT payment
+      response = `CON Please enter the number of USDT reciever\n`
     } else if (text === '1*4') {
       // ============================= OPTION 1/4 WALLET BALANCE =============================
       const txResponse = await getWalletBalance(phoneNumber)
       response = txResponse
     } else if (useMatchEthAmountEntered(text)) {
       response = `CON Please enter the number of reciever\n`
+    } else if (useMatchNumberUsdtEntered(text)) {
+      // ============================= CONFIRM USDT GAS FEES =============================
+      // Get the USDT payment amount from the text string
+      const paymentAmount = await getUserPaymentAmountBefore(text)
+      // Get the estimated gas fees
+      const gasPrice = await getGasEstimates(phoneNumber, text)
+      response = `CON Initialized payment ${paymentAmount} USDT\n`
+      response += `Estimated gas ${gasPrice} ETH\n`
+      response += `1. Confirm \n`
+      response += `2. Cancel \n`
     } else if (useMatchNumberEntered(text)) {
       // ============================= CONFIRM GAS FEES =============================
       // Get the payment amount from the text string
@@ -177,7 +194,7 @@ const markets = async (req, res) => {
     //   response = `END Buy crypto coming soon to Shukuru`
     // }
 
-    // console.log(text)
+    console.log(text)
     // console.log(serviceCode)
     // Send the response back to the API
     res.set('Content-Type: text/plain')
@@ -189,7 +206,7 @@ const markets = async (req, res) => {
 }
 
 const createWallet = async (req, res) => {
-  console.log(`Create wallet called....`)
+  // console.log(`Create wallet called....`)
   try {
     const { sessionId, serviceCode, phoneNumber, text } = req.body
     // Check to see if a user with the phone number exists
