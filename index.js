@@ -27,7 +27,7 @@ const dbConnection = mongoose.connection
 dbConnection.on('error', (err) => console.log(`Connection error ${err}`))
 dbConnection.once('open', () => console.log('Connected to DB!'))
 
-const PORT = process.env.PORT || 8000
+const PORT = process.env.PORT || 8000  
 
 app.listen(PORT, () => {
   console.log('Server started on port 8000')
