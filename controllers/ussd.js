@@ -12,6 +12,7 @@ const {
   useSelectedBTCToBuy,
   useMatchUSDTAmountEntered,
   useMatchNumberUsdtEntered,
+  useSelectedUsdt,
 } = require('../regex/ussdRegex.js')
 const { getGasEstimates } = require('../utils/getGasEstimates.js')
 const { sendWalletInfo } = require('../utils/getWalletInfo.js')
@@ -86,10 +87,27 @@ const markets = async (req, res) => {
       // response = `CON Please enter amount of BTC to pay\n`
       response = `END BTC coming soon to Shukuru`
     } else if (text === '1*1*2') {
-      // Selected payment option 2 use ETH
+      // ============================= OPTION Selected payment option 2 use ETH =============================
       response = `CON Please enter amount of ETH to pay\n`
+    } else if (useMatchEthAmountEntered(text)) {
+      // Number of ETH reciever
+      response = `CON Please enter the number of reciever\n`
+    } else if (
+      useMatchNumberEntered(text) &&
+      text !== '1*1*3' &&
+      useMatchNumberUsdtEntered(text)
+    ) {
+      // ============================= CONFIRM ETH GAS FEES =============================
+      // Get the payment amount from the text string
+      const paymentAmount = await getUserPaymentAmountBefore(text)
+      // Get the estimated gas fees
+      const gasPrice = await getGasEstimates(phoneNumber, text)
+      response = `CON Initialized payment ${paymentAmount} ETH\n`
+      response += `Estimated gas ${gasPrice} ETH\n`
+      response += `1. Confirm \n`
+      response += `2. Cancel \n`
     } else if (text === '1*1*3') {
-      // Selected payment option 3 use USDT
+      // ============================= OPTION Selected payment option 3 use USDT =============================
       response = `CON Please enter amount of USDT to pay\n`
       // response = `END USDT coming soon to Shukuru`
     } else if (useMatchUSDTAmountEntered(text)) {
@@ -99,8 +117,6 @@ const markets = async (req, res) => {
       // ============================= OPTION 1/4 WALLET BALANCE =============================
       const txResponse = await getWalletBalance(phoneNumber)
       response = txResponse
-    } else if (useMatchEthAmountEntered(text)) {
-      response = `CON Please enter the number of reciever\n`
     } else if (useMatchNumberUsdtEntered(text)) {
       // ============================= CONFIRM USDT GAS FEES =============================
       // Get the USDT payment amount from the text string
@@ -111,17 +127,8 @@ const markets = async (req, res) => {
       response += `Estimated gas ${gasPrice} ETH\n`
       response += `1. Confirm \n`
       response += `2. Cancel \n`
-    } else if (useMatchNumberEntered(text)) {
-      // ============================= CONFIRM GAS FEES =============================
-      // Get the payment amount from the text string
-      const paymentAmount = await getUserPaymentAmountBefore(text)
-      // Get the estimated gas fees
-      const gasPrice = await getGasEstimates(phoneNumber, text)
-      response = `CON Initialized payment ${paymentAmount} ETH\n`
-      response += `Estimated gas ${gasPrice} ETH\n`
-      response += `1. Confirm \n`
-      response += `2. Cancel \n`
     }
+
     if (useMatchAcceptGasFees(text)) {
       // ============================= SEND ETHEREUM =============================
       const txResponse = await sendEther(text, phoneNumber)

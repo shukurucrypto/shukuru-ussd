@@ -24,7 +24,16 @@ async function useMatchNumberUsdtEntered(input) {
 }
 
 async function useMatchNumberEntered(input) {
-  let regex = /^1\*1\*2\*\d\.\d\*[0-9]+$/is
+  // console.log(`Match number entered: ${input}`)
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex = /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is
+  return regex.test(input)
+}
+
+async function useSelectedUsdt(input) {
+  console.log(`Selected USDT: ${input}`)
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex = /^1\*1\*3$/is
   return regex.test(input)
 }
 
@@ -113,4 +122,5 @@ module.exports = {
   useSelectedBTCToBuy,
   useMatchUSDTAmountEntered,
   useMatchNumberUsdtEntered,
+  useSelectedUsdt,
 }
