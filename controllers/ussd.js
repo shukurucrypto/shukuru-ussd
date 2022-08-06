@@ -13,7 +13,16 @@ const {
   useMatchUSDTAmountEntered,
   useMatchNumberUsdtEntered,
   useSelectedUsdt,
+  useMatchAcceptUSDTGasFees,
+  useMatchUsdtRecieverNumberEntered,
 } = require('../regex/ussdRegex.js')
+const {
+  createTxState,
+  getActiveTx,
+  setNextStep,
+  removeActiveTx,
+  acceptGasFees,
+} = require('../utils/createTxState.js')
 const { getGasEstimates } = require('../utils/getGasEstimates.js')
 const { sendWalletInfo } = require('../utils/getWalletInfo.js')
 const { sendEther } = require('../utils/sendEther.js')
@@ -36,6 +45,8 @@ const markets = async (req, res) => {
     const { sessionId, serviceCode, phoneNumber, text } = req.body
 
     let response = ''
+
+    // console.log(`First text: ${text}`)
 
     if (text === '') {
       // This is the first request. Note how we start the response with CON
@@ -88,51 +99,69 @@ const markets = async (req, res) => {
       response = `END BTC coming soon to Shukuru`
     } else if (text === '1*1*2') {
       // ============================= OPTION Selected payment option 2 use ETH =============================
+      // Set the user's active asset to ETH here....
+      await createTxState('ETH', phoneNumber)
+
       response = `CON Please enter amount of ETH to pay\n`
     } else if (useMatchEthAmountEntered(text)) {
       // Number of ETH reciever
       response = `CON Please enter the number of reciever\n`
-    } else if (
-      useMatchNumberEntered(text) &&
-      text !== '1*1*3' &&
-      useMatchNumberUsdtEntered(text)
-    ) {
+    } else if (useMatchNumberEntered(text) && text !== '1*1*3') {
       // ============================= CONFIRM ETH GAS FEES =============================
       // Get the payment amount from the text string
-      const paymentAmount = await getUserPaymentAmountBefore(text)
-      // Get the estimated gas fees
-      const gasPrice = await getGasEstimates(phoneNumber, text)
-      response = `CON Initialized payment ${paymentAmount} ETH\n`
-      response += `Estimated gas ${gasPrice} ETH\n`
-      response += `1. Confirm \n`
-      response += `2. Cancel \n`
+      const activeAsset = await getActiveTx(phoneNumber)
+      // console.log(`Active asset ------------ ${activeAsset}`)
+      if (activeAsset.asset.name === 'ETH') {
+        const paymentAmount = await getUserPaymentAmountBefore(text)
+        // Get the estimated gas fees
+        // Switch between the confirmation assets here using the active asset
+        const gasPrice = await getGasEstimates(phoneNumber, text)
+        response = `CON Initialized payment ${paymentAmount} ETH\n`
+        response += `Estimated gas ${gasPrice} ETH\n`
+        response += `1. Confirm \n`
+        response += `2. Cancel \n`
+      } else if (activeAsset.asset.name === 'USDT') {
+        if (activeAsset.step > 1 && !activeAsset.accepted) {
+          // ============================= CONFIRM USDT GAS FEES =============================
+          // Get the USDT payment amount from the text string
+          const paymentAmount = await getUserPaymentAmountBefore(text)
+          // Get the estimated gas fees
+          const gasPrice = await getGasEstimates(phoneNumber, text)
+          await acceptGasFees(activeAsset)
+          response = `CON Initialized payment ${paymentAmount} USDT\n`
+          response += `Estimated gas ${gasPrice} ETH\n`
+          response += `1. Confirm \n`
+          response += `2. Cancel \n`
+        } else {
+          await setNextStep(activeAsset)
+          response = `CON Please enter the number of USDT reciever\n`
+        }
+      }
+      // console.log(`Still in loop--------------------- ${activeAsset}`)
     } else if (text === '1*1*3') {
       // ============================= OPTION Selected payment option 3 use USDT =============================
+      await createTxState('USDT', phoneNumber)
       response = `CON Please enter amount of USDT to pay\n`
       // response = `END USDT coming soon to Shukuru`
     } else if (useMatchUSDTAmountEntered(text)) {
       // Enter the number of user to recieve the USDT payment
-      response = `CON Please enter the number of USDT reciever\n`
+      response = `CON USDT payment initiated\n`
     } else if (text === '1*4') {
       // ============================= OPTION 1/4 WALLET BALANCE =============================
       const txResponse = await getWalletBalance(phoneNumber)
       response = txResponse
-    } else if (useMatchNumberUsdtEntered(text)) {
-      // ============================= CONFIRM USDT GAS FEES =============================
-      // Get the USDT payment amount from the text string
-      const paymentAmount = await getUserPaymentAmountBefore(text)
-      // Get the estimated gas fees
-      const gasPrice = await getGasEstimates(phoneNumber, text)
-      response = `CON Initialized payment ${paymentAmount} USDT\n`
-      response += `Estimated gas ${gasPrice} ETH\n`
-      response += `1. Confirm \n`
-      response += `2. Cancel \n`
     }
 
     if (useMatchAcceptGasFees(text)) {
       // ============================= SEND ETHEREUM =============================
       const txResponse = await sendEther(text, phoneNumber)
       response = txResponse
+    }
+
+    if (useMatchAcceptUSDTGasFees(text)) {
+      // ============================= SEND USDT =============================
+      await removeActiveTx(phoneNumber)
+      response = `END USDT payment initiated\n`
     }
     if (useRejectGasFees(text)) {
       // ============================= REJECTED GAS FEES =============================
@@ -201,7 +230,7 @@ const markets = async (req, res) => {
     //   response = `END Buy crypto coming soon to Shukuru`
     // }
 
-    console.log(text)
+    // console.log(text)
     // console.log(serviceCode)
     // Send the response back to the API
     res.set('Content-Type: text/plain')

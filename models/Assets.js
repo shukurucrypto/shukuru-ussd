@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const User = require('./User.js')
 
 const AssetSchema = new mongoose.Schema({
   user: {
@@ -10,12 +9,10 @@ const AssetSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
   },
   symbol: {
     type: String,
     required: true,
-    unique: true,
   },
   balance: {
     type: Number,

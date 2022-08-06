@@ -12,6 +12,14 @@ const ActiveTransactionsSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  step: {
+    type: Number,
+    default: 1,
+  },
+  accepted: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const ActiveTransactions = mongoose.model(

@@ -4,7 +4,7 @@ function useMatchEthAmountEntered(input) {
 }
 
 async function useMatchUSDTAmountEntered(input) {
-  let regex = /^1\*3\*3\*[0-9]*\.[0-9]+$/is
+  let regex = /^1\*1\*3\*[0-9]*\.[0-9]+$/is
   return regex.test(input)
 }
 
@@ -18,6 +18,16 @@ function useRejectGasFees(input) {
   return regex.test(input)
 }
 
+function useMatchAcceptUSDTGasFees(input) {
+  let regex = /1\*1\*3\*[0-9]*\.[0-9]+\*[0-9]+\*1/is
+  return regex.test(input)
+}
+
+async function useMatchUsdtRecieverNumberEntered(input) {
+  let regex = /^1\*1\*3\*[0-9]*\.[0-9]+\*[0-9]+$/is
+  return regex.test(input)
+}
+
 async function useMatchNumberUsdtEntered(input) {
   let regex = /^1\*1\*3\*\d\.\d\*[0-9]+$/is
   return regex.test(input)
@@ -27,7 +37,9 @@ async function useMatchNumberEntered(input) {
   // console.log(`Match number entered: ${input}`)
   // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
   let regex = /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is
-  return regex.test(input)
+  const response = regex.test(input)
+  // console.log(`Match number entered: ${response}`)
+  return response
 }
 
 async function useSelectedUsdt(input) {
@@ -123,4 +135,6 @@ module.exports = {
   useMatchUSDTAmountEntered,
   useMatchNumberUsdtEntered,
   useSelectedUsdt,
+  useMatchAcceptUSDTGasFees,
+  useMatchUsdtRecieverNumberEntered,
 }
