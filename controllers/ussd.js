@@ -26,6 +26,8 @@ const {
 const { getGasEstimates } = require('../utils/getGasEstimates.js')
 const { sendWalletInfo } = require('../utils/getWalletInfo.js')
 const { sendEther } = require('../utils/sendEther.js')
+const { sendUsdt } = require('../utils/sendUsdt.js')
+const { swapCoins } = require('../utils/swapCoins.js')
 
 const fetchCoin = async (name) => {
   try {
@@ -64,6 +66,7 @@ const markets = async (req, res) => {
       response += `2. Topup crypto \n`
       response += `3. Wallet info \n`
       response += `4. Wallet Balance \n`
+      response += `5. Swap coins \n`
     } else if (text === '1*3') {
       // ============================= OPTION 1 WALLET INFO =============================
       const walletResponse = await sendWalletInfo(phoneNumber)
@@ -146,10 +149,6 @@ const markets = async (req, res) => {
     } else if (useMatchUSDTAmountEntered(text)) {
       // Enter the number of user to recieve the USDT payment
       response = `CON USDT payment initiated\n`
-    } else if (text === '1*4') {
-      // ============================= OPTION 1/4 WALLET BALANCE =============================
-      const txResponse = await getWalletBalance(phoneNumber)
-      response = txResponse
     }
 
     if (useMatchAcceptGasFees(text)) {
@@ -161,8 +160,43 @@ const markets = async (req, res) => {
     if (useMatchAcceptUSDTGasFees(text)) {
       // ============================= SEND USDT =============================
       await removeActiveTx(phoneNumber)
-      response = `END USDT payment initiated\n`
+      const res = await sendUsdt(text, phoneNumber)
+      response = res
     }
+    if (text === '1*4') {
+      // ============================= OPTION 1/4 WALLET BALANCE =============================
+      const txResponse = await getWalletBalance(phoneNumber)
+      response = txResponse
+    }
+    if (text === '1*5') {
+      // ============================= OPTION 1/5 SWAP COINS =============================
+      response = `CON Select the coin to swap\n`
+      response += `1. ETH to USDT\n`
+      response += `2. USDT to ETH\n`
+    } else if (text === '1*5*1') {
+      // ============================= OPTION 1/5/1 SWAP ETH TO USDT =============================
+      response = `CON Please enter amount of ETH to swap\n`
+    } else if (text.startsWith('1*5*1*') && !text.endsWith('*1')) {
+      response = `CON Swapping 0.00456 ETH to USDT\n`
+      response += `You'll get 1 USDT \n`
+      response += `1. Confirm \n`
+      response += `2. Cancel \n`
+    } else if (text.startsWith('1*5*1*') && text.endsWith('*1')) {
+      const res = await swapCoins(text, phoneNumber, 'ETH/USDT')
+      response = res
+    } else if (text === '1*5*2') {
+      // ============================= OPTION 1/5/2 SWAP USDT TO ETH =============================
+      response = `CON Please enter amount of USDT to swap\n`
+    } else if (text.startsWith('1*5*2*') && !text.endsWith('*1')) {
+      response = `CON Swapping 0.00456 USDT to ETH\n`
+      response += `You'll get 0.000034 ETH \n`
+      response += `1. Confirm \n`
+      response += `2. Cancel \n`
+    } else if (text.startsWith('1*5*2*') && text.endsWith('*1')) {
+      const res = await swapCoins(text, phoneNumber, 'USDT/ETH')
+      response = res
+    }
+
     if (useRejectGasFees(text)) {
       // ============================= REJECTED GAS FEES =============================
       response = `END Thank you for using Shukuru Crypto\n`

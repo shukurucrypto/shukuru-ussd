@@ -23,7 +23,7 @@ async function walletBalance(phoneNumber) {
     if (currentUser) {
       const balance = await provider.getBalance(currentUser.address)
 
-      console.log(`first balance is: ${balance}`)
+      // console.log(`first balance is: ${balance}`)
 
       userBalance = ethers.utils.formatEther(balance)
       // update the wallet balance in the db
@@ -37,7 +37,7 @@ async function walletBalance(phoneNumber) {
         phoneNumber
       )
 
-      response = `END Your wallet balance is ${userBalance} ETH`
+      response = `END Your wallet balance has: ${userBalance} ETH`
       return response
     } else {
       response = `END You do not have a wallet yet`

@@ -43,9 +43,16 @@ async function useMatchNumberEntered(input) {
 }
 
 async function useSelectedUsdt(input) {
-  console.log(`Selected USDT: ${input}`)
+  // console.log(`Selected USDT: ${input}`)
   // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
   let regex = /^1\*1\*3$/is
+  return regex.test(input)
+}
+
+async function useSwapEthToUsdtPrice(input) {
+  // console.log(`Selected USDT: ${input}`)
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex = /^1\*5\*1\*[0-9]*\.[0-9]+$/is
   return regex.test(input)
 }
 
@@ -137,4 +144,5 @@ module.exports = {
   useSelectedUsdt,
   useMatchAcceptUSDTGasFees,
   useMatchUsdtRecieverNumberEntered,
+  useSwapEthToUsdtPrice,
 }
