@@ -24,13 +24,14 @@ const provider = new ethers.providers.JsonRpcProvider(providerRPCURL)
 const swap = async (amount, sellTokenAddress, buyTokenAddress, signer) => {
   const ABI = erc20Contract
 
-  console.log(`signer address: ${signer.address}`)
+  console.log(`sellToken address: ${sellTokenAddress}`)
+  console.log(`buyToken address: ${buyTokenAddress}`)
 
   // Quote parameters
-  const sellToken = sellTokenAddress // '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' // ETH
-  const buyToken = buyTokenAddress // '0x6b175474e89094c44da98b954eedeac495271d0f' // DAI
+  const sellToken = sellTokenAddress
+  const buyToken = buyTokenAddress
   const sellAmount = amount
-  const takerAddress = signer.address // '0xab5801a7d398351b8be11c439e05c5b3259aec9b' // An account with sufficient balance on mainnet
+  const takerAddress = signer.address
 
   const quoteResponse = await axios.get(
     `https://api.0x.org/swap/v1/quote?buyToken=${buyToken}&sellAmount=${sellAmount}&sellToken=${sellToken}&takerAddress=${takerAddress}`
@@ -94,7 +95,12 @@ const swap = async (amount, sellTokenAddress, buyTokenAddress, signer) => {
 const makeSwap = async (tokenFrom, tokenTo, amount, phoneNumber) => {
   let response
 
-  let tradeToAddress, tradeFromAddress
+  let tradeToAddress, tradeFromAddress, SELL_TOKEN_ADDRESS, BUY_TOKEN_ADDRESS
+
+  // get token from address from assets
+  const tokenFromAsset = await Assets.findOne({ symbol: tokenFrom })
+
+  const tokenToAsset = await Assets.findOne({ symbol: tokenTo })
 
   console.log('----------------------SWAPPING COINS CALLED--------------------')
 
@@ -124,23 +130,18 @@ const makeSwap = async (tokenFrom, tokenTo, amount, phoneNumber) => {
     sellAmount: amount.toString(),
   }
 
-  const SELL_TOKEN_ADDRESS = '0x509Ee0d083DdF8AC028f2a56731412edD63223B9' // USDT Goerli // '0xd393b1E02dA9831Ff419e22eA105aAe4c47E1253' // dai polygon mumbai address
-  const ETH_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' // Eth Goerli // '0x0000000000000000000000000000000000001010' // matic polygon mumbai address
+  if (tokenFrom === 'ETH') {
+    SELL_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+  } else {
+    SELL_TOKEN_ADDRESS = tokenFromAsset?.address?.live
+  }
+
+  BUY_TOKEN_ADDRESS = tokenToAsset?.address?.live
 
   try {
-    await swap(amount.toString(), ETH_TOKEN_ADDRESS, SELL_TOKEN_ADDRESS, signer)
-    // amount, sellTokenAddress, buyTokenAddress, signer
+    await swap(amount.toString(), SELL_TOKEN_ADDRESS, BUY_TOKEN_ADDRESS, signer)
 
-    // await axios
-    //   .get(`https://api.0x.org/swap/v1/price?${qs.stringify(params)}`)
-    //   .then((res) => {
-    //     const quote = res.data
-    //     console.log(`Quote: ${quote}`)
-    //   })
-    //   .catch((err) => {
-    //     console.log(err.message)
-    //   })
-    return `END Your swap is being processed, please wait for a confirmation SMS...`
+    return `END Swapping will go live on mainnet soon...`
   } catch (error) {
     response = `END An error occurred`
     console.log(error.message)

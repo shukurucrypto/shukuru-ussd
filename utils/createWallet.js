@@ -65,12 +65,20 @@ async function createWalletSigner(userText, phoneNumber) {
           name: 'Bitcoin',
           symbol: 'BTC',
           balance: 0.0,
+          address: {
+            live: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+            test: '0xC04B0d3107736C32e19F1c62b2aF67BE61d63a05',
+          },
         })
         const usdtAsset = new Assets({
           user: res._id,
           name: 'Tether',
           symbol: 'USDT',
           balance: 0.0,
+          address: {
+            live: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+            test: '0x509Ee0d083DdF8AC028f2a56731412edD63223B9',
+          },
         })
 
         await btcAsset.save()
