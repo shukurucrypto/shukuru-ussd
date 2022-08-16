@@ -27,7 +27,7 @@ const { getGasEstimates } = require('../utils/getGasEstimates.js')
 const { sendWalletInfo } = require('../utils/getWalletInfo.js')
 const { sendEther } = require('../utils/sendEther.js')
 const { sendUsdt } = require('../utils/sendUsdt.js')
-const { swapCoins } = require('../utils/swapCoins.js')
+const { swapCoins, swapCoinsQuote } = require('../utils/swapCoins.js')
 
 const fetchCoin = async (name) => {
   try {
@@ -42,7 +42,6 @@ const fetchCoin = async (name) => {
 }
 
 const markets = async (req, res) => {
-  // console.log(`Markets called....`)
   try {
     const { sessionId, serviceCode, phoneNumber, text } = req.body
 
@@ -114,7 +113,7 @@ const markets = async (req, res) => {
       // Get the payment amount from the text string
       const activeAsset = await getActiveTx(phoneNumber)
       // console.log(`Active asset ------------ ${activeAsset}`)
-      if (activeAsset.asset.name === 'ETH') {
+      if (activeAsset?.asset?.name === 'ETH') {
         const paymentAmount = await getUserPaymentAmountBefore(text)
         // Get the estimated gas fees
         // Switch between the confirmation assets here using the active asset
@@ -123,7 +122,7 @@ const markets = async (req, res) => {
         response += `Estimated gas ${gasPrice} ETH\n`
         response += `1. Confirm \n`
         response += `2. Cancel \n`
-      } else if (activeAsset.asset.name === 'USDT') {
+      } else if (activeAsset?.asset?.name === 'USDT') {
         if (activeAsset.step > 1 && !activeAsset.accepted) {
           // ============================= CONFIRM USDT GAS FEES =============================
           // Get the USDT payment amount from the text string
@@ -153,6 +152,8 @@ const markets = async (req, res) => {
 
     if (useMatchAcceptGasFees(text)) {
       // ============================= SEND ETHEREUM =============================
+      // response = `END Your swap is being processed, please wait for a confirmation SMS...`
+      // await swapCoins(text, phoneNumber, 'ETH/USDT')
       const txResponse = await sendEther(text, phoneNumber)
       response = txResponse
     }
@@ -177,24 +178,27 @@ const markets = async (req, res) => {
       // ============================= OPTION 1/5/1 SWAP ETH TO USDT =============================
       response = `CON Please enter amount of ETH to swap\n`
     } else if (text.startsWith('1*5*1*') && !text.endsWith('*1')) {
-      response = `CON Swapping 0.00456 ETH to USDT\n`
-      response += `You'll get 1 USDT \n`
+      const quote = await swapCoinsQuote(text, phoneNumber, 'ETH/USDT')
+      response = `CON Swapping ${quote} ETH to USDT\n`
+      // response += `You'll get 1 USDT \n`
       response += `1. Confirm \n`
       response += `2. Cancel \n`
     } else if (text.startsWith('1*5*1*') && text.endsWith('*1')) {
-      const res = await swapCoins(text, phoneNumber, 'ETH/USDT')
-      response = res
+      response = `END Your swap is being processed, please wait for a confirmation SMS...`
+      await swapCoins(text, phoneNumber, 'ETH/USDT')
     } else if (text === '1*5*2') {
       // ============================= OPTION 1/5/2 SWAP USDT TO ETH =============================
       response = `CON Please enter amount of USDT to swap\n`
     } else if (text.startsWith('1*5*2*') && !text.endsWith('*1')) {
-      response = `CON Swapping 0.00456 USDT to ETH\n`
-      response += `You'll get 0.000034 ETH \n`
+      const quote = await swapCoinsQuote(text, phoneNumber, 'USDT/ETH')
+
+      response = `CON Swapping ${quote} USDT to ETH\n`
+      // response += `You'll get 0.000034 ETH \n`
       response += `1. Confirm \n`
       response += `2. Cancel \n`
     } else if (text.startsWith('1*5*2*') && text.endsWith('*1')) {
-      const res = await swapCoins(text, phoneNumber, 'USDT/ETH')
-      response = res
+      response = `END Your swap is being processed, please wait for a confirmation SMS...`
+      await swapCoins(text, phoneNumber, 'USDT/ETH')
     }
 
     if (useRejectGasFees(text)) {

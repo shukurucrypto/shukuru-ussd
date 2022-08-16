@@ -9,10 +9,12 @@ const {
   getUserPaymentAmount,
   getUserToPayPhoneNumber,
   truncateAddress,
+  getUserSwapAmount,
 } = require('../regex/ussdRegex.js')
 const { providerRPCURL } = require('../settings/settings.js')
 const Assets = require('../models/Assets.js')
 const { getSwapQuote } = require('./getSwapQuote.js')
+const { makeSwap } = require('./makeSwap.js')
 require('dotenv').config()
 
 // const provider = new ethers.providers.JsonRpcProvider(
@@ -25,7 +27,9 @@ const swapCoins = async (userText, phoneNumber, swap) => {
   try {
     const currentUser = await User.findOne({ phoneNumber })
 
-    const swapAmount = ethers.utils.parseEther('0.50')
+    const amount = await getUserSwapAmount(userText)
+
+    const swapAmount = ethers.utils.parseEther(amount)
 
     if (!currentUser) {
       response = `END You do not have a wallet yet`
@@ -34,7 +38,7 @@ const swapCoins = async (userText, phoneNumber, swap) => {
 
     // Check to see if the user has enough ETH to swap
     if (swap === 'ETH/USDT') {
-      const swapQuote = await getSwapQuote('ETH', 'USDT', swapAmount)
+      const swapQuote = await makeSwap('ETH', 'USDT', swapAmount, phoneNumber)
       const balance = await provider.getBalance(currentUser.address)
       userBalance = ethers.utils.formatEther(balance)
 
@@ -44,15 +48,14 @@ const swapCoins = async (userText, phoneNumber, swap) => {
         response = `END You do not have enough ETH to swap\n`
         return response
       } else {
-        response = `END You have ${userBalance} ETH\n`
-        response += `Performin swap...`
+        response = swapQuote
         return response
       }
     }
 
     // Check to see if the user has enough USDT to swap
     if (swap === 'USDT/ETH') {
-      const swapQuote = await getSwapQuote('USDT', 'ETH', swapAmount)
+      const swapQuote = await makeSwap('USDT', 'ETH', swapAmount, phoneNumber)
       const userUsdtAsset = await Assets.findOne({
         user: currentUser._id,
         symbol: 'USDT',
@@ -62,8 +65,7 @@ const swapCoins = async (userText, phoneNumber, swap) => {
         response = `END You do not have enough USDT to swap\n`
         return response
       } else {
-        response = `END You have ${userUsdtAsset.balance} USDT\n`
-        response += `Performin swap...`
+        response = swapQuote
         return response
       }
     }
@@ -74,6 +76,46 @@ const swapCoins = async (userText, phoneNumber, swap) => {
   }
 }
 
+const swapCoinsQuote = async (userText, phoneNumber, swap) => {
+  let response
+  let enteredAmount
+  try {
+    const amount = await getUserSwapAmount(userText)
+
+    const swapAmount = ethers.utils.parseEther(amount)
+
+    // Check to see if the user has enough ETH to swap
+    if (swap === 'ETH/USDT') {
+      //   const swapQuote = await getSwapQuote('ETH', 'USDT', swapAmount)
+      //   // quote.price = swapQuote.price
+      //   // quote.gasPrice = swapQuote.gasPrice
+      //   // quote.estimatedGas = swapQuote.estimatedGas
+      //   // quote.sellAmount = swapQuote.sellAmount
+      //   console.log(`USDT/ETH quote -> ${swapQuote}`)
+      //   return quote
+      // enteredAmount = swapAmount
+      return amount
+    }
+
+    // // Check to see if the user has enough USDT to swap
+    if (swap === 'USDT/ETH') {
+      //   const swapQuote = await getSwapQuote('USDT', 'ETH', swapAmount)
+      //   // quote.price = swapQuote.price
+      //   // quote.gasPrice = swapQuote.gasPrice
+      //   // quote.estimatedGas = swapQuote.estimatedGas
+      //   // quote.sellAmount = swapQuote.sellAmount
+      //   console.log(`USDT/ETH quote -> ${swapQuote}`)
+      //   return quote
+      return amount
+    }
+  } catch (err) {
+    response = `END An error occurred`
+    console.log(err.message)
+    return response
+  }
+}
+
 module.exports = {
   swapCoins,
+  swapCoinsQuote,
 }

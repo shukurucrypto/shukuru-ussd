@@ -96,6 +96,12 @@ async function getUserPaymentAmount(text) {
   return price
 }
 
+async function getUserSwapAmount(text) {
+  let words = text.match(/[.\d]+/g)
+  let price = words[3]
+  return price
+}
+
 async function getUserPaymentAmountForGasFees(text) {
   let words = text.match(/[.\d]+/g)
   let price = words[words.length - 2]
@@ -145,4 +151,5 @@ module.exports = {
   useMatchAcceptUSDTGasFees,
   useMatchUsdtRecieverNumberEntered,
   useSwapEthToUsdtPrice,
+  getUserSwapAmount,
 }

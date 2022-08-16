@@ -9,14 +9,24 @@ const AssetSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    unique: false,
   },
   symbol: {
     type: String,
     required: true,
+    unique: false,
   },
   balance: {
     type: Number,
     required: true,
+  },
+  address: {
+    live: {
+      type: String,
+    },
+    test: {
+      type: String,
+    },
   },
 })
 

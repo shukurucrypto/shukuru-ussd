@@ -71,9 +71,10 @@ const sendEther = async (userText, phoneNumber) => {
     const recieverAddress = reciever.address
 
     const gasPrice = await provider.getGasPrice()
-    const ethGasPrice = ethers.utils.hexlify(gasPrice)
-
-    console.log(`Current gas price: ${ethGasPrice}`)
+    const gasLimit = await provider.estimateGas({
+      to: recieverAddress,
+      value: ethers.utils.parseEther(amount),
+    })
 
     // create their wallet
     // console.log("PAYER'S DECRYPTED KEY: ", privateKey);
@@ -87,6 +88,8 @@ const sendEther = async (userText, phoneNumber) => {
       from: currentUser.address,
       to: recieverAddress,
       value: ethers.utils.parseEther(amount),
+      gasPrice: ethers.BigNumber.from(gasPrice) || 0,
+      gasLimit: ethers.BigNumber.from(gasLimit) || 0,
     }
 
     // payer's wallet
@@ -174,8 +177,6 @@ const sendEther = async (userText, phoneNumber) => {
     response += `Wait for an SMS confirmation\n`
     return response
   } catch (error) {
-    console.log('DEBUG HERE: -------------------------', error.message)
-
     response = `END Payment Failed\n`
     response += `Make sure you have enough ETH in your wallet\n`
     return response

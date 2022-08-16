@@ -32,8 +32,6 @@ const getSwapQuote = async (tokenFrom, tokenTo, amount) => {
   //   We need to validate that none of the swap coins is ETH because ethereum doesnot have a smart contract address,
   //   therefore coingeko won't return the ETH data because it does not have it
   if (tokenFrom != 'ETH') {
-    console.log(`Token from -> ${tokenFrom}`)
-
     const fromToken = await getCoin(tokenFrom)
     tradeFrom = fromToken
     tradeFromAddress = fromToken.address
@@ -42,22 +40,18 @@ const getSwapQuote = async (tokenFrom, tokenTo, amount) => {
   }
 
   if (tokenTo != 'ETH') {
-    console.log(`Token to -> ${tokenTo}`)
-
     const toToken = await getCoin(tokenTo)
     tradeTo = toToken
     tradeToAddress = toToken.address
-    console.log(`ADDRESS -> ${tradeToAddress}`)
   } else {
     tradeToAddress = tokenTo
   }
 
   //   const convertedAmount = amount * 10 ** tokenFrom.decimals
-
   const params = {
     sellToken: tradeFromAddress,
     buyToken: tradeToAddress,
-    sellAmount: amount,
+    sellAmount: amount.toString(),
   }
 
   try {
@@ -65,7 +59,7 @@ const getSwapQuote = async (tokenFrom, tokenTo, amount) => {
       .get(`https://api.0x.org/swap/v1/price?${qs.stringify(params)}`)
       .then((res) => {
         const quote = res.data
-        console.log(quote)
+        return quote
       })
       .catch((err) => {
         console.log(err.message)

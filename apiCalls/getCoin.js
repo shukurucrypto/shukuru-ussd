@@ -15,7 +15,6 @@ const getCoin = async (coin) => {
         selectedCoin = token
       }
     })
-    console.log(`coin 2--------------- ${selectedCoin}`)
     return selectedCoin
   } catch (error) {
     console.log(error.message)
@@ -39,7 +38,7 @@ const getCoinAPI = async (req, res) => {
         selectedCoin = token
       }
     })
-    console.log(`coin 2--------------- ${selectedCoin}`)
+    console.log(`coin 2--------------- ${selectedCoin.logoURI}`)
     res.send(selectedCoin)
   } catch (error) {
     console.log(error.message)
@@ -50,13 +49,15 @@ const getCoinAPI = async (req, res) => {
 const getSwapQuoteAPI = async (req, res) => {
   let selectedCoin
   const params = {
-    sellToken: "ETH",
-    buyToken: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-    sellAmount: ethers.utils.parseEther("0.45"),
+    sellToken: 'ETH',
+    buyToken: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+    sellAmount: ethers.utils.parseEther('0.45'),
   }
 
   try {
-    const result = await axios.get(`https://api.0x.org/swap/v1/price?${qs.stringify(params)}`)
+    const result = await axios.get(
+      `https://api.0x.org/swap/v1/price?${qs.stringify(params)}`
+    )
     //   return the first 3
     const data = await result.data.tokens
     data.forEach((token) => {
