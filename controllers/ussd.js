@@ -110,6 +110,7 @@ const markets = async (req, res) => {
       response = `CON Please enter the number of reciever\n`
     } else if (useMatchNumberEntered(text) && text !== '1*1*3') {
       // ============================= CONFIRM ETH GAS FEES =============================
+
       // Get the payment amount from the text string
       const activeAsset = await getActiveTx(phoneNumber)
       // console.log(`Active asset ------------ ${activeAsset}`)
@@ -152,17 +153,16 @@ const markets = async (req, res) => {
 
     if (useMatchAcceptGasFees(text)) {
       // ============================= SEND ETHEREUM =============================
-      // response = `END Your swap is being processed, please wait for a confirmation SMS...`
-      // await swapCoins(text, phoneNumber, 'ETH/USDT')
-      const txResponse = await sendEther(text, phoneNumber)
-      response = txResponse
+      sendEther(text, phoneNumber)
+      // response = txResponse
+      response = `END Your crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
     }
 
     if (useMatchAcceptUSDTGasFees(text)) {
       // ============================= SEND USDT =============================
-      await removeActiveTx(phoneNumber)
-      const res = await sendUsdt(text, phoneNumber)
-      response = res
+      removeActiveTx(phoneNumber)
+      sendUsdt(text, phoneNumber)
+      response = `END Your crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
     }
     if (text === '1*4') {
       // ============================= OPTION 1/4 WALLET BALANCE =============================

@@ -13,17 +13,21 @@ const getGasEstimates = async (userPhone, text) => {
     // const currentUser = await User.findOne({ phoneNumber: userPhone })
 
     // get user amount
-    const amount = await getUserPaymentAmountForGasFees(text)
+    // const amount = await getUserPaymentAmountForGasFees(text)
 
-    // const gasPriceFetch = await provider.getGasPrice()
-    const estimate = await provider.estimateGas({
-      to: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-      value: ethers.utils.parseEther(amount),
-    })
-    const gasPrice = await ethers.utils.formatUnits(estimate, 'gwei')
+    const gasPrice = await provider.getGasPrice()
 
-    // console.log("Estimate is: ", gasPrice.toString());
-    return gasPrice.toString()
+    const gasCost = ethers.utils.formatEther(gasPrice)
+    // const estimate = await provider.estimateGas({
+    //   to: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    //   value: ethers.utils.parseEther(amount),
+    // })
+
+    // const gasPrice = ethers.utils.formatUnits(estimate, 'gwei')
+
+    // // const estimateInEth = ethers.utils.formatEther(estimate)
+    // return gasPrice.toString()
+    return gasCost.toString()
   } catch (error) {
     console.log(error.message)
   }

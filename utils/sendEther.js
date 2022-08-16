@@ -117,8 +117,6 @@ const sendEther = async (userText, phoneNumber) => {
 
     txRecipt = await result.wait(1)
 
-    // console.log('TX RECIPT: ------------------', txRecipt)
-
     if (txRecipt.status === 1 || txRecipt.status === '1') {
       await sendSMS(
         `You have successfully sent ${amount} ETH to ${

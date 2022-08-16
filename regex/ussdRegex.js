@@ -34,7 +34,6 @@ async function useMatchNumberUsdtEntered(input) {
 }
 
 async function useMatchNumberEntered(input) {
-  // console.log(`Match number entered: ${input}`)
   // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
   let regex = /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is
   const response = regex.test(input)
@@ -105,7 +104,6 @@ async function getUserSwapAmount(text) {
 async function getUserPaymentAmountForGasFees(text) {
   let words = text.match(/[.\d]+/g)
   let price = words[words.length - 2]
-  // console.log(`words -----: ${words}`);
   return price
 }
 
