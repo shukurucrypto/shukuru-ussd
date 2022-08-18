@@ -7,6 +7,7 @@ const {
   POLYGON_MUMBAI,
   NETWORK,
   GOERLI_RPC_URL,
+  POLYGON_MAINET,
 } = process.env
 
 const providerRPCURL = GOERLI_RPC_URL

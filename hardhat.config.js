@@ -1,6 +1,8 @@
 require('@nomicfoundation/hardhat-toolbox')
 require('hardhat-deploy')
 require('./tasks/swapTask')
+require('./tasks/checkBalanceTask')
+require('./tasks/uniswapToken')
 require('dotenv').config()
 
 module.exports = {

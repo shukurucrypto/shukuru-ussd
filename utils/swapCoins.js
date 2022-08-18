@@ -15,6 +15,7 @@ const { providerRPCURL } = require('../settings/settings.js')
 const Assets = require('../models/Assets.js')
 const { getSwapQuote } = require('./getSwapQuote.js')
 const { makeSwap } = require('./makeSwap.js')
+const { useUniswapTokens } = require('../functions/swapTokensWithUniswap.js')
 require('dotenv').config()
 
 // const provider = new ethers.providers.JsonRpcProvider(

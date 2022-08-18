@@ -81,8 +81,20 @@ async function createWalletSigner(userText, phoneNumber) {
           },
         })
 
+        const ethAsset = new Assets({
+          user: res._id,
+          name: 'wETH',
+          symbol: 'WETH',
+          balance: 0.0,
+          address: {
+            live: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+            test: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+          },
+        })
+
         await btcAsset.save()
         await usdtAsset.save()
+        await ethAsset.save()
 
         await sendSMS(
           `Welcome to Shukuru ${name}, your crypto wallet of address ${truncateAddress(
