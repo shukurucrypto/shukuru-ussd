@@ -18,6 +18,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     // required: true,
   },
+  btcAddress: {
+    type: String,
+    // required: true,
+  },
   passKey: {
     type: String,
     // required: true,
@@ -26,6 +30,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
   },
   balance: {
+    type: Number,
+    default: 0,
+  },
+  btcBalance: {
     type: Number,
     default: 0,
   },

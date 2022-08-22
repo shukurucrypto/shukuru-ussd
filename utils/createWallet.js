@@ -9,6 +9,8 @@ const {
 } = require('../regex/ussdRegex.js')
 const sendSMS = require('../SMS/smsFunctions.js')
 const { providerRPCURL } = require('../settings/settings.js')
+const { createBitcoinWallet } = require('../functions/createBitcoinWallet.js')
+const AccountSecrets = require('../models/AccountSecrets.js')
 require('dotenv').config()
 
 // const provider = new ethers.providers.InfuraProvider(
@@ -41,22 +43,39 @@ async function createWalletSigner(userText, phoneNumber) {
 
       const createdWallet = await new ethers.Wallet(wallet.privateKey, provider)
 
-      console.log(`Wallet Address: ${createdWallet.address}`)
-      console.log(`Wallet PK: ${wallet.privateKey}`)
+      // Create a Bitcoin wallet
+      const { address, privateKey } = await createBitcoinWallet()
+
+      // console.log(address)
+      // console.log(privateKey)
 
       const encryptedPassKey = await encrypt(wallet.privateKey)
       const encryptedMnemonic = await encrypt(wallet.mnemonic.phrase)
+
+      // Encrypt BTC private Key
+      const encryptedBTCPrivateKey = await encrypt(privateKey.toString())
+
       // // save the wallet to the database
       const user = new User({
         name: name,
         walletPin: encryptedWalletPin,
         phoneNumber: phoneNumber,
         address: createdWallet.address,
+        btcAddress: address.toString(),
         passKey: encryptedPassKey,
         mnemonic: encryptedMnemonic,
       })
 
       const res = await user.save()
+
+      // Save to user screts Schema
+      const userSecrets = new AccountSecrets({
+        user: res._id,
+        eth: encryptedPassKey,
+        btc: encryptedBTCPrivateKey,
+      })
+      // Save to the secrets schema
+      await userSecrets.save()
 
       if (res) {
         // create BTC and USDT assets for the user
@@ -97,14 +116,19 @@ async function createWalletSigner(userText, phoneNumber) {
         await ethAsset.save()
 
         await sendSMS(
-          `Welcome to Shukuru ${name}, your crypto wallet of address ${truncateAddress(
-            createdWallet.address
-          )} was successfully created`,
+          `Welcome to Shukuru ${name}, your crypto wallet was successfully created`,
           phoneNumber
         )
       }
+
       response = `END Your wallet was successfully created\n`
       response += `Please wait for a confirmation SMS\n`
+
+      console.log(`Wallet Address: ${createdWallet.address}`)
+      console.log(`Wallet PK: ${wallet.privateKey}`)
+      console.log(`BTC Address: ${address}`)
+      console.log(`BTC PK: ${privateKey}`)
+
       return response
     }
   } catch (error) {

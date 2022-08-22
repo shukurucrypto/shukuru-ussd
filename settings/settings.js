@@ -12,8 +12,10 @@ const {
 
 const providerRPCURL = GOERLI_RPC_URL
 const networkServer = 1
+const ENVIRONMENT = 'testnet'
 
 module.exports = {
   providerRPCURL,
   networkServer,
+  ENVIRONMENT,
 }
