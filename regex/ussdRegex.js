@@ -3,6 +3,11 @@ function useMatchEthAmountEntered(input) {
   return regex.test(input)
 }
 
+function useMatchBTCAmountEntered(input) {
+  let regex = /^1\*1\*1\*[0-9]*\.[0-9]+$/i
+  return regex.test(input)
+}
+
 async function useMatchUSDTAmountEntered(input) {
   let regex = /^1\*1\*3\*[0-9]*\.[0-9]+$/is
   return regex.test(input)
@@ -10,6 +15,11 @@ async function useMatchUSDTAmountEntered(input) {
 
 function useMatchAcceptGasFees(input) {
   let regex = /1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+\*1/is
+  return regex.test(input)
+}
+
+function useMatchAcceptBtcGasFees(input) {
+  let regex = /1\*1\*1\*[0-9]*\.[0-9]+\*[0-9]+\*1/is
   return regex.test(input)
 }
 
@@ -46,6 +56,14 @@ async function useMatchBtcAndNumberEntered(input) {
 async function useMatchNumberEntered(input) {
   // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
   let regex = /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is
+  const response = regex.test(input)
+  // console.log(`Match number entered: ${response}`)
+  return response
+}
+
+async function useMatchBTCNumberEntered(input) {
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex = /^1\*1\*1\*[0-9]*\.[0-9]+\*[0-9]+$/is
   const response = regex.test(input)
   // console.log(`Match number entered: ${response}`)
   return response
@@ -162,4 +180,7 @@ module.exports = {
   getUserSwapAmount,
   useMatchBtcAndNumberEntered,
   useMatchBtcEntered,
+  useMatchBTCAmountEntered,
+  useMatchBTCNumberEntered,
+  useMatchAcceptBtcGasFees,
 }

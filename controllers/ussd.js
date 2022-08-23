@@ -16,6 +16,9 @@ const {
   useSelectedUsdt,
   useMatchAcceptUSDTGasFees,
   useMatchUsdtRecieverNumberEntered,
+  useMatchBTCAmountEntered,
+  useMatchBTCNumberEntered,
+  useMatchAcceptBtcGasFees,
 } = require('../regex/ussdRegex.js')
 const {
   createTxState,
@@ -42,32 +45,10 @@ const fetchCoin = async (name) => {
   }
 }
 
-// 1. Make crypto payment
-// 2. Topup crypto
-// 3. Wallet info
-// 4. Wallet Balance
-// 5. Swap coins
-
 const markets = async (req, res) => {
   try {
     const { sessionId, serviceCode, phoneNumber, text } = req.body
-
-    // Create a menu cacher
-    const userMenu = await Menu.findOne({ phoneNumber: phoneNumber })
-
-    if (!userMenu) {
-      // Create a new menu for the user with home
-      const newMenu = new Menu({
-        phoneNumber: phoneNumber,
-        name: 'home',
-      })
-
-      await newMenu.save()
-    }
-
     let response = ''
-
-    // console.log(`First text: ${text}`)
 
     if (text === '') {
       // This is the first request. Note how we start the response with CON
@@ -75,12 +56,8 @@ const markets = async (req, res) => {
       response += `1. My Wallet\n`
       response += `2. See Markets`
     } else if (text === '1') {
-      // const coins = await fetchCoins()
       // ============================= OPTION 1 MY WALLETS =============================
-      // ${coin.symbol.toUpperCase()}) - $${coin.market_data.current_price.usd.toLocaleString()}
-      // Showing all the markets menu
       response = `CON Would you like to \n`
-      // response = `CON Now ${coins[0].market_data.current_price.usd.toLocaleString()}(${coins[0].symbol.toUpperCase()}), ${coins[1].market_data.current_price.usd.toLocaleString()}(${coins[1].symbol.toUpperCase()})\n`
       response += `1. Make crypto payment \n`
       response += `2. Topup crypto \n`
       response += `3. Wallet info \n`
@@ -92,23 +69,8 @@ const markets = async (req, res) => {
       response = walletResponse
     } else if (text === '1*2') {
       // ============================= OPTION 1/2 BUY =============================
-      // response = `END Buy crypto coming soon to Shukuru`
       response += `END Thank you for being an early testor \n`
       response += `Test ETH will be sent to your wallet`
-      // Showing coins to buy
-      //   response = `CON Select coin to buy\n`
-      //   response += `1. BTC - Bitcoin\n`
-      //   response += `2. ETH - Ethereum\n`
-      //   response += `3. USDT - Tether\n`
-      // } else if (text === '1*2*1') {
-      //   // Selected buy option 1 Buy BTC
-      //   response = `CON Please enter amount to buy BTC\n`
-      // } else if (text === '1*2*2') {
-      //   // Selected buy option 2 Buy ETH
-      //   response = `CON Please enter amount to buy ETH\n`
-      // } else if (text === '1*2*3') {
-      //   // Selected buy option 3 Buy USDT
-      //   response = `CON Please enter amount to buy USDT\n`
     } else if (text === '1*1') {
       // ============================= OPTION 1/3 MAKE CRYPTO PAYMENTS =============================
       response = `CON Select the coin to pay using\n`
@@ -119,11 +81,17 @@ const markets = async (req, res) => {
       // ################################# SELECT BTC #############################
       // Set the current user's active TX to BTC
       createTxState('BTC', phoneNumber)
-      // Selected payment option 1 use BTC
-      // response = `CON Please enter amount of BTC to pay\n`
       response = `CON Entered amount of BTC to send`
-
-      //
+    } else if (useMatchBTCAmountEntered(text)) {
+      // Number of BTC reciever
+      response = `CON Please enter the number of BTC reciever\n`
+    } else if (useMatchBTCNumberEntered(text) && text.startsWith('1*1*1*')) {
+      // ============================= CONFIRM BTC GAS FEES =============================
+      const paymentAmount = await getUserPaymentAmountBefore(text)
+      response = `CON Initialized payment ${paymentAmount} BTC\n`
+      // response += `Estimated gas 0.0345 BTC\n`
+      response += `1. Confirm \n`
+      response += `2. Cancel \n`
     } else if (text === '1*1*2') {
       // ################################# SELECT ETHEREUM #############################
 
@@ -178,6 +146,13 @@ const markets = async (req, res) => {
       response = `CON USDT payment initiated\n`
     }
 
+    // ################################# CONFIRM / ACCEPT GAS FEES #############################
+    if (useMatchAcceptBtcGasFees(text)) {
+      // ============================= SEND BITCOIN =============================
+      // sendEther(text, phoneNumber)
+      // response = txResponse
+      response = `END Your BTC crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
+    }
     if (useMatchAcceptGasFees(text)) {
       // ============================= SEND ETHEREUM =============================
       sendEther(text, phoneNumber)
@@ -293,13 +268,7 @@ const markets = async (req, res) => {
       // response += `2. Sell\n`
     }
 
-    // if (useSelectedBTCToBuy(text)) {
-    //   response = `END Buy crypto coming soon to Shukuru`
-    // }
-
-    console.log(text)
-    // console.log(serviceCode)
-    // Send the response back to the API
+    // console.log(text)
     res.set('Content-Type: text/plain')
     res.send(response)
   } catch (err) {
@@ -358,3 +327,85 @@ module.exports = {
   markets,
   createWallet,
 }
+
+/*
+console.log(sessionId)
+
+    // Create a menu cacher
+    const userMenu = await Menu.findOne({ phoneNumber: phoneNumber })
+
+    if (userMenu?.name === 'home' || text === '') {
+      response = `CON Welcome to Shukuru Crypto, What would you like to do?\n`
+      response += `1. My Wallet\n`
+      response += `2. See Markets`
+    }
+
+    if (text === '1' && userMenu.name !== 'wallet') {
+      // Set the user manu to wallet
+
+      userMenu.name = 'wallet'
+      // userMenu.active = true
+      userMenu.sessionId = sessionId
+
+      response = `CON Would you like to \n`
+      response += `1. Make crypto payment \n`
+      response += `2. Topup crypto \n`
+      response += `3. Wallet info \n`
+      response += `4. Wallet Balance \n`
+      response += `5. Swap coins \n`
+
+      // Set the active menu to wallet
+      await userMenu.save()
+    }
+
+    if (userMenu?.name === 'wallet' && text === '1') {
+      response = `CON Would you like to \n`
+      response += `1. Make crypto payment \n`
+      response += `2. Topup crypto \n`
+      response += `3. Wallet info \n`
+      response += `4. Wallet Balance \n`
+      response += `5. Swap coins \n`
+    }
+
+    if (userMenu?.name === 'wallet' && text === '1*1') {
+      // ============================= OPTION 1/3 MAKE CRYPTO PAYMENTS =============================
+      userMenu.name = 'coin'
+      response = `CON Select the coin to pay using\n`
+      response += `1. BTC - Bitcoin\n`
+      response += `2. ETH - Ethereum*\n`
+      response += `3. USDT - Tether\n`
+      userMenu.save()
+    }
+
+    if (userMenu?.name === 'coin') {
+      // ============================= OPTION 1/2/1 ENTER BITCOIN =============================
+      response = `CON Please enter amount to buy BTC\n`
+    }
+
+    if (userMenu?.name === 'coin' && text.startsWith('1*1*')) {
+      // ============================= ENTER BITCOIN NUMBER =============================
+      response = `CON Please enter BTC reciever number\n`
+    }
+
+    if (!userMenu) {
+      // Create a new menu for the user with home
+      const newMenu = new Menu({
+        phoneNumber: phoneNumber,
+        name: 'home',
+      })
+      newMenu.save()
+    }
+
+    if (userMenu && userMenu?.sessionId != sessionId) {
+      userMenu.name = 'home'
+      userMenu.save()
+    }
+
+    console.log(text)
+    console.log(userMenu.name)
+    // console.log(sessionId)
+    // console.log(userMenu?.sessionId)
+    // console.log(userMenu)
+    // console.log(serviceCode)
+    // Send the response back to the API
+    */

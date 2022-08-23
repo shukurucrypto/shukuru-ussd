@@ -11,6 +11,9 @@ const MenuSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  sessionId: {
+    type: String,
+  },
 })
 
 const Menu = mongoose.model('Menu', MenuSchema)

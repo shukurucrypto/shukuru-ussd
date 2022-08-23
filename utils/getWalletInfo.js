@@ -27,6 +27,8 @@ async function sendWalletInfo(phoneNumber) {
       const balance = await provider.getBalance(currentUser.address)
       const btcBalance = await getBTCBalance(currentUser.btcAddress)
 
+      userBalance = ethers.utils.formatEther(balance)
+
       const btcBalanceConverted =
         btcBalance.data.confirmed_balance > 0
           ? btcBalance.data.confirmed_balance
@@ -53,7 +55,6 @@ async function sendWalletInfo(phoneNumber) {
 
       response = `END We have sent you an SMS showing your wallet info \n`
 
-      userBalance = ethers.utils.formatEther(balance)
       if (currentUser.balance !== userBalance) {
         currentUser.balance = userBalance
         btcUserAsset.balance = balance
