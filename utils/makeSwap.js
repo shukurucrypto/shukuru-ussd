@@ -151,7 +151,7 @@ const makeSwap = async (tokenFrom, tokenTo, amount, phoneNumber) => {
   BUY_TOKEN_ADDRESS = tokenToAsset?.address
 
   try {
-    await swap(amount.toString(), SELL_TOKEN_ADDRESS, BUY_TOKEN_ADDRESS, signer)
+    // await swap(amount.toString(), SELL_TOKEN_ADDRESS, BUY_TOKEN_ADDRESS, signer)
     // await useUniswapTokens(signer)
 
     return `END Swapping will go live on mainnet soon...`

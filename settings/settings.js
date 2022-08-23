@@ -13,9 +13,14 @@ const {
 const providerRPCURL = GOERLI_RPC_URL
 const networkServer = 1
 const ENVIRONMENT = 'testnet'
+const network = {
+  name: 'goerli',
+  chainID: 5,
+}
 
 module.exports = {
   providerRPCURL,
   networkServer,
+  network,
   ENVIRONMENT,
 }

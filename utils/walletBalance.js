@@ -7,6 +7,7 @@ const { truncateAddress } = require('../regex/ussdRegex.js')
 const { providerRPCURL } = require('../settings/settings.js')
 const { getBTCBalance } = require('../functions/getBTCBalance.js')
 const Assets = require('../models/Assets.js')
+const { getUsdtBalance } = require('./getUsdtBalance.js')
 require('dotenv').config()
 
 // const provider = new ethers.providers.JsonRpcProvider(
@@ -26,6 +27,9 @@ async function walletBalance(phoneNumber) {
     if (currentUser) {
       const balance = await provider.getBalance(currentUser.address)
       const btcBalance = await getBTCBalance(currentUser.btcAddress)
+      const usdtBalance = await getUsdtBalance(phoneNumber)
+
+      // console.log(`USDT USER BALANCE-------------------${}`)
 
       const btcBalanceConverted =
         btcBalance.data.confirmed_balance > 0
@@ -42,6 +46,7 @@ async function walletBalance(phoneNumber) {
       )
 
       userBalance = ethers.utils.formatEther(balance)
+      usdtUserBalance = ethers.utils.formatEther(usdtBalance)
 
       // update the wallet balance in the db
 
@@ -57,7 +62,7 @@ async function walletBalance(phoneNumber) {
       response = `END Shuku ${currentUser.name}, Your wallet has:\n`
       response += ` ${btcBalanceConverted} BTC \n`
       response += ` ${userBalance} ETH \n`
-      response += ` 0.0 USDT \n`
+      response += ` ${usdtUserBalance} USDT \n`
 
       if (currentUser.balance !== userBalance) {
         currentUser.balance = userBalance

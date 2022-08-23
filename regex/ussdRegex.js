@@ -33,6 +33,16 @@ async function useMatchNumberUsdtEntered(input) {
   return regex.test(input)
 }
 
+async function useMatchBtcEntered(input) {
+  let regex = /^1\*1\*1\*[0-9]*\.[0-9]+$/is
+  return regex.test(input)
+}
+
+async function useMatchBtcAndNumberEntered(input) {
+  let regex = /^1\*1\*1\*[0-9]*\.[0-9]+\*[0-9]+$/is
+  return regex.test(input)
+}
+
 async function useMatchNumberEntered(input) {
   // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
   let regex = /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is
@@ -150,4 +160,6 @@ module.exports = {
   useMatchUsdtRecieverNumberEntered,
   useSwapEthToUsdtPrice,
   getUserSwapAmount,
+  useMatchBtcAndNumberEntered,
+  useMatchBtcEntered,
 }

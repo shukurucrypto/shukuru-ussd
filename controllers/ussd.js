@@ -1,6 +1,7 @@
 const axios = require('axios')
 const { fetchCoins } = require('../apiCalls/coins.js')
 const { wallet, getWalletBalance } = require('../functions/wallet.js')
+const Menu = require('../models/Menu.js')
 const User = require('../models/User.js')
 const {
   useMatchEthAmountEntered,
@@ -41,9 +42,28 @@ const fetchCoin = async (name) => {
   }
 }
 
+// 1. Make crypto payment
+// 2. Topup crypto
+// 3. Wallet info
+// 4. Wallet Balance
+// 5. Swap coins
+
 const markets = async (req, res) => {
   try {
     const { sessionId, serviceCode, phoneNumber, text } = req.body
+
+    // Create a menu cacher
+    const userMenu = await Menu.findOne({ phoneNumber: phoneNumber })
+
+    if (!userMenu) {
+      // Create a new menu for the user with home
+      const newMenu = new Menu({
+        phoneNumber: phoneNumber,
+        name: 'home',
+      })
+
+      await newMenu.save()
+    }
 
     let response = ''
 
@@ -96,10 +116,17 @@ const markets = async (req, res) => {
       response += `2. ETH - Ethereum*\n`
       response += `3. USDT - Tether\n`
     } else if (text === '1*1*1') {
+      // ################################# SELECT BTC #############################
+      // Set the current user's active TX to BTC
+      createTxState('BTC', phoneNumber)
       // Selected payment option 1 use BTC
       // response = `CON Please enter amount of BTC to pay\n`
-      response = `END BTC coming soon to Shukuru`
+      response = `CON Entered amount of BTC to send`
+
+      //
     } else if (text === '1*1*2') {
+      // ################################# SELECT ETHEREUM #############################
+
       // ============================= OPTION Selected payment option 2 use ETH =============================
       // Set the user's active asset to ETH here....
       await createTxState('ETH', phoneNumber)
@@ -169,6 +196,8 @@ const markets = async (req, res) => {
       const txResponse = await getWalletBalance(phoneNumber)
       response = txResponse
     }
+
+    // ################################# SELECT SWAP #############################
     if (text === '1*5') {
       // ============================= OPTION 1/5 SWAP COINS =============================
       response = `CON Select the coin to swap\n`
@@ -185,7 +214,7 @@ const markets = async (req, res) => {
       response += `2. Cancel \n`
     } else if (text.startsWith('1*5*1*') && text.endsWith('*1')) {
       response = `END Your swap is being processed, please wait for a confirmation SMS...`
-      await swapCoins(text, phoneNumber, 'ETH/USDT')
+      swapCoins(text, phoneNumber, 'ETH/USDT')
     } else if (text === '1*5*2') {
       // ============================= OPTION 1/5/2 SWAP USDT TO ETH =============================
       response = `CON Please enter amount of USDT to swap\n`
@@ -198,7 +227,7 @@ const markets = async (req, res) => {
       response += `2. Cancel \n`
     } else if (text.startsWith('1*5*2*') && text.endsWith('*1')) {
       response = `END Your swap is being processed, please wait for a confirmation SMS...`
-      await swapCoins(text, phoneNumber, 'USDT/ETH')
+      swapCoins(text, phoneNumber, 'USDT/ETH')
     }
 
     if (useRejectGasFees(text)) {
@@ -268,7 +297,7 @@ const markets = async (req, res) => {
     //   response = `END Buy crypto coming soon to Shukuru`
     // }
 
-    // console.log(text)
+    console.log(text)
     // console.log(serviceCode)
     // Send the response back to the API
     res.set('Content-Type: text/plain')
