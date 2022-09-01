@@ -29,6 +29,7 @@ const {
 } = require('../utils/createTxState.js')
 const { getGasEstimates } = require('../utils/getGasEstimates.js')
 const { sendWalletInfo } = require('../utils/getWalletInfo.js')
+const { sendBtc } = require('../utils/sendBtc.js')
 const { sendEther } = require('../utils/sendEther.js')
 const { sendUsdt } = require('../utils/sendUsdt.js')
 const { swapCoins, swapCoinsQuote } = require('../utils/swapCoins.js')
@@ -149,7 +150,7 @@ const markets = async (req, res) => {
     // ################################# CONFIRM / ACCEPT GAS FEES #############################
     if (useMatchAcceptBtcGasFees(text)) {
       // ============================= SEND BITCOIN =============================
-      // sendEther(text, phoneNumber)
+      sendBtc(text, phoneNumber)
       // response = txResponse
       response = `END Your BTC crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
     }
