@@ -15,7 +15,7 @@ const { providerRPCURL } = require('../settings/settings.js')
 const Assets = require('../models/Assets.js')
 const { getSwapQuote } = require('./getSwapQuote.js')
 const { makeSwap } = require('./makeSwap.js')
-const { useUniswapTokens } = require('../functions/swapTokensWithUniswap.js')
+// const { useUniswapTokens } = require('../functions/swapTokensWithUniswap.js')
 const { swapTokenRouter } = require('./swapTokenRouter.js')
 require('dotenv').config()
 
@@ -31,7 +31,7 @@ const swapCoins = async (userText, phoneNumber, swap) => {
 
     const amount = await getUserSwapAmount(userText)
 
-    const swapAmount = ethers.utils.parseEther(amount)
+    // const swapAmount = ethers.utils.parseEther(amount)
 
     if (!currentUser) {
       response = `END You do not have a wallet yet`
@@ -40,13 +40,13 @@ const swapCoins = async (userText, phoneNumber, swap) => {
 
     // Check to see if the user has enough ETH to swap
     if (swap === 'ETH/USDT') {
-      // const swapQuote = await makeSwap('ETH', 'USDT', swapAmount, phoneNumber)
-      const swapQuote = await swapTokenRouter(
-        'ETH',
-        'USDT',
-        swapAmount,
-        phoneNumber
-      )
+      const swapQuote = await makeSwap('WETH', 'USDT', amount, phoneNumber)
+      // const swapQuote = await swapTokenRouter(
+      //   'ETH',
+      //   'USDT',
+      //   swapAmount,
+      //   phoneNumber
+      // )
       const balance = await provider.getBalance(currentUser.address)
       userBalance = ethers.utils.formatEther(balance)
 
@@ -63,7 +63,7 @@ const swapCoins = async (userText, phoneNumber, swap) => {
 
     // Check to see if the user has enough USDT to swap
     if (swap === 'USDT/ETH') {
-      const swapQuote = await makeSwap('USDT', 'ETH', swapAmount, phoneNumber)
+      const swapQuote = await makeSwap('USDT', 'WETH', amount, phoneNumber)
       const userUsdtAsset = await Assets.findOne({
         user: currentUser._id,
         symbol: 'USDT',
@@ -93,8 +93,8 @@ const swapCoinsQuote = async (userText, phoneNumber, swap) => {
     const swapAmount = ethers.utils.parseEther(amount)
 
     // Check to see if the user has enough ETH to swap
-    if (swap === 'ETH/USDT') {
-      //   const swapQuote = await getSwapQuote('ETH', 'USDT', swapAmount)
+    if (swap === 'ETH/DAI') {
+      //   const swapQuote = await getSwapQuote('ETH', 'DAI', swapAmount)
       //   // quote.price = swapQuote.price
       //   // quote.gasPrice = swapQuote.gasPrice
       //   // quote.estimatedGas = swapQuote.estimatedGas

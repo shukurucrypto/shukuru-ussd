@@ -7,7 +7,8 @@ const { truncateAddress } = require('../regex/ussdRegex.js')
 const { providerRPCURL } = require('../settings/settings.js')
 const { getBTCBalance } = require('../functions/getBTCBalance.js')
 const Assets = require('../models/Assets.js')
-const { getUsdtBalance } = require('./getUsdtBalance.js')
+const { getDaiBalance } = require('./getDaiBalance.js')
+const { getLightningBalance } = require('../functions/getLightningBalance.js')
 require('dotenv').config()
 
 // const provider = new ethers.providers.JsonRpcProvider(
@@ -26,15 +27,16 @@ async function walletBalance(phoneNumber) {
 
     if (currentUser) {
       const balance = await provider.getBalance(currentUser.address)
-      const btcBalance = await getBTCBalance(currentUser.btcAddress)
-      const usdtBalance = await getUsdtBalance(phoneNumber)
+      // const btcBalance = await getBTCBalance(currentUser.btcAddress)
+      const usdtBalance = await getDaiBalance(phoneNumber)
+      const lightningBalance = await getLightningBalance(phoneNumber)
 
       // console.log(`USDT USER BALANCE-------------------${}`)
 
-      const btcBalanceConverted =
-        btcBalance.data.confirmed_balance > 0
-          ? btcBalance.data.confirmed_balance
-          : btcBalance.data.unconfirmed_balance
+      // const btcBalanceConverted =
+      //   btcBalance.data.confirmed_balance > 0
+      //     ? btcBalance.data.confirmed_balance
+      //     : btcBalance.data.unconfirmed_balance
 
       // Find btc asset and update balance
       const btcUserAsset = await Assets.findOneAndUpdate(
@@ -42,7 +44,8 @@ async function walletBalance(phoneNumber) {
           user: currentUser._id,
           symbol: 'BTC',
         },
-        { balance: btcBalanceConverted }
+        { balance: lightningBalance }
+        // { balance: btcBalanceConverted }
       )
 
       userBalance = ethers.utils.formatEther(balance)
@@ -52,17 +55,10 @@ async function walletBalance(phoneNumber) {
 
       // btcUserAsset.balance = btcBalance
 
-      await sendSMS(
-        `Your wallet ${truncateAddress(currentUser.address)} balance:\n 
-          ${userBalance} ETH\n
-          ${btcBalanceConverted} BTC`,
-        phoneNumber
-      )
-
       response = `END Shuku ${currentUser.name}, Your wallet has:\n`
-      response += ` ${btcBalanceConverted} BTC \n`
+      response += ` ${lightningBalance} BTC \n`
       response += ` ${userBalance} ETH \n`
-      response += ` ${usdtUserBalance} USDT \n`
+      response += ` ${usdtUserBalance} DAI \n`
 
       if (currentUser.balance !== userBalance) {
         currentUser.balance = userBalance
@@ -71,6 +67,13 @@ async function walletBalance(phoneNumber) {
         currentUser.save()
         btcUserAsset.save()
       }
+
+      // sendSMS(
+      //   `Your wallet ${truncateAddress(currentUser.address)} balance:\n
+      //     ${userBalance} ETH\n
+      //     ${lightningBalance} BTC`,
+      //   phoneNumber
+      // )
 
       return response
     } else {

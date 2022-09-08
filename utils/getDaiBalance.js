@@ -6,15 +6,15 @@ const provider = new ethers.providers.JsonRpcProvider(providerRPCURL)
 
 const ABI = require('../abiData/erc20.json')
 const { networkConfig } = require('../helper-hardhat-config.js')
-const USDT_ADDRESS = networkConfig.usdt.testAddress
+const DAI_ADDRESS = networkConfig.dai.testAddress
 
-const getUsdtBalance = async (phoneNumber) => {
+const getDaiBalance = async (phoneNumber) => {
   try {
     const userSigner = await getCurrentUserSigner(phoneNumber)
     const userAddress = await userSigner.getAddress()
     // const usdtAsset = await Assets.findOne()
 
-    const usdtContract = new ethers.Contract(USDT_ADDRESS, ABI, provider)
+    const usdtContract = new ethers.Contract(DAI_ADDRESS, ABI, provider)
 
     const userBalance = usdtContract.balanceOf(userAddress)
 
@@ -26,5 +26,5 @@ const getUsdtBalance = async (phoneNumber) => {
 }
 
 module.exports = {
-  getUsdtBalance,
+  getDaiBalance,
 }

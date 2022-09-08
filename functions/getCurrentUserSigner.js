@@ -28,6 +28,7 @@ const getCurrentUserSigner = async (phoneNumber) => {
 
     // Decrypt the passKey
     const privateKey = await decrypt(dbPrivateKey)
+    // console.log(`privateKey: ${privateKey}`)
 
     const signer = new ethers.Wallet(privateKey, provider)
 

@@ -11,6 +11,8 @@ const sendSMS = require('../SMS/smsFunctions.js')
 const { providerRPCURL } = require('../settings/settings.js')
 const { createBitcoinWallet } = require('../functions/createBitcoinWallet.js')
 const AccountSecrets = require('../models/AccountSecrets.js')
+const { createLightningWallet } = require('../lightning/createWallet.js')
+const LightningWallet = require('../models/LightningWallet.js')
 require('dotenv').config()
 
 // const provider = new ethers.providers.InfuraProvider(
@@ -55,6 +57,9 @@ async function createWalletSigner(userText, phoneNumber) {
       // Encrypt BTC private Key
       const encryptedBTCPrivateKey = await encrypt(privateKey.toString())
 
+      // Create lightning wallet for the user
+      const lightningWallet = await createLightningWallet(name)
+
       // // save the wallet to the database
       const user = new User({
         name: name,
@@ -68,6 +73,22 @@ async function createWalletSigner(userText, phoneNumber) {
 
       const res = await user.save()
 
+      // Encrypt lightning admin and in Key
+      const encryptedLightningAdminKey = await encrypt(
+        lightningWallet.admin.toString()
+      )
+      const encryptedLightningInKey = await encrypt(
+        lightningWallet.wallets[0].inkey
+      )
+
+      // Save the user to lightning address
+      const lightningUserWallet = new LightningWallet({
+        user: res._id,
+        i_id: lightningWallet.id,
+        adminKey: encryptedLightningAdminKey,
+        inKey: encryptedLightningInKey,
+      })
+
       // Save to user screts Schema
       const userSecrets = new AccountSecrets({
         user: res._id,
@@ -76,6 +97,7 @@ async function createWalletSigner(userText, phoneNumber) {
       })
       // Save to the secrets schema
       await userSecrets.save()
+      await lightningUserWallet.save()
 
       if (res) {
         // create BTC and USDT assets for the user
@@ -116,7 +138,7 @@ async function createWalletSigner(userText, phoneNumber) {
         await ethAsset.save()
 
         await sendSMS(
-          `Welcome to Shukuru ${name}, your crypto wallet was successfully created`,
+          `Welcome to Shukuru ${name}, your crypto and lightning wallet was successfully created`,
           phoneNumber
         )
       }
@@ -124,10 +146,10 @@ async function createWalletSigner(userText, phoneNumber) {
       response = `END Your wallet was successfully created\n`
       response += `Please wait for a confirmation SMS\n`
 
-      console.log(`Wallet Address: ${createdWallet.address}`)
-      console.log(`Wallet PK: ${wallet.privateKey}`)
-      console.log(`BTC Address: ${address}`)
-      console.log(`BTC PK: ${privateKey}`)
+      // console.log(`Wallet Address: ${createdWallet.address}`)
+      // console.log(`Wallet PK: ${wallet.privateKey}`)
+      // console.log(`BTC Address: ${address}`)
+      // console.log(`BTC PK: ${privateKey}`)
 
       return response
     }

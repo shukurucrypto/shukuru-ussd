@@ -51,237 +51,250 @@ const markets = async (req, res) => {
     const { sessionId, serviceCode, phoneNumber, text } = req.body
     let response = ''
 
-    if (text === '') {
-      // This is the first request. Note how we start the response with CON
-      response = `CON Welcome to Shukuru Crypto, What would you like to do?\n`
-      response += `1. My Wallet\n`
-      response += `2. See Markets`
-    } else if (text === '1') {
-      // ============================= OPTION 1 MY WALLETS =============================
-      response = `CON Would you like to \n`
-      response += `1. Make crypto payment \n`
-      response += `2. Topup crypto \n`
-      response += `3. Wallet info \n`
-      response += `4. Wallet Balance \n`
-      response += `5. Swap coins \n`
-    } else if (text === '1*3') {
-      // ============================= OPTION 1 WALLET INFO =============================
-      const walletResponse = await sendWalletInfo(phoneNumber)
-      response = walletResponse
-    } else if (text === '1*2') {
-      // ============================= OPTION 1/2 BUY =============================
-      response += `END Thank you for being an early testor \n`
-      response += `Test ETH will be sent to your wallet`
-    } else if (text === '1*1') {
-      // ============================= OPTION 1/3 MAKE CRYPTO PAYMENTS =============================
-      response = `CON Select the coin to pay using\n`
-      response += `1. BTC - Bitcoin\n`
-      response += `2. ETH - Ethereum*\n`
-      response += `3. USDT - Tether\n`
-    } else if (text === '1*1*1') {
-      // ################################# SELECT BTC #############################
-      // Set the current user's active TX to BTC
-      createTxState('BTC', phoneNumber)
-      response = `CON Entered amount of BTC to send`
-    } else if (useMatchBTCAmountEntered(text)) {
-      // Number of BTC reciever
-      response = `CON Please enter the number of BTC reciever\n`
-    } else if (useMatchBTCNumberEntered(text) && text.startsWith('1*1*1*')) {
-      // ============================= CONFIRM BTC GAS FEES =============================
-      const paymentAmount = await getUserPaymentAmountBefore(text)
-      response = `CON Initialized payment ${paymentAmount} BTC\n`
-      // response += `Estimated gas 0.0345 BTC\n`
-      response += `1. Confirm \n`
-      response += `2. Cancel \n`
-    } else if (text === '1*1*2') {
-      // ################################# SELECT ETHEREUM #############################
+    const user = await User.findOne({ phoneNumber })
 
-      // ============================= OPTION Selected payment option 2 use ETH =============================
-      // Set the user's active asset to ETH here....
-      await createTxState('ETH', phoneNumber)
-
-      response = `CON Please enter amount of ETH to pay\n`
-    } else if (useMatchEthAmountEntered(text)) {
-      // Number of ETH reciever
-      response = `CON Please enter the number of reciever\n`
-    } else if (useMatchNumberEntered(text) && text !== '1*1*3') {
-      // ============================= CONFIRM ETH GAS FEES =============================
-
-      // Get the payment amount from the text string
-      const activeAsset = await getActiveTx(phoneNumber)
-      // console.log(`Active asset ------------ ${activeAsset}`)
-      if (activeAsset?.asset?.name === 'ETH') {
+    if (!user) {
+      createWallet(req, res, phoneNumber, text)
+    } else {
+      if (text === '') {
+        // This is the first request. Note how we start the response with CON
+        response = `CON Welcome to Shukuru Crypto, What would you like to do?\n`
+        response += `1. My Wallet\n`
+        response += `2. See Markets`
+      } else if (text === '1') {
+        // ============================= OPTION 1 MY WALLETS =============================
+        response = `CON Would you like to \n`
+        response += `1. Make crypto payment \n`
+        response += `2. Topup crypto \n`
+        response += `3. Wallet info \n`
+        response += `4. Wallet Balance \n`
+        response += `5. Swap coins \n`
+      } else if (text === '1*3') {
+        // ============================= OPTION 1 WALLET INFO =============================
+        const walletResponse = await sendWalletInfo(phoneNumber)
+        response = walletResponse
+      } else if (text === '1*2') {
+        // ============================= OPTION 1/2 BUY =============================
+        response += `CON What do you want to top-up? \n`
+        response += `1. BTC \n`
+        response += `2. ETH `
+      } else if (text === '1*2*1') {
+        response = `CON Enter the amount of BTC to recieve. \n`
+      } else if (text.startsWith('1*2*1*')) {
+        response = `END Shuku User, We've sent you a message to recieve your BTC\n`
+      } else if (text === '1*2*2') {
+        response += `END Thank you for being an early testor. \n`
+        response += `We'll send you test ETH \n`
+      } else if (text === '1*1') {
+        // ============================= OPTION 1/3 MAKE CRYPTO PAYMENTS =============================
+        response = `CON Select the coin to pay using\n`
+        response += `1. BTC - Bitcoin\n`
+        response += `2. ETH - Ethereum*\n`
+        response += `3. DAI - Stable\n`
+      } else if (text === '1*1*1') {
+        // ################################# SELECT BTC #############################
+        // Set the current user's active TX to BTC
+        createTxState('BTC', phoneNumber)
+        response = `CON Entered amount of BTC to send`
+      } else if (useMatchBTCAmountEntered(text)) {
+        // Number of BTC reciever
+        response = `CON Please enter the number of BTC reciever\n`
+      } else if (useMatchBTCNumberEntered(text) && text.startsWith('1*1*1*')) {
+        // ============================= CONFIRM BTC GAS FEES =============================
         const paymentAmount = await getUserPaymentAmountBefore(text)
-        // Get the estimated gas fees
-        // Switch between the confirmation assets here using the active asset
-        const gasPrice = await getGasEstimates(phoneNumber, text)
-        response = `CON Initialized payment ${paymentAmount} ETH\n`
-        response += `Estimated gas ${gasPrice} ETH\n`
+        response = `CON Initialized payment ${paymentAmount} BTC\n`
+        // response += `Estimated gas 0.0345 BTC\n`
         response += `1. Confirm \n`
         response += `2. Cancel \n`
-      } else if (activeAsset?.asset?.name === 'USDT') {
-        if (activeAsset.step > 1 && !activeAsset.accepted) {
-          // ============================= CONFIRM USDT GAS FEES =============================
-          // Get the USDT payment amount from the text string
+      } else if (text === '1*1*2') {
+        // ################################# SELECT ETHEREUM #############################
+
+        // ============================= OPTION Selected payment option 2 use ETH =============================
+        // Set the user's active asset to ETH here....
+        await createTxState('ETH', phoneNumber)
+
+        response = `CON Please enter amount of ETH to pay\n`
+      } else if (useMatchEthAmountEntered(text)) {
+        // Number of ETH reciever
+        response = `CON Please enter the number of reciever\n`
+      } else if (useMatchNumberEntered(text) && text !== '1*1*3') {
+        // ============================= CONFIRM ETH GAS FEES =============================
+
+        // Get the payment amount from the text string
+        const activeAsset = await getActiveTx(phoneNumber)
+        // console.log(`Active asset ------------ ${activeAsset}`)
+        if (activeAsset?.asset?.name === 'ETH') {
           const paymentAmount = await getUserPaymentAmountBefore(text)
           // Get the estimated gas fees
+          // Switch between the confirmation assets here using the active asset
           const gasPrice = await getGasEstimates(phoneNumber, text)
-          await acceptGasFees(activeAsset)
-          response = `CON Initialized payment ${paymentAmount} USDT\n`
+          response = `CON Initialized payment ${paymentAmount} ETH\n`
           response += `Estimated gas ${gasPrice} ETH\n`
           response += `1. Confirm \n`
           response += `2. Cancel \n`
-        } else {
-          await setNextStep(activeAsset)
-          response = `CON Please enter the number of USDT reciever\n`
+        } else if (activeAsset?.asset?.name === 'USDT') {
+          if (activeAsset.step > 1 && !activeAsset.accepted) {
+            // ============================= CONFIRM USDT GAS FEES =============================
+            // Get the USDT payment amount from the text string
+            const paymentAmount = await getUserPaymentAmountBefore(text)
+            // Get the estimated gas fees
+            const gasPrice = await getGasEstimates(phoneNumber, text)
+            await acceptGasFees(activeAsset)
+            response = `CON Initialized payment ${paymentAmount} USDT\n`
+            response += `Estimated gas ${gasPrice} ETH\n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          } else {
+            await setNextStep(activeAsset)
+            response = `CON Please enter the number of USDT reciever\n`
+          }
         }
+        // console.log(`Still in loop--------------------- ${activeAsset}`)
+      } else if (text === '1*1*3') {
+        // ============================= OPTION Selected payment option 3 use USDT =============================
+        await createTxState('USDT', phoneNumber)
+        response = `CON Please enter amount of DAI to pay\n`
+        // response = `END USDT coming soon to Shukuru`
+      } else if (useMatchUSDTAmountEntered(text)) {
+        // Enter the number of user to recieve the USDT payment
+        response = `CON DAI payment initiated\n`
       }
-      // console.log(`Still in loop--------------------- ${activeAsset}`)
-    } else if (text === '1*1*3') {
-      // ============================= OPTION Selected payment option 3 use USDT =============================
-      await createTxState('USDT', phoneNumber)
-      response = `CON Please enter amount of USDT to pay\n`
-      // response = `END USDT coming soon to Shukuru`
-    } else if (useMatchUSDTAmountEntered(text)) {
-      // Enter the number of user to recieve the USDT payment
-      response = `CON USDT payment initiated\n`
-    }
 
-    // ################################# CONFIRM / ACCEPT GAS FEES #############################
-    if (useMatchAcceptBtcGasFees(text)) {
-      // ============================= SEND BITCOIN =============================
-      sendBtc(text, phoneNumber)
-      // response = txResponse
-      response = `END Your BTC crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
-    }
-    if (useMatchAcceptGasFees(text)) {
-      // ============================= SEND ETHEREUM =============================
-      sendEther(text, phoneNumber)
-      // response = txResponse
-      response = `END Your crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
-    }
+      // ################################# CONFIRM / ACCEPT GAS FEES #############################
+      if (useMatchAcceptBtcGasFees(text)) {
+        // ============================= SEND BITCOIN =============================
+        sendBtc(text, phoneNumber)
+        // response = txResponse
+        response = `END Your BTC crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
+      }
+      if (useMatchAcceptGasFees(text)) {
+        // ============================= SEND ETHEREUM =============================
+        sendEther(text, phoneNumber)
+        // response = txResponse
+        response = `END Your crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
+      }
 
-    if (useMatchAcceptUSDTGasFees(text)) {
-      // ============================= SEND USDT =============================
-      removeActiveTx(phoneNumber)
-      sendUsdt(text, phoneNumber)
-      response = `END Your crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
-    }
-    if (text === '1*4') {
-      // ============================= OPTION 1/4 WALLET BALANCE =============================
-      const txResponse = await getWalletBalance(phoneNumber)
-      response = txResponse
-    }
+      if (useMatchAcceptUSDTGasFees(text)) {
+        // ============================= SEND USDT =============================
+        removeActiveTx(phoneNumber)
+        sendUsdt(text, phoneNumber)
+        response = `END Your crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
+      }
+      if (text === '1*4') {
+        // ============================= OPTION 1/4 WALLET BALANCE =============================
+        const txResponse = await getWalletBalance(phoneNumber)
+        response = txResponse
+      }
 
-    // ################################# SELECT SWAP #############################
-    if (text === '1*5') {
-      // ============================= OPTION 1/5 SWAP COINS =============================
-      response = `CON Select the coin to swap\n`
-      response += `1. ETH to USDT\n`
-      response += `2. USDT to ETH\n`
-    } else if (text === '1*5*1') {
-      // ============================= OPTION 1/5/1 SWAP ETH TO USDT =============================
-      response = `CON Please enter amount of ETH to swap\n`
-    } else if (text.startsWith('1*5*1*') && !text.endsWith('*1')) {
-      const quote = await swapCoinsQuote(text, phoneNumber, 'ETH/USDT')
-      response = `CON Swapping ${quote} ETH to USDT\n`
-      // response += `You'll get 1 USDT \n`
-      response += `1. Confirm \n`
-      response += `2. Cancel \n`
-    } else if (text.startsWith('1*5*1*') && text.endsWith('*1')) {
-      response = `END Your swap is being processed, please wait for a confirmation SMS...`
-      swapCoins(text, phoneNumber, 'ETH/USDT')
-    } else if (text === '1*5*2') {
-      // ============================= OPTION 1/5/2 SWAP USDT TO ETH =============================
-      response = `CON Please enter amount of USDT to swap\n`
-    } else if (text.startsWith('1*5*2*') && !text.endsWith('*1')) {
-      const quote = await swapCoinsQuote(text, phoneNumber, 'USDT/ETH')
+      // ################################# SELECT SWAP #############################
+      if (text === '1*5') {
+        // ============================= OPTION 1/5 SWAP COINS =============================
+        response = `CON Select the coin to swap\n`
+        response += `1. ETH to DAI\n`
+        response += `2. DAI to ETH\n`
+      } else if (text === '1*5*1') {
+        // ============================= OPTION 1/5/1 SWAP ETH TO USDT =============================
+        response = `CON Please enter amount of ETH to swap\n`
+      } else if (text.startsWith('1*5*1*') && !text.endsWith('*1')) {
+        const quote = await swapCoinsQuote(text, phoneNumber, 'ETH/DAI')
+        response = `CON Swapping ${quote} ETH to DAI\n`
+        // response += `You'll get 1 USDT \n`
+        response += `1. Confirm \n`
+        response += `2. Cancel \n`
+      } else if (text.startsWith('1*5*1*') && text.endsWith('*1')) {
+        response = `END Your swap is being processed, please wait for a confirmation SMS...`
+        swapCoins(text, phoneNumber, 'ETH/USDT')
+      } else if (text === '1*5*2') {
+        // ============================= OPTION 1/5/2 SWAP DAI TO ETH =============================
+        response = `CON Please enter amount of DAI to swap\n`
+      } else if (text.startsWith('1*5*2*') && !text.endsWith('*1')) {
+        const quote = await swapCoinsQuote(text, phoneNumber, 'DAI/ETH')
 
-      response = `CON Swapping ${quote} USDT to ETH\n`
-      // response += `You'll get 0.000034 ETH \n`
-      response += `1. Confirm \n`
-      response += `2. Cancel \n`
-    } else if (text.startsWith('1*5*2*') && text.endsWith('*1')) {
-      response = `END Your swap is being processed, please wait for a confirmation SMS...`
-      swapCoins(text, phoneNumber, 'USDT/ETH')
+        response = `CON Swapping ${quote} DAI to ETH\n`
+        // response += `You'll get 0.000034 ETH \n`
+        response += `1. Confirm \n`
+        response += `2. Cancel \n`
+      } else if (text.startsWith('1*5*2*') && text.endsWith('*1')) {
+        response = `END Your swap is being processed, please wait for a confirmation SMS...`
+        swapCoins(text, phoneNumber, 'USDT/ETH')
+      }
+
+      if (useRejectGasFees(text)) {
+        // ============================= REJECTED GAS FEES =============================
+        response = `END Thank you for using Shukuru Crypto\n`
+        // ##############################################################################
+        // #######                            SEE MARKETS                       #########
+        // #######                             OPTION (2)                       #########
+        // ##############################################################################
+      } else if (text === '2') {
+        // Showing all the markets menu
+        response = `CON Shukuru Top cryptocurrencies\n`
+        response += `1. BTC - Bitcoin\n`
+        response += `2. ETH - Ethereum\n`
+        response += `3. DAI - Stable\n`
+        // } else if (text === '2*1') {
+        //   // Showing BTC coin options
+        //   response = `CON BTC - Bitcoin\n`
+        //   response += `1. Buy\n`
+        //   response += `2. Sell\n`
+        //   response += `3. Check balance\n`
+        //   response += `4. Market Stats`
+      } else if (text === '2*1') {
+        // Option 4 to check the BTC market
+        const coin = await fetchCoin('bitcoin')
+        response = `END ${
+          coin.name
+        } (${coin.symbol.toUpperCase()}) - $${coin.market_data.current_price.usd.toLocaleString()}\n`
+        response += ` Up ${coin.market_data.ath_change_percentage.btc}% last 24hr\n`
+        // response += `1. Buy\n`
+        // response += `2. Sell\n`
+        // } else if (text === '2*2') {
+        //   // Business logic for first level response
+        //   response = `CON ETH - Ethereum\n`
+        //   response += `1. Buy\n`
+        //   response += `2. Sell\n`
+        //   response += `3. Check balance\n`
+        //   response += `4. Market`
+      } else if (text === '2*2') {
+        // Option 4 to check the ETH market
+        const coin = await fetchCoin('ethereum')
+        response = `END ${
+          coin.name
+        } (${coin.symbol.toUpperCase()}) - $${coin.market_data.current_price.usd.toLocaleString()}\n`
+        response += ` ${coin.market_data.ath_change_percentage.eth}% last 24hr\n`
+        // response += `1. Buy\n`
+        // response += `2. Sell\n`
+        // } else if (text === '2*3') {
+        //   // Business logic for first level response
+        //   response = `CON USDT - Tether\n`
+        //   response += `1. Buy\n`
+        //   response += `2. Sell\n`
+        //   response += `3. Check balance\n`
+        //   response += `4. Market`
+      } else if (text === '2*3') {
+        // Option 4 to check the USDT market
+        const coin = await fetchCoin('dai')
+        response = `END ${
+          coin.name
+        } (${coin.symbol.toUpperCase()}) - $${coin.market_data.current_price.usd.toLocaleString()}\n`
+        response += ` ${coin.market_data.ath_change_percentage.btc}% last 24hr\n`
+        // response += `1. Buy\n`
+        // response += `2. Sell\n`
+      }
+
+      console.log(text)
+      res.set('Content-Type: text/plain')
+      res.send(response)
     }
-
-    if (useRejectGasFees(text)) {
-      // ============================= REJECTED GAS FEES =============================
-      response = `END Thank you for using Shukuru Crypto\n`
-      // ##############################################################################
-      // #######                            SEE MARKETS                       #########
-      // #######                             OPTION (2)                       #########
-      // ##############################################################################
-    } else if (text === '2') {
-      // Showing all the markets menu
-      response = `CON Shukuru Top cryptocurrencies\n`
-      response += `1. BTC - Bitcoin\n`
-      response += `2. ETH - Ethereum\n`
-      response += `3. USDT - Tether\n`
-      // } else if (text === '2*1') {
-      //   // Showing BTC coin options
-      //   response = `CON BTC - Bitcoin\n`
-      //   response += `1. Buy\n`
-      //   response += `2. Sell\n`
-      //   response += `3. Check balance\n`
-      //   response += `4. Market Stats`
-    } else if (text === '2*1') {
-      // Option 4 to check the BTC market
-      const coin = await fetchCoin('bitcoin')
-      response = `END ${
-        coin.name
-      } (${coin.symbol.toUpperCase()}) - $${coin.market_data.current_price.usd.toLocaleString()}\n`
-      response += ` Up ${coin.market_data.ath_change_percentage.btc}% last 24hr\n`
-      // response += `1. Buy\n`
-      // response += `2. Sell\n`
-      // } else if (text === '2*2') {
-      //   // Business logic for first level response
-      //   response = `CON ETH - Ethereum\n`
-      //   response += `1. Buy\n`
-      //   response += `2. Sell\n`
-      //   response += `3. Check balance\n`
-      //   response += `4. Market`
-    } else if (text === '2*2') {
-      // Option 4 to check the ETH market
-      const coin = await fetchCoin('ethereum')
-      response = `END ${
-        coin.name
-      } (${coin.symbol.toUpperCase()}) - $${coin.market_data.current_price.usd.toLocaleString()}\n`
-      response += ` ${coin.market_data.ath_change_percentage.eth}% last 24hr\n`
-      // response += `1. Buy\n`
-      // response += `2. Sell\n`
-      // } else if (text === '2*3') {
-      //   // Business logic for first level response
-      //   response = `CON USDT - Tether\n`
-      //   response += `1. Buy\n`
-      //   response += `2. Sell\n`
-      //   response += `3. Check balance\n`
-      //   response += `4. Market`
-    } else if (text === '2*3') {
-      // Option 4 to check the USDT market
-      const coin = await fetchCoin('tether')
-      response = `END ${
-        coin.name
-      } (${coin.symbol.toUpperCase()}) - $${coin.market_data.current_price.usd.toLocaleString()}\n`
-      response += ` ${coin.market_data.ath_change_percentage.btc}% last 24hr\n`
-      // response += `1. Buy\n`
-      // response += `2. Sell\n`
-    }
-
-    // console.log(text)
-    res.set('Content-Type: text/plain')
-    res.send(response)
   } catch (err) {
     console.log(err.message)
     res.send(err.message)
   }
 }
 
-const createWallet = async (req, res) => {
-  // console.log(`Create wallet called....`)
+const createWallet = async (req, res, phoneNumber, text) => {
   try {
-    const { sessionId, serviceCode, phoneNumber, text } = req.body
+    // const { sessionId, serviceCode, phoneNumber, text } = req.body
     // Check to see if a user with the phone number exists
     let response = ''
 
