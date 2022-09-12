@@ -73,7 +73,25 @@ const getSwapQuoteAPI = async (req, res) => {
   }
 }
 
+const getQRCode = async (req, res) => {
+  try {
+    // console.log(req.params)
+
+    // const codeData = req.params.id
+    // if (!codeData) {
+    //   return res.send('<h6>No QR code found!')
+    // }
+
+    // res.send(codeData)
+    return res.send('<p>Hi</p>')
+  } catch (err) {
+    console.log(err.message)
+    return err.message
+  }
+}
+
 module.exports = {
   getCoin,
   getCoinAPI,
+  getQRCode,
 }

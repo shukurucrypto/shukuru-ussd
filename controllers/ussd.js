@@ -1,5 +1,6 @@
 const axios = require('axios')
 const { fetchCoins } = require('../apiCalls/coins.js')
+const { createBTCInvoice } = require('../functions/createBTCInvoice.js')
 const { wallet, getWalletBalance } = require('../functions/wallet.js')
 const Menu = require('../models/Menu.js')
 const User = require('../models/User.js')
@@ -31,6 +32,7 @@ const { getGasEstimates } = require('../utils/getGasEstimates.js')
 const { sendWalletInfo } = require('../utils/getWalletInfo.js')
 const { sendBtc } = require('../utils/sendBtc.js')
 const { sendEther } = require('../utils/sendEther.js')
+const { sendLightningBtc } = require('../utils/sendLightningBTC.js')
 const { sendUsdt } = require('../utils/sendUsdt.js')
 const { swapCoins, swapCoinsQuote } = require('../utils/swapCoins.js')
 
@@ -76,11 +78,12 @@ const markets = async (req, res) => {
       } else if (text === '1*2') {
         // ============================= OPTION 1/2 BUY =============================
         response += `CON What do you want to top-up? \n`
-        response += `1. BTC \n`
+        response += `1. BTC (Lightning) \n`
         response += `2. ETH `
       } else if (text === '1*2*1') {
         response = `CON Enter the amount of BTC to recieve. \n`
       } else if (text.startsWith('1*2*1*')) {
+        createBTCInvoice(phoneNumber, text)
         response = `END Shuku User, We've sent you a message to recieve your BTC\n`
       } else if (text === '1*2*2') {
         response += `END Thank you for being an early testor. \n`
@@ -88,7 +91,7 @@ const markets = async (req, res) => {
       } else if (text === '1*1') {
         // ============================= OPTION 1/3 MAKE CRYPTO PAYMENTS =============================
         response = `CON Select the coin to pay using\n`
-        response += `1. BTC - Bitcoin\n`
+        response += `1. BTC - Bitcoin (Lightning)\n`
         response += `2. ETH - Ethereum*\n`
         response += `3. DAI - Stable\n`
       } else if (text === '1*1*1') {
@@ -163,7 +166,8 @@ const markets = async (req, res) => {
       // ################################# CONFIRM / ACCEPT GAS FEES #############################
       if (useMatchAcceptBtcGasFees(text)) {
         // ============================= SEND BITCOIN =============================
-        sendBtc(text, phoneNumber)
+        // sendBtc(text, phoneNumber)
+        sendLightningBtc(text, phoneNumber)
         // response = txResponse
         response = `END Your BTC crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
       }
@@ -282,7 +286,7 @@ const markets = async (req, res) => {
         // response += `2. Sell\n`
       }
 
-      console.log(text)
+      // console.log(text)
       res.set('Content-Type: text/plain')
       res.send(response)
     }

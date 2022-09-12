@@ -110,6 +110,12 @@ async function getUserPaymentAmountBefore(text) {
   return price
 }
 
+async function getTopupBTCAmount(text) {
+  let words = text.match(/[.\d]+/g)
+  let price = words[words.length - 1]
+  return price
+}
+
 async function useSelectedBTCToBuy(text) {
   let regex = /^1\*2\*1\*[0-9]*\.[0-9]+$/is
   let buyBTC = regex.test(text)
@@ -183,4 +189,5 @@ module.exports = {
   useMatchBTCAmountEntered,
   useMatchBTCNumberEntered,
   useMatchAcceptBtcGasFees,
+  getTopupBTCAmount,
 }

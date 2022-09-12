@@ -66,7 +66,7 @@ const swapTokens = async (tokenFrom, tokenTo, amount, wallet) => {
       TradeType.EXACT_INPUT,
       {
         recepient: wallet.address,
-        slippageTolerance: new Percent(5, 100),
+        slippageTolerance: new Percent(25, 100),
         deadline: Math.floor(Date.now() / 1000 + 1800),
       }
     )

@@ -1,5 +1,5 @@
 const express = require('express')
-const { getCoinAPI } = require('../apiCalls/getCoin.js')
+const { getCoinAPI, getQRCode } = require('../apiCalls/getCoin.js')
 const { markets, createWallet } = require('../controllers/ussd.js')
 const { createOtherWallet, otherMarkets } = require('../controllers/ussd2.js')
 const { networkServer } = require('../settings/settings.js')
@@ -10,6 +10,7 @@ router.post('/', markets)
 router.post('/create', createWallet)
 
 router.get('/coin', getCoinAPI)
+router.get('/code/:qr', getQRCode)
 
 // switch (networkServer) {
 //   case 1:
