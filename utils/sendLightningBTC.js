@@ -72,14 +72,14 @@ const sendLightningBtc = async (userText, phoneNumber) => {
       unit: 'BTC',
     }
 
-    const response = await createLightingInvoice(keyReciever, data)
+    const invoiceResponse = await createLightingInvoice(keyReciever, data)
 
-    if (response.payment_hash) {
+    if (invoiceResponse.payment_hash) {
       console.log('Invoice created!')
 
       const payData = {
         out: true,
-        bolt11: response.payment_request,
+        bolt11: invoiceResponse.payment_request,
       }
 
       const res = await payLightingInvoice(keyPayer, payData)

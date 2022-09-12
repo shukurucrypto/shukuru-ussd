@@ -10,7 +10,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use('/ussd', ussdRouter)
-
+  
 // Cconnect mongoose to the database
 try {
   // Connect to the MongoDB cluster
