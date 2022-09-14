@@ -31,7 +31,6 @@ const generateQR = async (paymentHash) => {
       },
     }
     const response = await axios.request(options)
-    console.log(response.data)
     return response.data.url
   } catch (err) {
     console.log(err.response)

@@ -42,9 +42,11 @@ const createBTCInvoice = async (phoneNumber, text) => {
       // const qrCode = await generateQR(response.payment_request)
       // console.log(response.payment_hash)
       sendSMS(
-        `Shuku ${currentUser.name}, Your invoice is here: https://ex.com/qr=${response.payment_hash}`,
+        `Shuku ${currentUser.name}, Your invoice is here: https://shukuru.vercel.app/ussd/qr=${response.payment_hash}`,
         phoneNumber
       )
+
+      // console.log(`https://shukuru.vercel.app/ussd/qr=${response.payment_hash}`)
 
       const savedInvoice = new Invoices({
         user: currentUser._id,
