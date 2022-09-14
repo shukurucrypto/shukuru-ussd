@@ -42,7 +42,7 @@ const createBTCInvoice = async (phoneNumber, text) => {
       // const qrCode = await generateQR(response.payment_request)
       // console.log(response.payment_hash)
       sendSMS(
-        `Shuku ${currentUser.name}, Your invoice is here: https://shukuru.vercel.app/ussd/qr=${response.payment_hash}`,
+        `Shuku ${currentUser.name}, Your invoice is here: https://shukuru.vercel.app/qr=${response.payment_hash}`,
         phoneNumber
       )
 
@@ -65,3 +65,5 @@ const createBTCInvoice = async (phoneNumber, text) => {
 module.exports = {
   createBTCInvoice,
 }
+
+// https://shukuru.vercel.app/qr=13a2c6eb3157bdac43c6894d0b0924fd264a40770bcf8da82b7067069f927c34
