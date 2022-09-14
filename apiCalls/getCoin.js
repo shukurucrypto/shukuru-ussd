@@ -1,5 +1,6 @@
 const axios = require('axios')
 const { ethers } = require('ethers')
+const Invoices = require('../models/Invoices')
 
 const getCoin = async (coin) => {
   let selectedCoin

@@ -10,6 +10,9 @@ const InvoicesSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  paymentRequest: {
+    type: String,
+  },
   paid: {
     type: Boolean,
     default: false,

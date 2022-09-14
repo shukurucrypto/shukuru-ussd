@@ -10,6 +10,7 @@ const LightningWallet = require('../models/LightningWallet.js')
 const {
   createLightingInvoice,
 } = require('../lightning/createLightningInvoice.js')
+const { generateQR } = require('../lightning/generateQR.js')
 
 const createBTCInvoice = async (phoneNumber, text) => {
   try {
@@ -35,16 +36,20 @@ const createBTCInvoice = async (phoneNumber, text) => {
 
     if (response.payment_hash) {
       // Encode the payment hash
-      const bipEncoded = await bip21.encode(response.payment_hash)
-      const qrUri = await QRCode.toDataURL(bipEncoded)
+      // const bipEncoded = await bip21.encode(response.payment_request)
+      // const qrUri = await QRCode.toDataURL(bipEncoded)
+      // console.log(qrUri)
+      // const qrCode = await generateQR(response.payment_request)
+      // console.log(response.payment_hash)
       sendSMS(
-        `Shuku ${currentUser.name}, Your top-up invoice is here: https://url-to-qr-code/${response.payment_hash}`,
+        `Shuku ${currentUser.name}, Your invoice is here: https://ex.com/qr=${response.payment_hash}`,
         phoneNumber
       )
 
       const savedInvoice = new Invoices({
         user: currentUser._id,
         paymentHash: response.payment_hash,
+        paymentRequest: response.payment_request,
       })
 
       await savedInvoice.save()
@@ -58,10 +63,3 @@ const createBTCInvoice = async (phoneNumber, text) => {
 module.exports = {
   createBTCInvoice,
 }
-
-// {
-//   payment_hash: 'ae09cf5ec28fcd67adc1e6ce711bfd1fd75e9b58458c29414663ab55663fda86',
-//   payment_request: 'lnbc2450u1p337fjmsp5fz6rlk9wmzk486p452gqegvjhez4kuunw2s5ckzt4q2pcwguldeqpp54cyu7hkz3lxk0twpum88zxlarlt4ax6cgkxzjs2xvw442e3lm2rqdz52d5826m4ypgx2ar9wgkzq4r0wqs82upqxqhrqvpjxs6jq6twypkhjgrvd9nksarwd9hxwgrhv9kxcet59chqxqyjw5qcqpjrzjqvfmvmq69ax369sjcluaw9a3qfetaldhkqp78jehgneteds87km2kz6u4uqqs4gqqyqqqqqqqqqqpjqq9q9qyysgqc6alp7m4xa82tl3mz25qqdp3c62cal57qem2g7x7ter22jcf53wxdfa7dpgcdzvlsk40s5w2g39dg24c7q9mj0jtvl65hdpscycxtxqpvtc759',
-//   checking_id: 'ae09cf5ec28fcd67adc1e6ce711bfd1fd75e9b58458c29414663ab55663fda86',
-//   lnurl_response: null
-// }
