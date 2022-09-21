@@ -13,6 +13,7 @@ const { createBitcoinWallet } = require('../functions/createBitcoinWallet.js')
 const AccountSecrets = require('../models/AccountSecrets.js')
 const { createLightningWallet } = require('../lightning/createWallet.js')
 const LightningWallet = require('../models/LightningWallet.js')
+const { getUserCurrency } = require('../functions/getUserCurrency.js')
 require('dotenv').config()
 
 // const provider = new ethers.providers.InfuraProvider(
@@ -26,8 +27,8 @@ async function createWalletSigner(userText, phoneNumber) {
   // console.log(`Create wallet called....`)
   let response
   try {
-    // console.log('Test number is: ' + phoneNumber)
     const currentUser = await User.findOne({ phoneNumber })
+
     if (currentUser) {
       response = `END Hi, ${currentUser.name}!\n`
       response += `You already have a Shukuru crypto wallet.\n`
@@ -60,6 +61,9 @@ async function createWalletSigner(userText, phoneNumber) {
       // Create lightning wallet for the user
       const lightningWallet = await createLightningWallet(name)
 
+      // Get the user default currency
+      const currency = await getUserCurrency(phoneNumber)
+
       // // save the wallet to the database
       const user = new User({
         name: name,
@@ -69,13 +73,16 @@ async function createWalletSigner(userText, phoneNumber) {
         btcAddress: address.toString(),
         passKey: encryptedPassKey,
         mnemonic: encryptedMnemonic,
+        country: currency,
       })
 
       const res = await user.save()
 
+      // console.log(lightningWallet)
+
       // Encrypt lightning admin and in Key
       const encryptedLightningAdminKey = await encrypt(
-        lightningWallet.admin.toString()
+        lightningWallet.wallets[0].adminkey
       )
       const encryptedLightningInKey = await encrypt(
         lightningWallet.wallets[0].inkey

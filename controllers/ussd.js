@@ -81,10 +81,10 @@ const markets = async (req, res) => {
         response += `1. BTC (Lightning) \n`
         response += `2. ETH `
       } else if (text === '1*2*1') {
-        response = `CON Enter the amount of BTC to recieve. \n`
+        response = `CON Enter the amount of BTC in ${user.country} to recieve. \n`
       } else if (text.startsWith('1*2*1*')) {
         createBTCInvoice(phoneNumber, text)
-        response = `END Shuku User, We've sent you a message to recieve your BTC\n`
+        response = `END Shuku ${user.name}, We've sent you a invoice to recieve your BTC\n`
       } else if (text === '1*2*2') {
         response += `END Thank you for being an early testor. \n`
         response += `We'll send you test ETH \n`
@@ -98,14 +98,14 @@ const markets = async (req, res) => {
         // ################################# SELECT BTC #############################
         // Set the current user's active TX to BTC
         createTxState('BTC', phoneNumber)
-        response = `CON Entered amount of BTC to send`
+        response = `CON Enter the amount of ${user.country} you want to send`
       } else if (useMatchBTCAmountEntered(text)) {
         // Number of BTC reciever
         response = `CON Please enter the number of BTC reciever\n`
       } else if (useMatchBTCNumberEntered(text) && text.startsWith('1*1*1*')) {
         // ============================= CONFIRM BTC GAS FEES =============================
         const paymentAmount = await getUserPaymentAmountBefore(text)
-        response = `CON Initialized payment ${paymentAmount} BTC\n`
+        response = `CON Initialized payment of ${paymentAmount} ${user.country} worth BTC\n`
         // response += `Estimated gas 0.0345 BTC\n`
         response += `1. Confirm \n`
         response += `2. Cancel \n`

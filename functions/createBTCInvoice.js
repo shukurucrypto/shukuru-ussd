@@ -28,8 +28,8 @@ const createBTCInvoice = async (phoneNumber, text) => {
     const data = {
       out: false,
       amount: amount,
-      memo: `Shuku ${currentUser.name}, Top up ${amount} in my lightning wallet..`,
-      unit: 'BTC',
+      memo: `Shuku ${currentUser.name}, Top up ${amount} ${currentUser.country} in my lightning wallet..`,
+      unit: currentUser.country,
     }
 
     const response = await createLightingInvoice(key, data)
@@ -68,3 +68,4 @@ module.exports = {
 
 // https://shukuru.vercel.app/qr=13a2c6eb3157bdac43c6894d0b0924fd264a40770bcf8da82b7067069f927c34
 // https://shukuru.vercel.app/qr=c32a7ca1ecc7ab739555c77da0b231790f6a875933a6130b35821eb701817b0e
+// Shuku Jovan, Your invoice is here: https://shukuru.vercel.app/qr/57ce41b19a400fb81f0ec8a616f2ebe662796dbf34fa98dafa2645fe9e3e7f2f

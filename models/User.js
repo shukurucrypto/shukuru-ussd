@@ -10,6 +10,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     // required: true,
   },
+  country: {
+    type: String,
+    default: 'UGX',
+  },
   walletPin: {
     type: String,
     // required: true,

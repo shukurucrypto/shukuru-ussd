@@ -4,7 +4,8 @@ function useMatchEthAmountEntered(input) {
 }
 
 function useMatchBTCAmountEntered(input) {
-  let regex = /^1\*1\*1\*[0-9]*\.[0-9]+$/i
+  let regex =
+    /^1\*1\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?$/is
   return regex.test(input)
 }
 
@@ -19,7 +20,8 @@ function useMatchAcceptGasFees(input) {
 }
 
 function useMatchAcceptBtcGasFees(input) {
-  let regex = /1\*1\*1\*[0-9]*\.[0-9]+\*[0-9]+\*1/is
+  let regex =
+    /^1\*1\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*[0-9]+\*1$/is
   return regex.test(input)
 }
 
@@ -115,7 +117,7 @@ async function getTopupBTCAmount(text) {
   let price = words[words.length - 1]
   return price
 }
-
+// Initialized payment 8000 BTC
 async function useSelectedBTCToBuy(text) {
   let regex = /^1\*2\*1\*[0-9]*\.[0-9]+$/is
   let buyBTC = regex.test(text)

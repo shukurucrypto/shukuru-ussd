@@ -68,8 +68,8 @@ const sendLightningBtc = async (userText, phoneNumber) => {
     const data = {
       out: false,
       amount: amount,
-      memo: `${currentUser.name} payment of ${amount} to ${reciever.name}.`,
-      unit: 'BTC',
+      memo: `${currentUser.name} payment of ${amount} ${currentUser.country} to ${reciever.name}.`,
+      unit: currentUser.country,
     }
 
     const invoiceResponse = await createLightingInvoice(keyReciever, data)
@@ -95,11 +95,15 @@ const sendLightningBtc = async (userText, phoneNumber) => {
           reciever.phoneNumber
         )
       }
+    } else {
+      await sendSMS(
+        `You do not have enough sats to pay out.`,
+        currentUser.phoneNumber
+      )
     }
 
     // Make BTC transaction here
     // first of all create an invoice from the reciever account
-
     /*
     if (txRecipt.txid) {
       await sendSMS(
@@ -119,7 +123,7 @@ const sendLightningBtc = async (userText, phoneNumber) => {
     }
     */
   } catch (error) {
-    console.log(error.message)
+    // console.log(error.message)
     return error.message
   }
 }
