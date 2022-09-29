@@ -177,6 +177,16 @@ const markets = async (req, res) => {
             response += `END Thank you for being an early testor. \n`
             response += `We'll send you some ETH \n`
           },
+          '1*3': async () => {
+            // ============================= OPTION 3 WALLET INFO =============================
+            const walletResponse = await sendWalletInfo(phoneNumber)
+            response = walletResponse
+          },
+          '1*4': async () => {
+            // ============================= OPTION 1/4 WALLET BALANCE =============================
+            const txResponse = await getWalletBalance(phoneNumber)
+            response = txResponse
+          },
         }
 
         let mainMenu = (1).toString()
