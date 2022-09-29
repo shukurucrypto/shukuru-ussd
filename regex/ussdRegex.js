@@ -14,6 +14,12 @@ async function useMatchUSDTAmountEntered(input) {
   return regex.test(input)
 }
 
+async function useMatchUSDTEntered(input) {
+  let regex =
+    /^1\*1\*3\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?$/is
+  return regex.test(input)
+}
+
 function useMatchAcceptGasFees(input) {
   let regex = /1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+\*1/is
   return regex.test(input)
@@ -55,6 +61,33 @@ async function useMatchBtcAndNumberEntered(input) {
   return regex.test(input)
 }
 
+async function useMatchETHNumberEntered(input) {
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex =
+    /^1\*1\*2\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*[0-9]+$/is
+  const response = regex.test(input)
+  // console.log(`Match number entered: ${response}`)
+  return response
+}
+
+async function useMatchConfirmUSDTGas(input) {
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex =
+    /^1\*1\*3\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*[0-9]+$/is
+  const response = regex.test(input)
+  // console.log(`Match number entered: ${response}`)
+  return response
+}
+
+async function useMatchConfirmUSDTPay(input) {
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex =
+    /^1\*1\*3\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*[0-9]+\*1$/is
+  const response = regex.test(input)
+  // console.log(`Match number entered: ${response}`)
+  return response
+}
+
 async function useMatchNumberEntered(input) {
   // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
   let regex = /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is
@@ -65,7 +98,17 @@ async function useMatchNumberEntered(input) {
 
 async function useMatchBTCNumberEntered(input) {
   // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
-  let regex = /^1\*1\*1\*[0-9]*\.[0-9]+\*[0-9]+$/is
+  let regex =
+    /^1\*1\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*[0-9]+$/is
+  const response = regex.test(input)
+  // console.log(`Match number entered: ${response}`)
+  return response
+}
+
+async function useMatchAcceptBTCGasQuote(input) {
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex =
+    /^1\*1\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*1$/is
   const response = regex.test(input)
   // console.log(`Match number entered: ${response}`)
   return response
@@ -75,6 +118,12 @@ async function useSelectedUsdt(input) {
   // console.log(`Selected USDT: ${input}`)
   // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
   let regex = /^1\*1\*3$/is
+  return regex.test(input)
+}
+
+async function useBTCTopAmountEntered(input) {
+  let regex =
+    /^1\*2\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?$/is
   return regex.test(input)
 }
 
@@ -192,4 +241,10 @@ module.exports = {
   useMatchBTCNumberEntered,
   useMatchAcceptBtcGasFees,
   getTopupBTCAmount,
+  useMatchAcceptBTCGasQuote,
+  useMatchETHNumberEntered,
+  useMatchUSDTEntered,
+  useMatchConfirmUSDTGas,
+  useMatchConfirmUSDTPay,
+  useBTCTopAmountEntered
 }

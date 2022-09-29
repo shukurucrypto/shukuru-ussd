@@ -2,6 +2,7 @@ const axios = require('axios')
 const { fetchCoins } = require('../apiCalls/coins.js')
 const { createBTCInvoice } = require('../functions/createBTCInvoice.js')
 const { getLightningBalance } = require('../functions/getLightningBalance.js')
+// const match = require('conditional-expression').default
 const { wallet, getWalletBalance } = require('../functions/wallet.js')
 const Menu = require('../models/Menu.js')
 const User = require('../models/User.js')
@@ -21,6 +22,7 @@ const {
   useMatchBTCAmountEntered,
   useMatchBTCNumberEntered,
   useMatchAcceptBtcGasFees,
+  useMatchAcceptBTCGasQuote,
 } = require('../regex/ussdRegex.js')
 const {
   createTxState,
@@ -36,6 +38,8 @@ const { sendEther } = require('../utils/sendEther.js')
 const { sendLightningBtc } = require('../utils/sendLightningBTC.js')
 const { sendUsdt } = require('../utils/sendUsdt.js')
 const { swapCoins, swapCoinsQuote } = require('../utils/swapCoins.js')
+const { listenerCount } = require('../models/Menu.js')
+const { switchKey } = require('../helpers/helper.js')
 
 const fetchCoin = async (name) => {
   try {
@@ -59,6 +63,143 @@ const markets = async (req, res) => {
     if (!user) {
       createWallet(req, res, phoneNumber, text)
     } else {
+      const engine = async (entry) => {
+        let obj = {
+          '': () => {
+            // This is the first request. Note how we start the response with CON
+            response = `CON Welcome to Shukuru Crypto, What would you like to do?\n`
+            response += `1. My Wallet\n`
+            response += `2. See Markets`
+          },
+          '1*1': () => {
+            // ============================= MAKE CRYPTO PAYMENTS MENU=============================
+            response = `CON Select the coin to pay using\n`
+            response += `1. BTC - Bitcoin (Lightning)\n`
+            response += `2. ETH - Ethereum*\n`
+            response += `3. USDT - Tether\n`
+          },
+          '1*1*1': () => {
+            // ################################# SELECT BTC #############################
+            // Set the current user's active TX to BTC
+            createTxState('BTC', phoneNumber)
+            response = `CON Enter the amount of ${user.country} you want to send`
+          },
+          btcNumber: () => {
+            // Number of BTC reciever
+            response = `CON Please enter the number of BTC reciever\n`
+          },
+          confirmBtcGas: async () => {
+            // ============================= CONFIRM BTC GAS FEES =============================
+            const lightningBalance = await getLightningBalance(phoneNumber)
+            if (lightningBalance === 0) {
+              response = `END You have Insufficient funds!\n`
+              response += `Top-up more BTC to complete your transaction\n`
+            } else {
+              const paymentAmount = await getUserPaymentAmountBefore(text)
+              response = `CON Initialized payment of ${paymentAmount} ${user.country} worth BTC\n`
+              // response += `Estimated gas 0.0345 BTC\n`
+              response += `1. Confirm \n`
+              response += `2. Cancel \n`
+            }
+          },
+          sendBtc: () => {
+            sendLightningBtc(text, phoneNumber)
+            response = `END Your BTC crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
+          },
+          '1*1*2': () => {
+            // ################################# SELECT ETHEREUM #############################
+
+            // ============================= OPTION Selected payment option 2 use ETH =============================
+            // Set the user's active asset to ETH here....
+            createTxState('ETH', phoneNumber)
+
+            response = `CON Please enter amount of ETH to pay\n`
+          },
+          ethNumber: () => {
+            // Number of ETH reciever
+            response = `CON Please enter the number of reciever\n`
+          },
+          confirmEthGas: async () => {
+            const paymentAmount = await getUserPaymentAmountBefore(text)
+            // Get the estimated gas fees
+            // Switch between the confirmation assets here using the active asset
+            const gasPrice = await getGasEstimates(phoneNumber, text)
+            response = `CON Initialized payment ${paymentAmount} ETH\n`
+            response += `Estimated gas ${gasPrice} ETH\n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+          sendEth: () => {
+            sendEther(text, phoneNumber)
+            // response = txResponse
+            response = `END Your crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
+          },
+          '1*1*3': () => {
+            // ============================= OPTION Selected payment option 3 use USDT =============================
+            createTxState('USDT', phoneNumber)
+            response = `CON Please enter amount of USDT to pay\n`
+          },
+          usdtNumber: () => {
+            // Number of ETH reciever
+            response = `CON Please enter the number of USDT reciever\n`
+          },
+          confirmUSDTGas: async () => {
+            // ============================= CONFIRM USDT GAS FEES =============================
+            // Get the USDT payment amount from the text string
+            const paymentAmount = await getUserPaymentAmountBefore(text)
+            // Get the estimated gas fees
+            const gasPrice = await getGasEstimates(phoneNumber, text)
+            response = `CON Initialized payment ${paymentAmount} USDT\n`
+            response += `Estimated gas ${gasPrice} ETH\n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+          sendUsdt: () => {
+            // sendEther(text, phoneNumber)
+            // response = txResponse
+            response = `END Your USDT crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
+          },
+          '1*2': () => {
+            // ============================= OPTION 1/2 BUY =============================
+            response += `CON What do you want to top-up? \n`
+            response += `1. BTC (Lightning) \n`
+            response += `2. ETH `
+          },
+          '1*2*1': () => {
+            // ============================= TOP UP BTC =============================
+            response = `CON Enter the amount of BTC in ${user.country} to recieve. \n`
+          },
+          createTopUpInvoice: () => {
+            createBTCInvoice(phoneNumber, text)
+            response = `END Shuku ${user.name}, We've sent you a invoice to recieve your BTC\n`
+          },
+          '1*2*2': () => {
+            response += `END Thank you for being an early testor. \n`
+            response += `We'll send you some ETH \n`
+          },
+        }
+
+        let mainMenu = (1).toString()
+        obj[mainMenu] = () => {
+          response = `CON Would you like to \n`
+          response += `1. Make crypto payment \n`
+          response += `2. Topup crypto \n`
+          response += `3. Wallet info \n`
+          response += `4. Wallet Balance \n`
+          response += `5. Swap coins \n`
+        }
+
+        // console.log(entry)
+        const result = await switchKey(entry)
+
+        if (result) {
+          entry = result
+        }
+
+        return obj[entry]
+      }
+
+      /*
       if (text === '') {
         // This is the first request. Note how we start the response with CON
         response = `CON Welcome to Shukuru Crypto, What would you like to do?\n`
@@ -170,7 +311,9 @@ const markets = async (req, res) => {
         // Enter the number of user to recieve the USDT payment
         response = `CON USDT payment initiated\n`
       }
+*/
 
+      /*
       // ################################# CONFIRM / ACCEPT GAS FEES #############################
       if (useMatchAcceptBtcGasFees(text)) {
         // ============================= SEND BITCOIN =============================
@@ -314,8 +457,22 @@ const markets = async (req, res) => {
         // response += `1. Buy\n`
         // response += `2. Sell\n`
       }
+*/
+      // console.log(text)
+      // res.set('Content-Type: text/plain')
+      // res.send(response)
 
       // console.log(text)
+      const result = await engine(text)
+
+      if (!result) {
+        res.set('Content-Type: text/plain')
+        response = `END Invalid entry`
+        res.send(response)
+        return
+      }
+
+      await result()
       res.set('Content-Type: text/plain')
       res.send(response)
     }
@@ -456,3 +613,46 @@ console.log(sessionId)
     // console.log(serviceCode)
     // Send the response back to the API
     */
+
+// if (!obj.hasOwnProperty(entry)) {
+//   if (await useMatchBTCAmountEntered(entry)) {
+//     obj[entry] = () => {
+//       // Number of BTC reciever
+//       response = `CON Please enter the number of BTC reciever\n`
+//     }
+//   }
+
+//   if (await useMatchBTCNumberEntered(entry)) {
+//     obj[entry] = async () => {
+//       const paymentAmount = await getUserPaymentAmountBefore(text)
+//       response = `CON Initialized payment of ${paymentAmount} ${user.country} worth BTC\n`
+//       // response += `Estimated gas 0.0345 BTC\n`
+//       response += `1. Confirm \n`
+//       response += `2. Cancel \n`
+//       // ============================= CONFIRM BTC GAS FEES =============================
+//       /*
+//       const lightningBalance = await getLightningBalance(phoneNumber)
+//       if (lightningBalance === 0) {
+//         response = `END You have Insufficient funds!\n`
+//         response += `Top-up more BTC to complete your transaction\n`
+//       } else {
+//         const paymentAmount = await getUserPaymentAmountBefore(text)
+//         response = `CON Initialized payment of ${paymentAmount} ${user.country} worth BTC\n`
+//         // response += `Estimated gas 0.0345 BTC\n`
+//         response += `1. Confirm \n`
+//         response += `2. Cancel \n`
+//       }
+//       */
+//     }
+
+//     if (await useMatchAcceptBTCGasQuote(entry)) {
+//       console.log('Called 3')
+//       obj[entry] = () => {
+//         // sendBtc(text, phoneNumber)
+//         sendLightningBtc(text, phoneNumber)
+//         // response = txResponse
+//         response = `END Your BTC crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
+//       }
+//     }
+//   }
+// }
