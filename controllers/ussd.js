@@ -187,6 +187,87 @@ const markets = async (req, res) => {
             const txResponse = await getWalletBalance(phoneNumber)
             response = txResponse
           },
+          '1*5': () => {
+            response = `CON Select the coin to swap\n`
+            response += `1. ETH to USDT\n`
+            response += `2. USDT to ETH\n`
+          },
+          '1*5*1': () => {
+            // ============================= OPTION 1/5/1 SWAP ETH TO USDT =============================
+            response = `CON Please enter amount of ETH to swap\n`
+          },
+          swapEthToUsdtQuote: async () => {
+            const quote = await swapCoinsQuote(text, phoneNumber, 'ETH/USDT')
+
+            if (quote.response) {
+              response += quote.response
+            } else {
+              response = `CON You'll get ${Number(quote.buyAmount).toFixed(
+                3
+              )} USDT \n`
+              response += `Gas costs $${Number(quote.estimatedGasPrice).toFixed(
+                3
+              )}\n`
+              response += `-------------------------------\n`
+
+              response += `1. Confirm \n`
+              response += `2. Cancel \n`
+            }
+          },
+          swapEthToUsdtConfirmed: () => {
+            response = `END Your swap is being processed, please wait for a confirmation SMS...`
+            swapCoins(text, phoneNumber, 'ETH/USDT')
+          },
+          '1*5*2': () => {
+            // ============================= OPTION 1/5/2 SWAP USDT TO ETH =============================
+            response = `CON Please enter amount of USDT to swap\n`
+          },
+          swapUsdtToEthQuote: async () => {
+            const quote = await swapCoinsQuote(text, phoneNumber, 'USDT/ETH')
+
+            if (quote.response) {
+              response += quote.response
+            } else {
+              response = `CON You'll get ${Number(quote.buyAmount).toFixed(
+                6
+              )} ETH\n`
+              response += `Gas costs $${Number(quote.estimatedGasPrice).toFixed(
+                3
+              )}\n`
+              response += `-------------------------------\n`
+
+              response += `1. Confirm \n`
+              response += `2. Cancel \n`
+            }
+          },
+          swapUsdtToEthConfirmed: async () => {
+            response = `END Your swap is being processed, please wait for a confirmation SMS...`
+            swapCoins(text, phoneNumber, 'USDT/ETH')
+          },
+          '2*1': async () => {
+            // ================= BITCOIN MARKET STATS ==================
+            const coin = await fetchCoin('bitcoin')
+            response = `END ${
+              coin.name
+            } (${coin.symbol.toUpperCase()}) - $${coin.market_data.current_price.usd.toLocaleString()}\n`
+            response += ` Up ${coin.market_data.ath_change_percentage.btc}% last 24hr\n`
+          },
+          '2*2': async () => {
+            // ================= ETHEREUM MARKET STATS ==================
+            const coin = await fetchCoin('ethereum')
+            response = `END ${
+              coin.name
+            } (${coin.symbol.toUpperCase()}) - $${coin.market_data.current_price.usd.toLocaleString()}\n`
+            response += ` Up ${coin.market_data.ath_change_percentage.btc}% last 24hr\n`
+          },
+          '2*3': async () => {
+            // ================= USDT MARKET STATS ==================
+            const coin = await fetchCoin('tether')
+            response = `END ${
+              coin.name
+            } (${coin.symbol.toUpperCase()}) - $${coin.market_data.current_price.usd.toLocaleString()}\n`
+            response += ` Up ${coin.market_data.ath_change_percentage.btc}% last 24hr\n`
+          },
         }
 
         let mainMenu = (1).toString()
@@ -197,6 +278,15 @@ const markets = async (req, res) => {
           response += `3. Wallet info \n`
           response += `4. Wallet Balance \n`
           response += `5. Swap coins \n`
+        }
+
+        let marketsMenu = (2).toString()
+        obj[marketsMenu] = () => {
+          // Showing all the markets menu
+          response = `CON Shukuru Top cryptocurrencies\n`
+          response += `1. BTC - Bitcoin\n`
+          response += `2. ETH - Ethereum\n`
+          response += `3. USDT - Stable\n`
         }
 
         // console.log(entry)

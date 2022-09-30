@@ -127,6 +127,30 @@ async function useBTCTopAmountEntered(input) {
   return regex.test(input)
 }
 
+async function useSwapEthToUsdtAmountEntered(input) {
+  let regex =
+    /^1\*5\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?$/is
+  return regex.test(input)
+}
+
+async function useSwapUsdtToEthConfirmed(input) {
+  let regex =
+    /^1\*5\*2\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*1$/is
+  return regex.test(input)
+}
+
+async function useSwapUsdtToEthAmountEntered(input) {
+  let regex =
+    /^1\*5\*2\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?$/is
+  return regex.test(input)
+}
+
+async function useSwapEthToUsdtConfirmed(input) {
+  let regex =
+    /^1\*5\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*1$/is
+  return regex.test(input)
+}
+
 async function useSwapEthToUsdtPrice(input) {
   // console.log(`Selected USDT: ${input}`)
   // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
@@ -233,6 +257,7 @@ module.exports = {
   useSelectedUsdt,
   useMatchAcceptUSDTGasFees,
   useMatchUsdtRecieverNumberEntered,
+  useSwapUsdtToEthAmountEntered,
   useSwapEthToUsdtPrice,
   getUserSwapAmount,
   useMatchBtcAndNumberEntered,
@@ -246,5 +271,8 @@ module.exports = {
   useMatchUSDTEntered,
   useMatchConfirmUSDTGas,
   useMatchConfirmUSDTPay,
-  useBTCTopAmountEntered
+  useBTCTopAmountEntered,
+  useSwapEthToUsdtAmountEntered,
+  useSwapEthToUsdtConfirmed,
+  useSwapUsdtToEthConfirmed,
 }

@@ -10,6 +10,10 @@ const {
   useMatchConfirmUSDTGas,
   useMatchConfirmUSDTPay,
   useBTCTopAmountEntered,
+  useSwapEthToUsdtAmountEntered,
+  useSwapEthToUsdtConfirmed,
+  useSwapUsdtToEthAmountEntered,
+  useSwapUsdtToEthConfirmed,
 } = require('../regex/ussdRegex')
 
 const switchKey = async (entryText) => {
@@ -52,6 +56,22 @@ const switchKey = async (entryText) => {
 
   if (await useBTCTopAmountEntered(entryText)) {
     entry = 'createTopUpInvoice'
+  }
+
+  if (await useSwapEthToUsdtAmountEntered(entryText)) {
+    entry = 'swapEthToUsdtQuote'
+  }
+
+  if (await useSwapUsdtToEthAmountEntered(entryText)) {
+    entry = 'swapUsdtToEthQuote'
+  }
+
+  if (await useSwapEthToUsdtConfirmed(entryText)) {
+    entry = 'swapEthToUsdtConfirmed'
+  }
+
+  if (await useSwapUsdtToEthConfirmed(entryText)) {
+    entry = 'swapUsdtToEthConfirmed'
   }
 
   return entry
