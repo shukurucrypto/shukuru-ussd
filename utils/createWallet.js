@@ -124,19 +124,19 @@ async function createWalletSigner(userText, phoneNumber) {
           symbol: 'USDT',
           balance: 0.0,
           address: {
-            live: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-            test: '0x509Ee0d083DdF8AC028f2a56731412edD63223B9',
+            live: '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',
+            test: '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',
           },
         })
 
         const ethAsset = new Assets({
           user: res._id,
-          name: 'wETH',
+          name: 'Wrapped Ether',
           symbol: 'WETH',
           balance: 0.0,
           address: {
-            live: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-            test: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+            live: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+            test: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
           },
         })
 

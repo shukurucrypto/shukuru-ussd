@@ -7,8 +7,9 @@ const { truncateAddress } = require('../regex/ussdRegex.js')
 const { providerRPCURL } = require('../settings/settings.js')
 const { getBTCBalance } = require('../functions/getBTCBalance.js')
 const Assets = require('../models/Assets.js')
-const { getDaiBalance } = require('./getDaiBalance.js')
+const { getUsdtBalance } = require('./getUsdtBalance.js')
 const { getLightningBalance } = require('../functions/getLightningBalance.js')
+const { getCurrentUserSigner } = require('../functions/getCurrentUserSigner.js')
 require('dotenv').config()
 
 // const provider = new ethers.providers.JsonRpcProvider(
@@ -26,39 +27,28 @@ async function walletBalance(phoneNumber) {
     // await fundTestWallets(currentUser.address); // uncomment this to fund test wallet
 
     if (currentUser) {
-      const balance = await provider.getBalance(currentUser.address)
+      const signer = await getCurrentUserSigner(phoneNumber)
+
+      const balance = await provider.getBalance(signer.address)
       // const btcBalance = await getBTCBalance(currentUser.btcAddress)
-      const usdtBalance = await getDaiBalance(phoneNumber)
+      const usdtBalance = await getUsdtBalance(phoneNumber)
       const lightningBalance = await getLightningBalance(phoneNumber)
 
-      // console.log(`USDT USER BALANCE-------------------${}`)
+      userBalance = ethers.utils.formatEther(balance)
+      usdtUserBalance = ethers.utils.formatEther(usdtBalance)
 
-      // const btcBalanceConverted =
-      //   btcBalance.data.confirmed_balance > 0
-      //     ? btcBalance.data.confirmed_balance
-      //     : btcBalance.data.unconfirmed_balance
+      response = `END Shuku ${currentUser.name}, your wallet has:\n`
+      response += ` ${Number(lightningBalance).toFixed(3)} BTC \n`
+      response += ` ${Number(userBalance).toFixed(3)} ETH \n`
+      response += ` ${Number(usdtBalance).toFixed(3)} USDT \n`
 
-      // Find btc asset and update balance
       const btcUserAsset = await Assets.findOneAndUpdate(
         {
           user: currentUser._id,
           symbol: 'BTC',
         },
         { balance: lightningBalance }
-        // { balance: btcBalanceConverted }
       )
-
-      userBalance = ethers.utils.formatEther(balance)
-      usdtUserBalance = ethers.utils.formatEther(usdtBalance)
-
-      // update the wallet balance in the db
-
-      // btcUserAsset.balance = btcBalance
-
-      response = `END Shuku ${currentUser.name}, Your wallet has:\n`
-      response += ` ${lightningBalance} BTC \n`
-      response += ` ${userBalance} ETH \n`
-      response += ` ${usdtUserBalance} DAI \n`
 
       if (currentUser.balance !== userBalance) {
         currentUser.balance = userBalance
@@ -67,13 +57,6 @@ async function walletBalance(phoneNumber) {
         currentUser.save()
         btcUserAsset.save()
       }
-
-      // sendSMS(
-      //   `Your wallet ${truncateAddress(currentUser.address)} balance:\n
-      //     ${userBalance} ETH\n
-      //     ${lightningBalance} BTC`,
-      //   phoneNumber
-      // )
 
       return response
     } else {

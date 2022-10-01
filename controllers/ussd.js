@@ -1,6 +1,7 @@
 const axios = require('axios')
 const { fetchCoins } = require('../apiCalls/coins.js')
 const { createBTCInvoice } = require('../functions/createBTCInvoice.js')
+const { getLightningBalance } = require('../functions/getLightningBalance.js')
 const { wallet, getWalletBalance } = require('../functions/wallet.js')
 const Menu = require('../models/Menu.js')
 const User = require('../models/User.js')
@@ -93,7 +94,7 @@ const markets = async (req, res) => {
         response = `CON Select the coin to pay using\n`
         response += `1. BTC - Bitcoin (Lightning)\n`
         response += `2. ETH - Ethereum*\n`
-        response += `3. USDT - Stable\n`
+        response += `3. USDT - Tether\n`
       } else if (text === '1*1*1') {
         // ################################# SELECT BTC #############################
         // Set the current user's active TX to BTC
@@ -104,11 +105,18 @@ const markets = async (req, res) => {
         response = `CON Please enter the number of BTC reciever\n`
       } else if (useMatchBTCNumberEntered(text) && text.startsWith('1*1*1*')) {
         // ============================= CONFIRM BTC GAS FEES =============================
-        const paymentAmount = await getUserPaymentAmountBefore(text)
-        response = `CON Initialized payment of ${paymentAmount} ${user.country} worth BTC\n`
-        // response += `Estimated gas 0.0345 BTC\n`
-        response += `1. Confirm \n`
-        response += `2. Cancel \n`
+        const lightningBalance = await getLightningBalance(phoneNumber)
+
+        if (lightningBalance === 0) {
+          response = `END You have Insufficient funds!\n`
+          response += `Top-up more BTC to complete your transaction\n`
+        } else {
+          const paymentAmount = await getUserPaymentAmountBefore(text)
+          response = `CON Initialized payment of ${paymentAmount} ${user.country} worth BTC\n`
+          // response += `Estimated gas 0.0345 BTC\n`
+          response += `1. Confirm \n`
+          response += `2. Cancel \n`
+        }
       } else if (text === '1*1*2') {
         // ################################# SELECT ETHEREUM #############################
 
@@ -160,7 +168,7 @@ const markets = async (req, res) => {
         // response = `END USDT coming soon to Shukuru`
       } else if (useMatchUSDTAmountEntered(text)) {
         // Enter the number of user to recieve the USDT payment
-        response = `CON DAI payment initiated\n`
+        response = `CON USDT payment initiated\n`
       }
 
       // ################################# CONFIRM / ACCEPT GAS FEES #############################

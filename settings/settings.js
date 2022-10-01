@@ -8,9 +8,10 @@ const {
   NETWORK,
   GOERLI_RPC_URL,
   POLYGON_MAINET,
+  ARBITRUM_MAINET,
 } = process.env
 
-const providerRPCURL = GOERLI_RPC_URL
+const providerRPCURL = ARBITRUM_MAINET
 const networkServer = 1
 const ENVIRONMENT = 'testnet'
 const network = {
