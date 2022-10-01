@@ -93,7 +93,7 @@ const markets = async (req, res) => {
         response = `CON Select the coin to pay using\n`
         response += `1. BTC - Bitcoin (Lightning)\n`
         response += `2. ETH - Ethereum*\n`
-        response += `3. DAI - Stable\n`
+        response += `3. USDT - Stable\n`
       } else if (text === '1*1*1') {
         // ################################# SELECT BTC #############################
         // Set the current user's active TX to BTC
@@ -156,7 +156,7 @@ const markets = async (req, res) => {
       } else if (text === '1*1*3') {
         // ============================= OPTION Selected payment option 3 use USDT =============================
         await createTxState('USDT', phoneNumber)
-        response = `CON Please enter amount of DAI to pay\n`
+        response = `CON Please enter amount of USDT to pay\n`
         // response = `END USDT coming soon to Shukuru`
       } else if (useMatchUSDTAmountEntered(text)) {
         // Enter the number of user to recieve the USDT payment
@@ -194,30 +194,51 @@ const markets = async (req, res) => {
       if (text === '1*5') {
         // ============================= OPTION 1/5 SWAP COINS =============================
         response = `CON Select the coin to swap\n`
-        response += `1. ETH to DAI\n`
-        response += `2. DAI to ETH\n`
+        response += `1. ETH to USDT\n`
+        response += `2. USDT to ETH\n`
       } else if (text === '1*5*1') {
         // ============================= OPTION 1/5/1 SWAP ETH TO USDT =============================
         response = `CON Please enter amount of ETH to swap\n`
       } else if (text.startsWith('1*5*1*') && !text.endsWith('*1')) {
-        const quote = await swapCoinsQuote(text, phoneNumber, 'ETH/DAI')
-        response = `CON Swapping ${quote} ETH to DAI\n`
-        // response += `You'll get 1 USDT \n`
-        response += `1. Confirm \n`
-        response += `2. Cancel \n`
+        const quote = await swapCoinsQuote(text, phoneNumber, 'ETH/USDT')
+
+        if (quote.response) {
+          response += quote.response
+        } else {
+          response = `CON You'll get ${Number(quote.buyAmount).toFixed(
+            3
+          )} USDT \n`
+          response += `Gas costs $${Number(quote.estimatedGasPrice).toFixed(
+            3
+          )}\n`
+          response += `-------------------------------\n`
+
+          response += `1. Confirm \n`
+          response += `2. Cancel \n`
+        }
       } else if (text.startsWith('1*5*1*') && text.endsWith('*1')) {
         response = `END Your swap is being processed, please wait for a confirmation SMS...`
         swapCoins(text, phoneNumber, 'ETH/USDT')
       } else if (text === '1*5*2') {
-        // ============================= OPTION 1/5/2 SWAP DAI TO ETH =============================
-        response = `CON Please enter amount of DAI to swap\n`
+        // ============================= OPTION 1/5/2 SWAP USDT TO ETH =============================
+        response = `CON Please enter amount of USDT to swap\n`
       } else if (text.startsWith('1*5*2*') && !text.endsWith('*1')) {
-        const quote = await swapCoinsQuote(text, phoneNumber, 'DAI/ETH')
+        const quote = await swapCoinsQuote(text, phoneNumber, 'USDT/ETH')
 
-        response = `CON Swapping ${quote} DAI to ETH\n`
-        // response += `You'll get 0.000034 ETH \n`
-        response += `1. Confirm \n`
-        response += `2. Cancel \n`
+        if (quote.response) {
+          response += quote.response
+        } else {
+          response = `CON You'll get ${Number(quote.buyAmount).toFixed(
+            6
+          )} ETH\n`
+          response += `Gas costs $${Number(quote.estimatedGasPrice).toFixed(
+            3
+          )}\n`
+          response += `-------------------------------\n`
+
+          response += `1. Confirm \n`
+          response += `2. Cancel \n`
+        }
       } else if (text.startsWith('1*5*2*') && text.endsWith('*1')) {
         response = `END Your swap is being processed, please wait for a confirmation SMS...`
         swapCoins(text, phoneNumber, 'USDT/ETH')
@@ -235,7 +256,7 @@ const markets = async (req, res) => {
         response = `CON Shukuru Top cryptocurrencies\n`
         response += `1. BTC - Bitcoin\n`
         response += `2. ETH - Ethereum\n`
-        response += `3. DAI - Stable\n`
+        response += `3. USDT - Stable\n`
         // } else if (text === '2*1') {
         //   // Showing BTC coin options
         //   response = `CON BTC - Bitcoin\n`

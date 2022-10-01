@@ -1,76 +1,162 @@
 const ethers = require('ethers')
 const qs = require('qs')
 const axios = require('axios')
-const User = require('../models/User.js')
-const Transaction = require('../models/Transaction.js')
-const bcrypt = require('bcrypt')
-const { decrypt } = require('../security/encrypt.js')
-const sendSMS = require('../SMS/smsFunctions.js')
-const {
-  extractPhoneNumber,
-  getUserPaymentAmount,
-  getUserToPayPhoneNumber,
-  truncateAddress,
-} = require('../regex/ussdRegex.js')
 const { providerRPCURL } = require('../settings/settings.js')
-const Assets = require('../models/Assets.js')
-const { getCoin } = require('../apiCalls/getCoin.js')
 require('dotenv').config()
 
-// const provider = new ethers.providers.JsonRpcProvider(
-//   process.env.RINKEBY_RPC_URL
-// );
-const provider = new ethers.providers.JsonRpcProvider(providerRPCURL)
+const getSwapPrices = async (tokenFrom, tokenTo, amount) => {
+  let response
+
+  let tradeFrom, tradeTo, params
+
+  console.log('----------------------CALLED--------------------')
+
+  if (tokenFrom === 'ETH') {
+    tradeFrom = {
+      symbol: 'ETH',
+      address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      name: 'Ether',
+      decimals: 18,
+    }
+
+    tradeTo = {
+      symbol: 'USDT',
+      address: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+      name: 'Tether USD',
+      decimals: 6,
+    }
+
+    params = {
+      sellToken: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      buyToken: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+      //   sellAmount: 1000000000000000000,
+      sellAmount: amount * 10 ** 18,
+      //   takerAddress: walletAddress,
+      //   slippagePercentage: 0.03,
+      skipValidation: true,
+    }
+  } else {
+    tradeFrom = {
+      symbol: 'USDT',
+      address: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+      name: 'Tether USD',
+      decimals: 6,
+    }
+
+    tradeTo = {
+      symbol: 'ETH',
+      address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      name: 'Ether',
+      decimals: 18,
+    }
+
+    params = {
+      sellToken: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+      buyToken: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      //   sellAmount: 1000000000000000000,
+      sellAmount: amount * 10 ** 6,
+      //   takerAddress: walletAddress,
+      //   slippagePercentage: 0.03,
+      skipValidation: true,
+    }
+  }
+  // 8.288335
+  try {
+    let estimatedGasPrice
+
+    const res = await axios.get(
+      `https://arbitrum.api.0x.org/swap/v1/quote?${qs.stringify(params)}`
+    )
+
+    if (tokenFrom === 'ETH') {
+      estimatedGasPrice = res.data.estimatedGas / 10 ** tradeTo.decimals
+    } else {
+      estimatedGasPrice = res.data.estimatedGas / 10 ** tradeFrom.decimals
+    }
+
+    const buyAmount = res.data.buyAmount / 10 ** tradeTo.decimals
+
+    return {
+      estimatedGasPrice,
+      buyAmount,
+    }
+  } catch (error) {
+    response = `END An error occurred`
+    console.log(error.response.data)
+    return response
+  }
+}
 
 const getSwapQuote = async (tokenFrom, tokenTo, amount) => {
   let response
 
-  let tradeFrom, tradeTo, tradeToAddress, tradeFromAddress
+  let tradeFrom, tradeTo, params
 
   console.log('----------------------CALLED--------------------')
 
-  //   We need to validate that none of the swap coins is ETH because ethereum doesnot have a smart contract address,
-  //   therefore coingeko won't return the ETH data because it does not have it
-  if (tokenFrom != 'ETH') {
-    const fromToken = await getCoin(tokenFrom)
-    tradeFrom = fromToken
-    tradeFromAddress = fromToken.address
+  if (tokenFrom === 'ETH') {
+    tradeFrom = {
+      symbol: 'ETH',
+      address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      name: 'Ether',
+      decimals: 18,
+    }
+
+    tradeTo = {
+      symbol: 'USDT',
+      address: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+      name: 'Tether USD',
+      decimals: 6,
+    }
+
+    params = {
+      sellToken: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      buyToken: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+      //   sellAmount: 1000000000000000000,
+      sellAmount: amount * 10 ** 18,
+      //   takerAddress: walletAddress,
+      //   slippagePercentage: 0.03,
+      skipValidation: true,
+    }
   } else {
-    tradeFromAddress = tokenFrom
-  }
+    tradeFrom = {
+      symbol: 'USDT',
+      address: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+      name: 'Tether USD',
+      decimals: 6,
+    }
 
-  if (tokenTo != 'ETH') {
-    const toToken = await getCoin(tokenTo)
-    tradeTo = toToken
-    tradeToAddress = toToken.address
-  } else {
-    tradeToAddress = tokenTo
-  }
+    tradeTo = {
+      symbol: 'ETH',
+      address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      name: 'Ether',
+      decimals: 18,
+    }
 
-  //   const convertedAmount = amount * 10 ** tokenFrom.decimals
-  const params = {
-    sellToken: tradeFromAddress,
-    buyToken: tradeToAddress,
-    sellAmount: amount.toString(),
+    params = {
+      sellToken: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+      buyToken: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      //   sellAmount: 1000000000000000000,
+      sellAmount: amount * 10 ** 6,
+      //   takerAddress: walletAddress,
+      //   slippagePercentage: 0.03,
+      skipValidation: true,
+    }
   }
-
+  // 8.288335
   try {
-    await axios
-      .get(`https://api.0x.org/swap/v1/price?${qs.stringify(params)}`)
-      .then((res) => {
-        const quote = res.data
-        return quote
-      })
-      .catch((err) => {
-        console.log(err.message)
-      })
+    const res = await axios.get(
+      `https://arbitrum.api.0x.org/swap/v1/quote?${qs.stringify(params)}`
+    )
+    return res.data
   } catch (error) {
     response = `END An error occurred`
-    console.log(error.message)
+    console.log(error.response.data)
     return response
   }
 }
 
 module.exports = {
   getSwapQuote,
+  getSwapPrices,
 }
