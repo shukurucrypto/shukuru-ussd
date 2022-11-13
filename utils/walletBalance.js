@@ -42,6 +42,7 @@ async function walletBalance(phoneNumber) {
       response += ` ${Number(lightningBalance).toFixed(3)} BTC \n`
       response += ` ${Number(userBalance).toFixed(3)} ETH \n`
       response += ` ${Number(usdtBalance).toFixed(3)} USDT \n`
+      response += ` ${0.0} cUSD \n`
 
       const btcUserAsset = await Assets.findOneAndUpdate(
         {
