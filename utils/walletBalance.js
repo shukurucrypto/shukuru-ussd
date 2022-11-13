@@ -30,6 +30,7 @@ async function walletBalance(phoneNumber) {
       const signer = await getCurrentUserSigner(phoneNumber)
 
       const balance = await provider.getBalance(signer.address)
+
       // const btcBalance = await getBTCBalance(currentUser.btcAddress)
       const usdtBalance = await getUsdtBalance(phoneNumber)
       const lightningBalance = await getLightningBalance(phoneNumber)
@@ -67,7 +68,6 @@ async function walletBalance(phoneNumber) {
     response = `END An error occurred`
     return response
   }
-  // get user from the database
 }
 
 module.exports = {

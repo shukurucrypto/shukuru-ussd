@@ -77,6 +77,7 @@ const markets = async (req, res) => {
             response += `1. BTC - Bitcoin (Lightning)\n`
             response += `2. ETH - Ethereum*\n`
             response += `3. USDT - Tether\n`
+            response += `4. cUSD - Celo Dollar`
           },
           '1*1*1': () => {
             // ################################# SELECT BTC #############################

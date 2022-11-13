@@ -13,6 +13,7 @@ const getUsdtBalance = async (phoneNumber) => {
     const userSigner = await getCurrentUserSigner(phoneNumber)
 
     const contract = new ethers.Contract(USDT_ADDRESS, ABI, userSigner)
+
     const balance = await contract.balanceOf(userSigner.address)
 
     return balance

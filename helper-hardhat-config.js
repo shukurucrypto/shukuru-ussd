@@ -1,3 +1,4 @@
+// ALL ADDRESSES USING ARBITRUM NAINET
 const networkConfig = {
   31337: {
     name: 'local',

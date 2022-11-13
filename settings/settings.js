@@ -8,6 +8,7 @@ const {
   NETWORK,
   GOERLI_RPC_URL,
   POLYGON_MAINET,
+  ARBITRUM_GOERLI,
   ARBITRUM_MAINET,
 } = process.env
 
