@@ -1,20 +1,20 @@
-require('@nomiclabs/hardhat-waffle')
-require('@nomiclabs/hardhat-etherscan')
+require('@nomicfoundation/hardhat-toolbox')
 require('hardhat-deploy')
-require('solidity-coverage')
-require('hardhat-gas-reporter')
-require('hardhat-contract-sizer')
+require('./tasks/swapTask')
+require('./tasks/checkBalanceTask')
+require('./tasks/uniswapToken')
 require('dotenv').config()
 
-/**
- * @type import('hardhat/config').HardhatUserConfig
- */
 module.exports = {
   defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
       chainId: 31337,
       blockConfirmations: 1,
+      forking: {
+        url: process.env.MAINNET,
+        // url: process.env.POLYGON_MAINET,
+      },
     },
     rinkeby: {
       url: process.env.RINKEBY_RPC_URL || '',

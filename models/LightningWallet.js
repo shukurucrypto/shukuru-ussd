@@ -1,34 +1,27 @@
 const mongoose = require('mongoose')
 
-const AssetSchema = new mongoose.Schema({
+const LightningWalletSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
-  name: {
+  i_id: {
     type: String,
     required: true,
     unique: false,
   },
-  symbol: {
+  adminKey: {
     type: String,
     required: true,
     unique: false,
   },
-  balance: {
-    type: Number,
+  inKey: {
+    type: String,
     required: true,
-  },
-  address: {
-    live: {
-      type: String,
-    },
-    test: {
-      type: String,
-    },
+    unique: false,
   },
 })
 
-const Assets = mongoose.model('Asset', AssetSchema)
-module.exports = Assets
+const LightningWallet = mongoose.model('LightningWallet', LightningWalletSchema)
+module.exports = LightningWallet

@@ -3,8 +3,20 @@ function useMatchEthAmountEntered(input) {
   return regex.test(input)
 }
 
+function useMatchBTCAmountEntered(input) {
+  let regex =
+    /^1\*1\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?$/is
+  return regex.test(input)
+}
+
 async function useMatchUSDTAmountEntered(input) {
-  let regex = /^1\*3\*3\*[0-9]*\.[0-9]+$/is
+  let regex = /^1\*1\*3\*[0-9]*\.[0-9]+$/is
+  return regex.test(input)
+}
+
+async function useMatchUSDTEntered(input) {
+  let regex =
+    /^1\*1\*3\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?$/is
   return regex.test(input)
 }
 
@@ -13,8 +25,24 @@ function useMatchAcceptGasFees(input) {
   return regex.test(input)
 }
 
+function useMatchAcceptBtcGasFees(input) {
+  let regex =
+    /^1\*1\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*[0-9]+\*1$/is
+  return regex.test(input)
+}
+
 function useRejectGasFees(input) {
   let regex = /1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+\*2/is
+  return regex.test(input)
+}
+
+function useMatchAcceptUSDTGasFees(input) {
+  let regex = /1\*1\*3\*[0-9]*\.[0-9]+\*[0-9]+\*1/is
+  return regex.test(input)
+}
+
+async function useMatchUsdtRecieverNumberEntered(input) {
+  let regex = /^1\*1\*3\*[0-9]*\.[0-9]+\*[0-9]+$/is
   return regex.test(input)
 }
 
@@ -23,8 +51,110 @@ async function useMatchNumberUsdtEntered(input) {
   return regex.test(input)
 }
 
+async function useMatchBtcEntered(input) {
+  let regex = /^1\*1\*1\*[0-9]*\.[0-9]+$/is
+  return regex.test(input)
+}
+
+async function useMatchBtcAndNumberEntered(input) {
+  let regex = /^1\*1\*1\*[0-9]*\.[0-9]+\*[0-9]+$/is
+  return regex.test(input)
+}
+
+async function useMatchETHNumberEntered(input) {
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex =
+    /^1\*1\*2\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*[0-9]+$/is
+  const response = regex.test(input)
+  // console.log(`Match number entered: ${response}`)
+  return response
+}
+
+async function useMatchConfirmUSDTGas(input) {
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex =
+    /^1\*1\*3\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*[0-9]+$/is
+  const response = regex.test(input)
+  // console.log(`Match number entered: ${response}`)
+  return response
+}
+
+async function useMatchConfirmUSDTPay(input) {
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex =
+    /^1\*1\*3\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*[0-9]+\*1$/is
+  const response = regex.test(input)
+  // console.log(`Match number entered: ${response}`)
+  return response
+}
+
 async function useMatchNumberEntered(input) {
-  let regex = /^1\*1\*2\*\d\.\d\*[0-9]+$/is
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex = /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is
+  const response = regex.test(input)
+  // console.log(`Match number entered: ${response}`)
+  return response
+}
+
+async function useMatchBTCNumberEntered(input) {
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex =
+    /^1\*1\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*[0-9]+$/is
+  const response = regex.test(input)
+  // console.log(`Match number entered: ${response}`)
+  return response
+}
+
+async function useMatchAcceptBTCGasQuote(input) {
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex =
+    /^1\*1\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*1$/is
+  const response = regex.test(input)
+  // console.log(`Match number entered: ${response}`)
+  return response
+}
+
+async function useSelectedUsdt(input) {
+  // console.log(`Selected USDT: ${input}`)
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex = /^1\*1\*3$/is
+  return regex.test(input)
+}
+
+async function useBTCTopAmountEntered(input) {
+  let regex =
+    /^1\*2\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?$/is
+  return regex.test(input)
+}
+
+async function useSwapEthToUsdtAmountEntered(input) {
+  let regex =
+    /^1\*5\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?$/is
+  return regex.test(input)
+}
+
+async function useSwapUsdtToEthConfirmed(input) {
+  let regex =
+    /^1\*5\*2\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*1$/is
+  return regex.test(input)
+}
+
+async function useSwapUsdtToEthAmountEntered(input) {
+  let regex =
+    /^1\*5\*2\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?$/is
+  return regex.test(input)
+}
+
+async function useSwapEthToUsdtConfirmed(input) {
+  let regex =
+    /^1\*5\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*1$/is
+  return regex.test(input)
+}
+
+async function useSwapEthToUsdtPrice(input) {
+  // console.log(`Selected USDT: ${input}`)
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex = /^1\*5\*1\*[0-9]*\.[0-9]+$/is
   return regex.test(input)
 }
 
@@ -55,6 +185,12 @@ async function getUserPaymentAmountBefore(text) {
   return price
 }
 
+async function getTopupBTCAmount(text) {
+  let words = text.match(/[.\d]+/g)
+  let price = words[words.length - 1]
+  return price
+}
+// Initialized payment 8000 BTC
 async function useSelectedBTCToBuy(text) {
   let regex = /^1\*2\*1\*[0-9]*\.[0-9]+$/is
   let buyBTC = regex.test(text)
@@ -68,10 +204,15 @@ async function getUserPaymentAmount(text) {
   return price
 }
 
+async function getUserSwapAmount(text) {
+  let words = text.match(/[.\d]+/g)
+  let price = words[3]
+  return price
+}
+
 async function getUserPaymentAmountForGasFees(text) {
   let words = text.match(/[.\d]+/g)
   let price = words[words.length - 2]
-  // console.log(`words -----: ${words}`);
   return price
 }
 
@@ -113,4 +254,25 @@ module.exports = {
   useSelectedBTCToBuy,
   useMatchUSDTAmountEntered,
   useMatchNumberUsdtEntered,
+  useSelectedUsdt,
+  useMatchAcceptUSDTGasFees,
+  useMatchUsdtRecieverNumberEntered,
+  useSwapUsdtToEthAmountEntered,
+  useSwapEthToUsdtPrice,
+  getUserSwapAmount,
+  useMatchBtcAndNumberEntered,
+  useMatchBtcEntered,
+  useMatchBTCAmountEntered,
+  useMatchBTCNumberEntered,
+  useMatchAcceptBtcGasFees,
+  getTopupBTCAmount,
+  useMatchAcceptBTCGasQuote,
+  useMatchETHNumberEntered,
+  useMatchUSDTEntered,
+  useMatchConfirmUSDTGas,
+  useMatchConfirmUSDTPay,
+  useBTCTopAmountEntered,
+  useSwapEthToUsdtAmountEntered,
+  useSwapEthToUsdtConfirmed,
+  useSwapUsdtToEthConfirmed,
 }
