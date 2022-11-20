@@ -209,12 +209,12 @@ const markets = async (req, res) => {
           },
           '1*2*2': () => {
             response += `END Thank you for being an early testor. \n`
-            response += `**Your rewards are on the way**\n`
+            response += `*Your rewards are on the way*\n`
             response += `You can also top-up with your address  \n`
           },
           "1*2*3": () => {
             response += `END Thank you for being an early testor. \n`
-            response += `**Your rewards are on the way**\n`
+            response += `*Your rewards are on the way*\n`
             response += `You can also top-up with your address  \n`
           },
           '1*3': async () => {
