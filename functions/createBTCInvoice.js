@@ -73,15 +73,16 @@ const shortenUrl = (urlToShorten) => {
   })
 }
 
-const linkShortener = async (url) => {
-  const res = Shortener.Shorten(url, ).then((res) => {
+const linkShortener = (url) => {
+  const result = Shortener.Shorten(url, ).then((res) => {
     if(typeof res === "undefined"){
       console.log("Titlenot available");
+      return "0xErr"
     }else {
-      console.log(res);
       return res
     }
   })
+  return result
 }
 module.exports = { 
   createBTCInvoice,
