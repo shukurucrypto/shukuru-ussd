@@ -10,7 +10,7 @@ async function sendWalletInfo(phoneNumber) {
     if (currentUser) {
       await sendSMS(
         ` 
-          Address: ${currentUser.address}\n
+          Address: ${currentUser.address}\r\n
           Chain: Arbitrum one\n
         `,
         phoneNumber
