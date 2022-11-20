@@ -1,6 +1,8 @@
 const bip21 = require('bip21')
 const QRCode = require('qrcode')
 
+const shortUrl = require('node-url-shortener')
+const Shortener = require('link-shortener')
 const { decrypt } = require('../security/encrypt.js')
 const User = require('../models/User.js')
 const Invoices = require('../models/Invoices.js')
@@ -41,8 +43,10 @@ const createBTCInvoice = async (phoneNumber, text) => {
       // console.log(qrUri)
       // const qrCode = await generateQR(response.payment_request)
       // console.log(response.payment_hash)
+      // const invoiceUrl = shortenUrl(`https://shukuru.vercel.app/qr/${response.payment_hash}`)
+      const invoiceUrl = linkShortener(`https://shukuru.vercel.app/qr/${response.payment_hash}`)
       sendSMS(
-        `Shuku ${currentUser.name}, Your invoice is here: https://shukuru.vercel.app/qr/${response.payment_hash}`,
+        `Shuku ${currentUser.name}, Your invoice is here: ${invoiceUrl}`,
         phoneNumber
       )
 
@@ -62,7 +66,24 @@ const createBTCInvoice = async (phoneNumber, text) => {
   }
 }
 
-module.exports = {
+const shortenUrl = (urlToShorten) => {
+  shortUrl.short(urlToShorten, (err, url) => {
+    console.log(url);
+    return url
+  })
+}
+
+const linkShortener = (url) => {
+  const result = Shortener.Shorten(url, 'Shukuru-invoice').then((res) => {
+    if(typeof res === "undefined"){
+      console.log("Titlenot available");
+    }else {
+      console.log(res);
+      return res
+    }
+  })
+}
+module.exports = { 
   createBTCInvoice,
 }
 
