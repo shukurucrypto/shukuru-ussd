@@ -196,7 +196,7 @@ const markets = async (req, res) => {
             // ============================= OPTION 1/2 BUY =============================
             response += `CON What do you want to top-up? \n`
             response += `1. BTC (Lightning) \n`
-            response += `2. ETH `
+            response += `4. ETH \n`
             response += `3. cUSD (Celo Dollar)` 
           },
           '1*2*1': () => {
