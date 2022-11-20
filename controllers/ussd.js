@@ -40,6 +40,7 @@ const { sendUsdt } = require('../utils/sendUsdt.js')
 const { swapCoins, swapCoinsQuote } = require('../utils/swapCoins.js')
 const { listenerCount } = require('../models/Menu.js')
 const { switchKey } = require('../helpers/helper.js')
+const { sendCelloUSD } = require('../utils/sendCelloUSD.js')
 
 const fetchCoin = async (name) => {
   try {
@@ -63,6 +64,13 @@ const markets = async (req, res) => {
     if (!user) {
       createWallet(req, res, phoneNumber, text)
     } else {
+      /* 
+        The engine function works by returning the menus to be displayed in the ui. It is a giant
+        object with functions as with their key value pairs.
+        1. The engine() is called while passing in the text info inside it. 
+          APssign a text variable, we call the corresponding function key valu pair that matches it.
+
+        */
       const engine = async (entry) => {
         let obj = {
           '': () => {
@@ -156,10 +164,34 @@ const markets = async (req, res) => {
             response += `2. Cancel \n`
           },
           sendUsdt: () => {
-            // sendEther(text, phoneNumber)
+            sendEther(text, phoneNumber)
             // response = txResponse
             response = `END Your USDT crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
+          },                    
+          '1*1*4': () => {
+            //  PAY WITH CELLO DOLLAR
+            response = `CON Please enter the amount of cUSD to pay\n`
           },
+          cUsdNumber: () => {
+            response = `CON Please enter the number of cUSD reciever\n`
+          },
+ 
+          confirmcUSDGas: async () => {
+            // ============================= CONFIRM cUSDGAS FEES =============================
+            const paymentAmount = await getUserPaymentAmountBefore(text)
+
+            const gasPrice = await getGasEstimates(phoneNumber, text)
+            response = `CON Initialized payment ${paymentAmount} USDT\n`
+            // response += `Estimated gas of ${gasPrice} cUSD\n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+          sendcUSD: () => {
+            // send
+            sendCelloUSD(text, phoneNumber)
+            response = `END Your cUSD crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
+          },
+ 
           '1*2': () => {
             // ============================= OPTION 1/2 BUY =============================
             response += `CON What do you want to top-up? \n`
@@ -270,8 +302,11 @@ const markets = async (req, res) => {
             response += ` Up ${coin.market_data.ath_change_percentage.btc}% last 24hr\n`
           },
         }
+        /*
+          Before we return the manu, we first pass it through the regex function to see if it was regex matchable
+        */
 
-        let mainMenu = (1).toString()
+        let mainMenu = (1).toString() // here were just stringifying the main menu entry which is 1 to a string
         obj[mainMenu] = () => {
           response = `CON Would you like to \n`
           response += `1. Make crypto payment \n`
@@ -291,7 +326,7 @@ const markets = async (req, res) => {
         }
 
         // console.log(entry)
-        const result = await switchKey(entry)
+        const result = await switchKey(entry) // This method handles the all the regexes
 
         if (result) {
           entry = result

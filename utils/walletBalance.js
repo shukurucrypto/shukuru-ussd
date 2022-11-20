@@ -1,4 +1,5 @@
 const ethers = require('ethers')
+const Web3 = require("web3")
 const User = require('../models/User.js')
 const sendSMS = require('../SMS/smsFunctions.js')
 const bcrypt = require('bcrypt')
@@ -10,6 +11,7 @@ const Assets = require('../models/Assets.js')
 const { getUsdtBalance } = require('./getUsdtBalance.js')
 const { getLightningBalance } = require('../functions/getLightningBalance.js')
 const { getCurrentUserSigner } = require('../functions/getCurrentUserSigner.js')
+const { getCelloDollarBalance } = require('./getCelloDollarBalance.js')
 require('dotenv').config()
 
 // const provider = new ethers.providers.JsonRpcProvider(
@@ -32,17 +34,19 @@ async function walletBalance(phoneNumber) {
       const balance = await provider.getBalance(signer.address)
 
       // const btcBalance = await getBTCBalance(currentUser.btcAddress)
-      const usdtBalance = await getUsdtBalance(phoneNumber)
-      const lightningBalance = await getLightningBalance(phoneNumber)
+      let usdtBalance = await getUsdtBalance(phoneNumber)
+      let lightningBalance = await getLightningBalance(phoneNumber)
+      let celloDollarBalance = await getCelloDollarBalance(phoneNumber)
 
-      userBalance = ethers.utils.formatEther(balance)
-      usdtUserBalance = ethers.utils.formatEther(usdtBalance)
+      const userBalance = ethers.utils.formatEther(balance)
+      const usdtUserBalance = ethers.utils.formatEther(usdtBalance)
+      celloDollarBalance_ = ethers.utils.formatEther(celloDollarBalance)
 
       response = `END Shuku ${currentUser.name}, your wallet has:\n`
       response += ` ${Number(lightningBalance).toFixed(3)} BTC \n`
       response += ` ${Number(userBalance).toFixed(3)} ETH \n`
       response += ` ${Number(usdtBalance).toFixed(3)} USDT \n`
-      response += ` ${0.0} cUSD \n`
+      response += ` ${Number(celloDollarBalance_).toFixed(3)} cello Dollar \n`
 
       const btcUserAsset = await Assets.findOneAndUpdate(
         {

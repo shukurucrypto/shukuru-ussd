@@ -9,6 +9,11 @@ function useMatchBTCAmountEntered(input) {
   return regex.test(input)
 }
 
+function useMatchcUSDAmountEntered(input) {
+  let regex =
+    /^1\*1\*4\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?$/is
+  return regex.test(input)
+}
 async function useMatchUSDTAmountEntered(input) {
   let regex = /^1\*1\*3\*[0-9]*\.[0-9]+$/is
   return regex.test(input)
@@ -70,6 +75,14 @@ async function useMatchETHNumberEntered(input) {
   return response
 }
 
+async function useMatchConfirmcUSDGas(input) {
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex =
+    /^1\*1\*4\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*[0-9]+$/is
+  const response = regex.test(input)
+  return response
+}
+
 async function useMatchConfirmUSDTGas(input) {
   // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
   let regex =
@@ -88,6 +101,14 @@ async function useMatchConfirmUSDTPay(input) {
   return response
 }
 
+async function useMatchConfirmCelloUSDPay(input) {
+  // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
+  let regex =
+    /^1\*1\*4\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\*[0-9]+\*1$/is
+  const response = regex.test(input)
+  // console.log(`Match number entered: ${response}`)
+  return response
+}
 async function useMatchNumberEntered(input) {
   // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
   let regex = /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is
@@ -275,4 +296,7 @@ module.exports = {
   useSwapEthToUsdtAmountEntered,
   useSwapEthToUsdtConfirmed,
   useSwapUsdtToEthConfirmed,
+useMatchConfirmcUSDGas,
+useMatchcUSDAmountEntered,
+ useMatchConfirmCelloUSDPay
 }

@@ -6,6 +6,7 @@ const {
   useMatchEthAmountEntered,
   useMatchBTCNumberEntered,
   useMatchETHNumberEntered,
+useMatchConfirmcUSDGas,
   useMatchUSDTEntered,
   useMatchConfirmUSDTGas,
   useMatchConfirmUSDTPay,
@@ -14,6 +15,8 @@ const {
   useSwapEthToUsdtConfirmed,
   useSwapUsdtToEthAmountEntered,
   useSwapUsdtToEthConfirmed,
+  useMatchcUSDAmountEntered,
+  useMatchConfirmCelloUSDPay,
 } = require('../regex/ussdRegex')
 
 const switchKey = async (entryText) => {
@@ -25,6 +28,11 @@ const switchKey = async (entryText) => {
   if (await useMatchConfirmUSDTPay(entryText)) {
     entry = 'sendUsdt'
   }
+
+  if (await useMatchConfirmCelloUSDPay(entryText)){
+    entry = "sendcUSD"
+  }
+
 
   if (await useMatchAcceptGasFees(entryText)) {
     entry = 'sendEth'
@@ -38,6 +46,10 @@ const switchKey = async (entryText) => {
     entry = 'confirmUSDTGas'
   }
 
+  if(await useMatchConfirmcUSDGas(entryText)) {
+    entry = 'confirmcUSDGas'
+  }
+
   if (await useMatchBTCAmountEntered(entryText)) {
     entry = 'btcNumber'
   }
@@ -48,6 +60,11 @@ const switchKey = async (entryText) => {
 
   if (await useMatchEthAmountEntered(entryText)) {
     entry = 'ethNumber'
+  }
+
+  if(await useMatchcUSDAmountEntered(entryText)){
+  
+    entry = 'cUsdNumber'
   }
 
   if (await useMatchBTCNumberEntered(entryText)) {
