@@ -12,7 +12,6 @@ async function sendWalletInfo(phoneNumber) {
         ` 
           Address: ${currentUser.address}\n
           Chain: Arbitrum one\n
-          ID: 42161\n
         `,
         phoneNumber
       )
