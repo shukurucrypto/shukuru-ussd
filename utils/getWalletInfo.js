@@ -9,7 +9,7 @@ async function sendWalletInfo(phoneNumber) {
 
     if (currentUser) {
       await sendSMS(
-        ` Shuku ${currentUser.name},\n 
+        ` 
           Address: ${currentUser.address}\n
           Chain: Arbitrum one\n
           ID: 42161\n
