@@ -29,18 +29,22 @@ async function walletBalance(phoneNumber) {
     // await fundTestWallets(currentUser.address); // uncomment this to fund test wallet
 
     if (currentUser) {
+      
       const signer = await getCurrentUserSigner(phoneNumber)
 
       const balance = await provider.getBalance(signer.address)
+
 
       // const btcBalance = await getBTCBalance(currentUser.btcAddress)
       let usdtBalance = await getUsdtBalance(phoneNumber)
       let lightningBalance = await getLightningBalance(phoneNumber)
       let celloDollarBalance = await getCelloDollarBalance(phoneNumber)
 
+
       const userBalance = ethers.utils.formatEther(balance)
-      const usdtUserBalance = ethers.utils.formatEther(usdtBalance)
+      // const usdtUserBalance = ethers.utils.formatEther(usdtBalance)
       celloDollarBalance_ = ethers.utils.formatEther(celloDollarBalance)
+
 
       response = `END Shuku ${currentUser.name}, your wallet has:\n`
       response += ` ${Number(lightningBalance).toFixed(3)} BTC \n`
@@ -48,21 +52,21 @@ async function walletBalance(phoneNumber) {
       response += ` ${Number(usdtBalance).toFixed(3)} USDT \n`
       response += ` ${Number(celloDollarBalance_).toFixed(3)} cello Dollar \n`
 
-      const btcUserAsset = await Assets.findOneAndUpdate(
-        {
-          user: currentUser._id,
-          symbol: 'BTC',
-        },
-        { balance: lightningBalance }
-      )
+      // const btcUserAsset = Assets.findOneAndUpdate(
+      //   {
+      //     user: currentUser._id,
+      //     symbol: 'BTC',
+      //   },
+      //   { balance: lightningBalance }
+      // )
 
-      if (currentUser.balance !== userBalance) {
-        currentUser.balance = userBalance
-        btcUserAsset.balance = balance
+      // if (currentUser.balance !== userBalance) {
+      //   currentUser.balance = userBalance
+      //   btcUserAsset.balance = balance
 
-        currentUser.save()
-        btcUserAsset.save()
-      }
+      //   currentUser.save()
+      //   btcUserAsset.save()
+      // }
 
       return response
     } else {

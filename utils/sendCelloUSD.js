@@ -32,8 +32,10 @@ const sendCelloUSD = async (userText, phoneNumber) => {
     const currentUser = await User.findOne({ phoneNumber })
 
     // get the amount to be paid
-    const amount = await getUserPaymentAmount(userText)
-    // console.log('Amount is: ', amount)
+    const amount_ = await getUserPaymentAmount(userText)
+    const parsedAmount = ethers.utils.parseEther(amount_)
+    const amount = parsedAmount.toString() 
+
     const userPhone = await getUserToPayPhoneNumber(userText)
 
     const paidUserPhone = userPhone.replace(/^0+/, '')
