@@ -11,6 +11,7 @@ const {
   truncateAddress,
 } = require('../regex/ussdRegex.js')
 const { providerRPCURL, celoProviderUrl } = require('../settings/settings.js')
+const { currencyConvertor } = require('./currencyConvertor.js')
 require('dotenv').config()
 
 const web3 = new Web3(celoProviderUrl)
@@ -33,7 +34,11 @@ const sendCelloUSD = async (userText, phoneNumber) => {
 
     // get the amount to be paid
     const amount_ = await getUserPaymentAmount(userText)
-    const parsedAmount = ethers.utils.parseEther(amount_)
+
+    // convert the currency back to USD
+    const convertedToUSDAmount = await currencyConvertor(amount_, currentUser.country, "USD")
+    const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
+
     const amount = parsedAmount.toString() 
 
     const userPhone = await getUserToPayPhoneNumber(userText)
@@ -70,6 +75,7 @@ const sendCelloUSD = async (userText, phoneNumber) => {
 
     const convertedBalance = await ethers.utils.formatEther(walletBalance.toString())
 
+
     if (convertedBalance === 0.0 || convertedBalance === 0) {
       response = `END Payment Failed\n`
       response += `Make sure you have enough ETH in your wallet\n`
@@ -85,7 +91,8 @@ const sendCelloUSD = async (userText, phoneNumber) => {
     txRecipt = await result.waitReceipt()
 
 
-    if (txRecipt.status === 1 || txRecipt.status === '1') {
+
+    if (txRecipt.status){
       await sendSMS(
         `You have successfully sent ${amount} ETH to ${
           reciever.phoneNumber

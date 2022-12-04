@@ -4,6 +4,7 @@ const { getInvoice } = require('../controllers/invoices.js')
 const { markets, createWallet } = require('../controllers/ussd.js')
 const { createOtherWallet, otherMarkets } = require('../controllers/ussd2.js')
 const { networkServer } = require('../settings/settings.js')
+const { currencyConvertor } = require('../utils/currencyConvertor.js')
 
 const router = express.Router()
 
@@ -14,6 +15,7 @@ router.get('/coin', getCoinAPI)
 router.get('/code/:qr', getQRCode)
 
 router.post('/qr', getInvoice)
+// router.post('/test', currencyConvertor)
 
 // switch (networkServer) {
 //   case 1:

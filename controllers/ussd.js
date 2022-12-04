@@ -170,7 +170,7 @@ const markets = async (req, res) => {
           },                    
           '1*1*4': () => {
             //  PAY WITH CELLO DOLLAR
-            response = `CON Please enter the amount of cUSD to pay\n`
+            response = `CON Please enter the amount of cUSD in ${user.country} to pay\n`
           },
           cUsdNumber: () => {
             response = `CON Please enter the number of cUSD reciever\n`

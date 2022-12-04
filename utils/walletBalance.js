@@ -1,4 +1,5 @@
 const ethers = require('ethers')
+const { currencyConvertor } = require('./currencyConvertor.js')
 const Web3 = require("web3")
 const User = require('../models/User.js')
 const sendSMS = require('../SMS/smsFunctions.js')
@@ -45,12 +46,13 @@ async function walletBalance(phoneNumber) {
       // const usdtUserBalance = ethers.utils.formatEther(usdtBalance)
       celloDollarBalance_ = ethers.utils.formatEther(celloDollarBalance)
 
+      const convertedCello = await currencyConvertor(celloDollarBalance_ , "USD", currentUser.country)
 
       response = `END Shuku ${currentUser.name}, your wallet has:\n`
       response += ` ${Number(lightningBalance).toFixed(3)} BTC \n`
       response += ` ${Number(userBalance).toFixed(3)} ETH \n`
-      response += ` ${Number(usdtBalance).toFixed(3)} USDT \n`
-      response += ` ${Number(celloDollarBalance_).toFixed(3)} cello Dollar \n`
+      response += ` ${Number(usdtBalance).toFixed(3)} Tether (UGX)\n`
+      response += ` ${Number(convertedCello).toFixed(1)} cDollar (UGX)\n`
 
       // const btcUserAsset = Assets.findOneAndUpdate(
       //   {
