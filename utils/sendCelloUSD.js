@@ -94,31 +94,31 @@ const sendCelloUSD = async (userText, phoneNumber) => {
 
     if (txRecipt.status){
       await sendSMS(
-        `You have successfully sent ${amount} ETH to ${
+        `You have successfully sent ${convertedToUSDAmount} Celo Dollar (UGX) to ${
           reciever.phoneNumber
         }. Address: ${truncateAddress(recieverAddress)}`,
         currentUser.phoneNumber
       )
 
       await sendSMS(
-        `You have recived ${amount} ETH from ${
+        `You have recived ${convertedToUSDAmount} Celo Dollar (UGX) from ${
           currentUser.phoneNumber
         }. Address: ${truncateAddress(currentUser.address)}`,
         reciever.phoneNumber
       )
     } else {
       await sendSMS(
-        `You dont have enough balance to pay ${amount} ETH to ${paidUserPhone}`,
+        `You dont have enough balance to pay ${convertedToUSDAmount} Celo Dollar to ${paidUserPhone}`,
         currentUser.phoneNumber
       )
     }
 
-    response = `END ETH payment to ${paidUserPhone} has been initiated\n`
+    response = `END cUSD payment to ${paidUserPhone} has been initiated\n`
     response += `Wait for an SMS confirmation\n`
     return response
   } catch (error) {
     response = `END Payment Failed\n`
-    response += `Make sure you have enough ETH in your wallet\n`
+    response += `Make sure you have enough Celo Dollar in your wallet\n`
     return response
   }
 }
