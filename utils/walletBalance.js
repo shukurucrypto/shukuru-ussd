@@ -1,6 +1,6 @@
 const ethers = require('ethers')
 const { currencyConvertor } = require('./currencyConvertor.js')
-const Web3 = require("web3")
+const Web3 = require('web3')
 const User = require('../models/User.js')
 const sendSMS = require('../SMS/smsFunctions.js')
 const bcrypt = require('bcrypt')
@@ -30,23 +30,24 @@ async function walletBalance(phoneNumber) {
     // await fundTestWallets(currentUser.address); // uncomment this to fund test wallet
 
     if (currentUser) {
-      
       const signer = await getCurrentUserSigner(phoneNumber)
 
       const balance = await provider.getBalance(signer.address)
-
 
       // const btcBalance = await getBTCBalance(currentUser.btcAddress)
       let usdtBalance = await getUsdtBalance(phoneNumber)
       let lightningBalance = await getLightningBalance(phoneNumber)
       let celloDollarBalance = await getCelloDollarBalance(phoneNumber)
 
-
       const userBalance = ethers.utils.formatEther(balance)
       // const usdtUserBalance = ethers.utils.formatEther(usdtBalance)
       celloDollarBalance_ = ethers.utils.formatEther(celloDollarBalance)
 
-      const convertedCello = await currencyConvertor(celloDollarBalance_ , "USD", currentUser.country)
+      const convertedCello = await currencyConvertor(
+        celloDollarBalance_,
+        'USD',
+        currentUser.country
+      )
 
       response = `END Shuku ${currentUser.name}, your wallet has:\n`
       response += ` ${Number(lightningBalance).toFixed(3)} BTC \n`

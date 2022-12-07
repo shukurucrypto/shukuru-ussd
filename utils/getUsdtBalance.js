@@ -19,7 +19,7 @@ const getUsdtBalance = async (phoneNumber) => {
     return balance
   } catch (err) {
     console.log(err.message)
-    return err.message
+    return 0.0
   }
 }
 
