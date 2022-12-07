@@ -11,10 +11,10 @@ const {
   ARBITRUM_GOERLI,
   ARBITRUM_MAINET,
   CELO_TESTNET,
-  CELO_MAINNET
+  CELO_MAINNET,
 } = process.env
 
-const providerRPCURL = ARBITRUM_MAINET
+const providerRPCURL = ARBITRUM_GOERLI
 const celoProviderUrl = CELO_TESTNET
 
 const networkServer = 1
