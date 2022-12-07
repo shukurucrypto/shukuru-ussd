@@ -1,9 +1,8 @@
-
 const ethers = require('ethers')
 const User = require('../models/User.js')
 const { decrypt } = require('../security/encrypt.js')
 const sendSMS = require('../SMS/smsFunctions.js')
-const Web3 = require("web3")
+const Web3 = require('web3')
 const ContractKit = require('@celo/contractkit')
 const {
   getUserPaymentAmount,
@@ -36,10 +35,15 @@ const sendCelloUSD = async (userText, phoneNumber) => {
     const amount_ = await getUserPaymentAmount(userText)
 
     // convert the currency back to USD
-    const convertedToUSDAmount = await currencyConvertor(amount_, currentUser.country, "USD")
+    const convertedToUSDAmount = await currencyConvertor(
+      amount_,
+      currentUser.country,
+      'USD'
+    )
+
     const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
 
-    const amount = parsedAmount.toString() 
+    const amount = parsedAmount.toString()
 
     const userPhone = await getUserToPayPhoneNumber(userText)
 
@@ -68,13 +72,14 @@ const sendCelloUSD = async (userText, phoneNumber) => {
     const recieverAddress = reciever.address
 
     // tx object
-   await kit.connection.addAccount(privateKey)
+    await kit.connection.addAccount(privateKey)
 
     // get wallet balance
     const walletBalance = await cUSDtoken.balanceOf(currentUser.address)
 
-    const convertedBalance = await ethers.utils.formatEther(walletBalance.toString())
-
+    const convertedBalance = await ethers.utils.formatEther(
+      walletBalance.toString()
+    )
 
     if (convertedBalance === 0.0 || convertedBalance === 0) {
       response = `END Payment Failed\n`
@@ -84,26 +89,35 @@ const sendCelloUSD = async (userText, phoneNumber) => {
     let txRecipt
     // send
     // const result = await signedWallet.sendTransaction(tx)
-   const result = await cUSDtoken.transfer(recieverAddress, amount).send({from: currentUser.address})
-
+    const result = await cUSDtoken
+      .transfer(recieverAddress, amount)
+      .send({ from: currentUser.address })
 
     // txRecipt = await result.wait(1)
     txRecipt = await result.waitReceipt()
 
+    const convertedToReciever = await currencyConvertor(
+      convertedToUSDAmount,
+      'USD',
+      currentUser.country
+    )
 
-
-    if (txRecipt.status){
+    if (txRecipt.status) {
       await sendSMS(
-        `You have successfully sent ${convertedToUSDAmount} Celo Dollar (UGX) to ${
-          reciever.phoneNumber
-        }. Address: ${truncateAddress(recieverAddress)}`,
+        `You have successfully sent ${convertedToUSDAmount} Celo Dollar (${
+          currentUser.country
+        }) to ${reciever.phoneNumber}. Address: ${truncateAddress(
+          recieverAddress
+        )}`,
         currentUser.phoneNumber
       )
 
       await sendSMS(
-        `You have recived ${convertedToUSDAmount} Celo Dollar (UGX) from ${
-          currentUser.phoneNumber
-        }. Address: ${truncateAddress(currentUser.address)}`,
+        `You have recived ${convertedToReciever} Celo Dollar (${
+          reciever.country
+        }) from ${currentUser.phoneNumber}. Address: ${truncateAddress(
+          currentUser.address
+        )}`,
         reciever.phoneNumber
       )
     } else {

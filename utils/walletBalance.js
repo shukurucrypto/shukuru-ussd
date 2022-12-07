@@ -52,8 +52,12 @@ async function walletBalance(phoneNumber) {
       response = `END Shuku ${currentUser.name}, your wallet has:\n`
       response += ` ${Number(lightningBalance).toFixed(3)} BTC \n`
       response += ` ${Number(userBalance).toFixed(3)} ETH \n`
-      response += ` ${Number(usdtBalance).toFixed(3)} Tether (UGX)\n`
-      response += ` ${Number(convertedCello).toFixed(1)} cDollar (UGX)\n`
+      response += ` ${Number(usdtBalance).toFixed(3)} Tether (${
+        currentUser.country
+      })\n`
+      response += ` ${Number(convertedCello).toFixed(1)} cDollar (${
+        currentUser.country
+      })\n`
 
       // const btcUserAsset = Assets.findOneAndUpdate(
       //   {
