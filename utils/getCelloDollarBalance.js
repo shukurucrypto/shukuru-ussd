@@ -14,7 +14,6 @@ const getCelloDollarBalance = async (phoneNumber) => {
     let cUSDtoken = await kit.contracts.getStableToken()
 
     const balance = await cUSDtoken.balanceOf(userSigner.address)
-    // console.log(`${userSigner.address} Balance here----> ${balance.toString()}`)
 
     return balance.toString()
   } catch (err) {

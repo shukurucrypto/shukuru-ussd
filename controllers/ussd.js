@@ -198,7 +198,8 @@ const markets = async (req, res) => {
             response += `CON What do you want to top-up? \n`
             response += `1. BTC (Lightning) \n`
             response += `2. ETH \n`
-            response += `3. cUSD (Celo Dollar)`
+            response += `3. cUSD (Celo Dollar) \n`
+            response += `4. USDT (Tether)`
           },
           '1*2*1': () => {
             // ============================= TOP UP BTC =============================
@@ -214,6 +215,11 @@ const markets = async (req, res) => {
             response += `You can also top-up with your address  \n`
           },
           '1*2*3': () => {
+            response += `END Thank you for being an early testor. \n`
+            response += `*Your rewards are on the way*\n`
+            response += `You can also top-up with your address  \n`
+          },
+          '1*2*4': () => {
             response += `END Thank you for being an early testor. \n`
             response += `*Your rewards are on the way*\n`
             response += `You can also top-up with your address  \n`
