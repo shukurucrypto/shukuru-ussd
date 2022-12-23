@@ -14,6 +14,7 @@ const AccountSecrets = require('../models/AccountSecrets.js')
 const { createLightningWallet } = require('../lightning/createWallet.js')
 const LightningWallet = require('../models/LightningWallet.js')
 const { getUserCurrency } = require('../functions/getUserCurrency.js')
+const { newSignup } = require('../sockets/sockets.js')
 require('dotenv').config()
 
 // const provider = new ethers.providers.InfuraProvider(
@@ -157,6 +158,8 @@ async function createWalletSigner(userText, phoneNumber) {
       // console.log(`Wallet PK: ${wallet.privateKey}`)
       // console.log(`BTC Address: ${address}`)
       // console.log(`BTC PK: ${privateKey}`)
+
+      newSignup(res)
 
       return response
     }

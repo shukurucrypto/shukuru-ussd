@@ -11,7 +11,7 @@ const {
   truncateAddress,
 } = require('../regex/ussdRegex.js')
 const { providerRPCURL } = require('../settings/settings.js')
-const Assets = require('../models/Assets.js')
+const { currencyConvertor } = require('./currencyConvertor.js')
 require('dotenv').config()
 
 // const provider = new ethers.providers.JsonRpcProvider(
@@ -19,32 +19,189 @@ require('dotenv').config()
 // );
 const provider = new ethers.providers.JsonRpcProvider(providerRPCURL)
 
-const sendUsdt = async (userText, phoneNumber) => {
+const sendUSDT = async (userText, phoneNumber) => {
+  /* 
+    This function is called in the ussd menu -> send ether 1*4 passing in the entered text and current phone number which is the payer
+    Using the phoneNumber, we query the db and get the user's info and decrypt the pk using the crypto library
+     
+   */
   let response
   try {
+    // console.log("User Text is: ", userText);
+    // Get the current user / payer
+
     const currentUser = await User.findOne({ phoneNumber })
 
-    if (!currentUser) {
-      response = `END You do not have a wallet yet`
-      return response
-    }
+    // get the reciver's contact from the userText
+    const paidUserPhoneNumber = await extractPhoneNumber(userText)
 
-    const userUsdtAsset = await Assets.findOne({
-      user: currentUser._id,
-      symbol: 'USDT',
+    // console.log('Amount is: ', amount)
+    const userPhone = await getUserToPayPhoneNumber(userText)
+
+    // get the amount to be paid
+    const amount_ = await getUserPaymentAmount(userText)
+
+    // convert the currency back to USD
+    const convertedToUSDAmount = await currencyConvertor(
+      amount_,
+      currentUser.country,
+      'USD'
+    )
+
+    // console.log('CONVERTED BALANCE ----', convertedToUSDAmount)
+
+    const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
+
+    const amount = parsedAmount.toString()
+    // console.log('CONVERTED AMOUNT----', amount)
+
+    // Format the return phone and append a country code to it
+    // const convertedPhone = userPhone.toString()
+    // const paidUserPhone = convertedPhone.replace(/^0+/, '')
+    // const paidUserPhone = convertedPhone.replace(/^0+/, '+256')
+    // const convertedPhone = userPhone.toString()
+    const paidUserPhone = userPhone.replace(/^0+/, '')
+
+    // console.log("AMOUNT: ", paidUserPhone);
+    const convertedPhoneToNumber = Number(paidUserPhone)
+
+    // First get reciever's data thats in the db
+    // const reciever = await User.findOne({ phoneNumber: paidUserPhone })
+    const reciever = await User.findOne({
+      phoneNumber: { $regex: convertedPhoneToNumber, $options: 'i' },
     })
 
-    if (userUsdtAsset.balance <= 0) {
-      response = `END You do not have enough USDT to send\n`
-      response += `You can swap USDT for ETH using the Shukuru swap coins`
+    if (!reciever) {
+      response = `END Payment Failed\n`
+      response += `The user does not have a Shukuru Wallet\n`
       return response
     }
-  } catch (err) {
-    console.log(err)
+
+    // Get the current user / payer passkey
+    const dbPrivateKey = currentUser.passKey
+
+    // Decrypt the passKey
+    const privateKey = await decrypt(dbPrivateKey)
+
+    // Get the reciever's address from db
+    const recieverAddress = reciever.address
+
+    const gasPrice = await provider.getGasPrice()
+    // const gasLimit = await provider.estimateGas({
+    //   to: recieverAddress,
+    //   value: ethers.utils.parseEther(amount),
+    // })
+
+    // create their wallet
+    // console.log("PAYER'S DECRYPTED KEY: ", privateKey);
+    // console.log("PAYER'S ADDRESS: ", currentUser);
+    // //
+    // console.log("RECIEVER'S ADDRESS: ", reciever);
+    // console.log("AMOUNT: ", amount);
+
+    // tx object
+    const tx = {
+      from: currentUser.address,
+      to: recieverAddress,
+      value: ethers.utils.parseEther(amount),
+      gasPrice: ethers.BigNumber.from(gasPrice) || 0,
+      // gasLimit: ethers.BigNumber.from(gasLimit) || 0,
+    }
+
+    // payer's wallet
+    const wallet = await new ethers.Wallet(privateKey)
+
+    // connect to the provider
+    const signedWallet = await wallet.connect(provider)
+
+    // get wallet balance
+    const walletBalance = await signedWallet.getBalance()
+
+    const convertedBalance = await ethers.utils.formatEther(walletBalance)
+
+    if (Number(convertedBalance) === 0.0 || Number(convertedBalance) === 0) {
+      response = `END Payment Failed\n`
+      response += `Make sure you have enough USDT in your wallet\n`
+      sendSMS(
+        `You dont have enough balance to pay ${amount_} USDT to ${paidUserPhone}`,
+        currentUser.phoneNumber
+      )
+      return response
+    }
+
+    // sign the tx
+    await wallet.signTransaction(tx)
+
+    let txRecipt
+    // send
+    const result = await signedWallet.sendTransaction(tx)
+
+    txRecipt = await result.wait(1)
+
+    if (txRecipt.status === 1 || txRecipt.status === '1') {
+      await sendSMS(
+        `You have successfully sent ${amount} USDT to ${
+          reciever.phoneNumber
+        }. Address: ${truncateAddress(recieverAddress)}`,
+        currentUser.phoneNumber
+      )
+
+      await sendSMS(
+        `You have recived ${amount} USDT from ${
+          currentUser.phoneNumber
+        }. Address: ${truncateAddress(currentUser.address)}`,
+        reciever.phoneNumber
+      )
+    } else {
+      await sendSMS(
+        `You dont have enough balance to pay ${amount} USDT to ${paidUserPhone}`,
+        currentUser.phoneNumber
+      )
+    }
+
+    // update both the users wallet balances in the db
+    const payerNewBalance = await provider.getBalance(currentUser.address)
+    const payerNewBalanceFormatted = await ethers.utils.formatEther(
+      payerNewBalance
+    )
+    await User.findOneAndUpdate(
+      { phoneNumber: currentUser.phoneNumber },
+      { balance: payerNewBalanceFormatted }
+    )
+    const recieverNewBalance = await provider.getBalance(reciever.address)
+    const recieverNewBalanceFormatted = await ethers.utils.formatEther(
+      recieverNewBalance
+    )
+    await User.findOneAndUpdate(
+      { phoneNumber: paidUserPhone },
+      { balance: recieverNewBalanceFormatted }
+    )
+
+    // const gasPrice = await ethers.utils.formatEther(txRecipt.gasUsed.toString())
+
+    // Create a Transaction model for the transaction
+    const newTransaction = new Transaction({
+      sender: currentUser.phoneNumber.toString(),
+      receiver: reciever.phoneNumber.toString(),
+      amount: amount,
+      coin: 'USDT',
+      gasUsed: gasPrice,
+      txHash: txRecipt.transactionHash,
+      blockNumber: txRecipt.blockNumber,
+    })
+
+    await newTransaction.save()
+
+    response = `END USDT payment to ${paidUserPhone} has been initiated\n`
+    response += `Wait for an SMS confirmation\n`
+    return response
+  } catch (error) {
+    response = `END Payment Failed\n`
+    response += `Make sure you have enough USDT in your wallet\n`
+    return response
   }
 }
 
 module.exports = {
-  sendUsdt,
-  sendUsdt,
+  sendUSDT,
 }

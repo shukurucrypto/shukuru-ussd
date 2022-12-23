@@ -81,9 +81,13 @@ const sendCelloUSD = async (userText, phoneNumber) => {
       walletBalance.toString()
     )
 
-    if (convertedBalance === 0.0 || convertedBalance === 0) {
+    if (Number(convertedBalance) === 0.0 || Number(convertedBalance) === 0) {
       response = `END Payment Failed\n`
       response += `Make sure you have enough ETH in your wallet\n`
+      sendSMS(
+        `You dont have enough balance to pay ${amount_} cUSD to ${paidUserPhone}`,
+        currentUser.phoneNumber
+      )
       return response
     }
     let txRecipt

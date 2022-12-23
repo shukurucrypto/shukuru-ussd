@@ -36,11 +36,12 @@ const { sendWalletInfo } = require('../utils/getWalletInfo.js')
 const { sendBtc } = require('../utils/sendBtc.js')
 const { sendEther } = require('../utils/sendEther.js')
 const { sendLightningBtc } = require('../utils/sendLightningBTC.js')
-const { sendUsdt } = require('../utils/sendUsdt.js')
+const { sendUSDT } = require('../utils/sendUsdt.js')
 const { swapCoins, swapCoinsQuote } = require('../utils/swapCoins.js')
 const { listenerCount } = require('../models/Menu.js')
 const { switchKey } = require('../helpers/helper.js')
 const { sendCelloUSD } = require('../utils/sendCelloUSD.js')
+const { sendSessionSocket } = require('../sockets/sockets.js')
 
 const fetchCoin = async (name) => {
   try {
@@ -146,7 +147,7 @@ const markets = async (req, res) => {
           '1*1*3': () => {
             // ============================= OPTION Selected payment option 3 use USDT =============================
             createTxState('USDT', phoneNumber)
-            response = `CON Please enter amount of USDT to pay\n`
+            response = `CON Please enter amount of USDT in ${user.country} to pay\n`
           },
           usdtNumber: () => {
             // Number of ETH reciever
@@ -158,16 +159,16 @@ const markets = async (req, res) => {
             const paymentAmount = await getUserPaymentAmountBefore(text)
             // Get the estimated gas fees
             const gasPrice = await getGasEstimates(phoneNumber, text)
-            response = `CON Initialized payment ${paymentAmount} USDT\n`
+            response = `CON Initialized payment ${paymentAmount} USDT / (${user.country})\n`
             response += `Estimated gas ${gasPrice} GWEI\n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
           sendUsdt: () => {
-            sendEther(text, phoneNumber)
+            sendUSDT(text, phoneNumber)
             // response = txResponse
             response = `END Your USDT crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
-          },                    
+          },
           '1*1*4': () => {
             //  PAY WITH CELLO DOLLAR
             response = `CON Please enter the amount of cUSD in ${user.country} to pay\n`
@@ -175,13 +176,13 @@ const markets = async (req, res) => {
           cUsdNumber: () => {
             response = `CON Please enter the number of cUSD reciever\n`
           },
- 
+
           confirmcUSDGas: async () => {
             // ============================= CONFIRM cUSDGAS FEES =============================
             const paymentAmount = await getUserPaymentAmountBefore(text)
 
             const gasPrice = await getGasEstimates(phoneNumber, text)
-            response = `CON Initialized payment ${paymentAmount} USDT\n`
+            response = `CON Initialized payment ${paymentAmount} cUSD / (${user.country})\n`
             // response += `Estimated gas of ${gasPrice} cUSD\n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
@@ -191,13 +192,13 @@ const markets = async (req, res) => {
             sendCelloUSD(text, phoneNumber)
             response = `END Your cUSD crypto payment was successfully initialised, Please wait for a confirmation SMS.... \n`
           },
- 
+
           '1*2': () => {
             // ============================= OPTION 1/2 BUY =============================
             response += `CON What do you want to top-up? \n`
             response += `1. BTC (Lightning) \n`
             response += `2. ETH \n`
-            response += `3. cUSD (Celo Dollar)` 
+            response += `3. cUSD (Celo Dollar)`
           },
           '1*2*1': () => {
             // ============================= TOP UP BTC =============================
@@ -212,7 +213,7 @@ const markets = async (req, res) => {
             response += `*Your rewards are on the way*\n`
             response += `You can also top-up with your address  \n`
           },
-          "1*2*3": () => {
+          '1*2*3': () => {
             response += `END Thank you for being an early testor. \n`
             response += `*Your rewards are on the way*\n`
             response += `You can also top-up with your address  \n`

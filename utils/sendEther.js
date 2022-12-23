@@ -11,6 +11,7 @@ const {
   truncateAddress,
 } = require('../regex/ussdRegex.js')
 const { providerRPCURL } = require('../settings/settings.js')
+const { currencyConvertor } = require('./currencyConvertor.js')
 require('dotenv').config()
 
 // const provider = new ethers.providers.JsonRpcProvider(
@@ -34,11 +35,13 @@ const sendEther = async (userText, phoneNumber) => {
     // get the reciver's contact from the userText
     const paidUserPhoneNumber = await extractPhoneNumber(userText)
 
-    // get the amount to be paid
-    const amount = await getUserPaymentAmount(userText)
     // console.log('Amount is: ', amount)
     const userPhone = await getUserToPayPhoneNumber(userText)
 
+    // get the amount to be paid
+    const amount_ = await getUserPaymentAmount(userText)
+
+    // convert the currency back to USD
     // Format the return phone and append a country code to it
     // const convertedPhone = userPhone.toString()
     // const paidUserPhone = convertedPhone.replace(/^0+/, '')
@@ -71,10 +74,10 @@ const sendEther = async (userText, phoneNumber) => {
     const recieverAddress = reciever.address
 
     const gasPrice = await provider.getGasPrice()
-    const gasLimit = await provider.estimateGas({
-      to: recieverAddress,
-      value: ethers.utils.parseEther(amount),
-    })
+    // const gasLimit = await provider.estimateGas({
+    //   to: recieverAddress,
+    //   value: ethers.utils.parseEther(amount),
+    // })
 
     // create their wallet
     // console.log("PAYER'S DECRYPTED KEY: ", privateKey);
@@ -89,14 +92,11 @@ const sendEther = async (userText, phoneNumber) => {
       to: recieverAddress,
       value: ethers.utils.parseEther(amount),
       gasPrice: ethers.BigNumber.from(gasPrice) || 0,
-      gasLimit: ethers.BigNumber.from(gasLimit) || 0,
+      // gasLimit: ethers.BigNumber.from(gasLimit) || 0,
     }
 
     // payer's wallet
     const wallet = await new ethers.Wallet(privateKey)
-
-    // sign the tx
-    await wallet.signTransaction(tx)
 
     // connect to the provider
     const signedWallet = await wallet.connect(provider)
@@ -106,11 +106,19 @@ const sendEther = async (userText, phoneNumber) => {
 
     const convertedBalance = await ethers.utils.formatEther(walletBalance)
 
-    if (convertedBalance === 0.0 || convertedBalance === 0) {
+    if (Number(convertedBalance) === 0.0 || Number(convertedBalance) === 0) {
       response = `END Payment Failed\n`
       response += `Make sure you have enough ETH in your wallet\n`
+      sendSMS(
+        `You dont have enough balance to pay ${amount_} ETH to ${paidUserPhone}`,
+        currentUser.phoneNumber
+      )
       return response
     }
+
+    // sign the tx
+    await wallet.signTransaction(tx)
+
     let txRecipt
     // send
     const result = await signedWallet.sendTransaction(tx)
