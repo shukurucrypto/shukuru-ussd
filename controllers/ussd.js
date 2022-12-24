@@ -291,6 +291,126 @@ const markets = async (req, res) => {
             response = `END Your swap is being processed, please wait for a confirmation SMS...`
             swapCoins(text, phoneNumber, 'USDT/ETH')
           },
+          '1*6': async () => {
+            response = `CON What would you like to buy?\n`
+            response += `1. Airtime \n`
+            response += `2. Data Bundles \n`
+          },
+          '1*6*1': async () => {
+            response = `CON Enter amount \n`
+          },
+          '1*6*2': async () => {
+            response = `CON Select your (Daily) bundles\n`
+            response += `1. 70MB \n`
+            response += `2. 170MB \n`
+            response += `3. 500MB \n`
+            response += `4. 2.6GB \n`
+          },
+
+          // 70MB MENU
+          '1*6*2*1': async () => {
+            response = `CON Choose to buy 70MB with? \n`
+            response += `1. BTC \n`
+            response += `2. USDT \n`
+            response += `3. Celo Dolar (cUSD)\n`
+          },
+          // User select buy 70MB with BTC Option ------> 1.
+          '1*6*2*1*1': async () => {
+            response = `CON Initiate buy 70MB worth 5000 sats (1000 UGX) \n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+          // User select buy 70MB with USDT Option ------> 2.
+          '1*6*2*1*2': async () => {
+            response = `CON Initiate buy 70MB worth 0.25 USDT (1000 UGX) \n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+          // User select buy 70MB with Celo Dolar Option ------> 3.
+          '1*6*2*1*3': async () => {
+            response = `CON Initiate buy 70MB worth 0.25 cUSD (1000 UGX) \n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+
+          // 170 MB MENU
+          '1*6*2*2': async () => {
+            response = `CON Choose to buy 170MB with? \n`
+            response += `1. BTC \n`
+            response += `2. USDT \n`
+            response += `3. Celo Dolar (cUSD)\n`
+          },
+          // User select buy 170MB with BTC Option ------> 1.
+          '1*6*2*2*1': async () => {
+            response = `CON Initiate buy 170MB worth 8000 sats (2000 UGX) \n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+          // User select buy 170MB with USDT Option ------> 2.
+          '1*6*2*2*2': async () => {
+            response = `CON Initiate buy 170MB worth 0.25 USDT (2000 UGX) \n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+          // User select buy 170MB with Celo Dolar Option ------> 3.
+          '1*6*2*2*3': async () => {
+            response = `CON Initiate buy 170MB worth 0.25 cUSD (2000 UGX) \n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+
+          // 500 MENU
+          '1*6*2*3': async () => {
+            response = `CON Choose to buy 500MB with? \n`
+            response += `1. BTC \n`
+            response += `2. USDT \n`
+            response += `3. Celo Dolar (cUSD)\n`
+          },
+          // User select buy 500MB with BTC Option ------> 1.
+          '1*6*2*3*1': async () => {
+            response = `CON Initiate buy 500MB worth 12000 sats (4000 UGX) \n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+          // User select buy 500MB with USDT Option ------> 2.
+          '1*6*2*3*2': async () => {
+            response = `CON Initiate buy 500MB worth 0.35 USDT (4000 UGX) \n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+          // User select buy 500MB with Celo Dolar Option ------> 3.
+          '1*6*2*3*3': async () => {
+            response = `CON Initiate buy 500MB worth 0.35 cUSD (4000 UGX) \n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+
+          // 2.6 GB MENU
+          '1*6*2*4': async () => {
+            response = `CON Choose to buy 2.6GB with? \n`
+            response += `1. BTC \n`
+            response += `2. USDT \n`
+            response += `3. Celo Dolar (cUSD)\n`
+          },
+          // User select buy 2.6GB with BTC Option ------> 1.
+          '1*6*2*4*1': async () => {
+            response = `CON Initiate buy 2.6GB worth 50000 sats (5000 UGX) \n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+          // User select buy 2.6GB with USDT Option ------> 2.
+          '1*6*2*4*2': async () => {
+            response = `CON Initiate buy 2.6GB worth 1.24 USDT (5000 UGX) \n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+          // User select buy 2.6GB with Celo Dolar Option ------> 3.
+          '1*6*2*4*3': async () => {
+            response = `CON Initiate buy 2.6GB worth 1.24 cUSD (5000 UGX) \n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+
           '2*1': async () => {
             // ================= BITCOIN MARKET STATS ==================
             const coin = await fetchCoin('bitcoin')
@@ -328,6 +448,7 @@ const markets = async (req, res) => {
           response += `3. Wallet info \n`
           response += `4. Wallet Balance \n`
           response += `5. Swap coins \n`
+          response += `6. Buy with crypto\n`
         }
 
         let marketsMenu = (2).toString()
