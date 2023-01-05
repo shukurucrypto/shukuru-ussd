@@ -90,7 +90,7 @@ const sendEther = async (userText, phoneNumber) => {
     const tx = {
       from: currentUser.address,
       to: recieverAddress,
-      value: ethers.utils.parseEther(amount),
+      value: ethers.utils.parseEther(amount_),
       gasPrice: ethers.BigNumber.from(gasPrice) || 0,
       // gasLimit: ethers.BigNumber.from(gasLimit) || 0,
     }
@@ -127,21 +127,21 @@ const sendEther = async (userText, phoneNumber) => {
 
     if (txRecipt.status === 1 || txRecipt.status === '1') {
       await sendSMS(
-        `You have successfully sent ${amount} ETH to ${
+        `You have successfully sent ${amount_} ETH to ${
           reciever.phoneNumber
         }. Address: ${truncateAddress(recieverAddress)}`,
         currentUser.phoneNumber
       )
 
       await sendSMS(
-        `You have recived ${amount} ETH from ${
+        `You have recived ${amount_} ETH from ${
           currentUser.phoneNumber
         }. Address: ${truncateAddress(currentUser.address)}`,
         reciever.phoneNumber
       )
     } else {
       await sendSMS(
-        `You dont have enough balance to pay ${amount} ETH to ${paidUserPhone}`,
+        `You dont have enough balance to pay ${amount_} ETH to ${paidUserPhone}`,
         currentUser.phoneNumber
       )
     }
@@ -170,7 +170,7 @@ const sendEther = async (userText, phoneNumber) => {
     const newTransaction = new Transaction({
       sender: currentUser.phoneNumber.toString(),
       receiver: reciever.phoneNumber.toString(),
-      amount: amount,
+      amount: amount_,
       coin: 'ETH',
       gasUsed: gasPrice,
       txHash: txRecipt.transactionHash,

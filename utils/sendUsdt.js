@@ -139,6 +139,7 @@ const sendUSDT = async (userText, phoneNumber) => {
     txRecipt = await result.wait(1)
 
     if (txRecipt.status === 1 || txRecipt.status === '1') {
+      console.log('SENT USDT PAYMENT----')
       await sendSMS(
         `You have successfully sent ${amount} USDT to ${
           reciever.phoneNumber

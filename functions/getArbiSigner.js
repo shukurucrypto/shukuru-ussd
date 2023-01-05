@@ -13,12 +13,10 @@ const {
 const { providerRPCURL } = require('../settings/settings.js')
 require('dotenv').config()
 
+const provider = new ethers.providers.JsonRpcProvider(providerRPCURL)
 // const provider = new ethers.providers.JsonRpcProvider(
-//   process.env.RINKEBY_RPC_URL
-// );
-const provider = new ethers.providers.JsonRpcProvider(
-  process.env.ARBITRUM_MAINET
-)
+//   process.env.ARBITRUM_MAINET
+// )
 
 const getArbiSigner = async (phoneNumber) => {
   let response

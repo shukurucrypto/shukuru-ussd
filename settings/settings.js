@@ -12,10 +12,12 @@ const {
   ARBITRUM_MAINET,
   CELO_TESTNET,
   CELO_MAINNET,
+  ADMIN_KEY,
+  ADMIN_INKEY,
 } = process.env
 
-const providerRPCURL = ARBITRUM_GOERLI
-const celoProviderUrl = CELO_TESTNET
+// const providerRPCURL = ARBITRUM_GOERLI
+const providerRPCURL = POLYGON_MUMBAI
 
 const networkServer = 1
 const ENVIRONMENT = 'testnet'
@@ -23,6 +25,9 @@ const network = {
   name: 'goerli',
   chainID: 5,
 }
+
+// const celoProviderUrl = ENVIRONMENT === 'testnet' ? CELO_TESTNET : CELO_MAINNET
+const celoProviderUrl = CELO_TESTNET
 
 module.exports = {
   providerRPCURL,

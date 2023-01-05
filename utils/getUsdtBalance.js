@@ -1,12 +1,16 @@
 const ethers = require('ethers')
-const { providerRPCURL } = require('../settings/settings.js')
+const { providerRPCURL, ENVIRONMENT } = require('../settings/settings.js')
 const { getCurrentUserSigner } = require('../functions/getCurrentUserSigner.js')
 
 const provider = new ethers.providers.JsonRpcProvider(providerRPCURL)
 
 const ABI = require('../abiData/erc20.json')
 const { networkConfig } = require('../helper-hardhat-config.js')
-const USDT_ADDRESS = networkConfig.usdt.liveAddress
+// const USDT_ADDRESS = networkConfig.usdt.liveAddress
+const USDT_ADDRESS =
+  ENVIRONMENT === 'testnet'
+    ? networkConfig.usdt.mumbaiAddress
+    : networkConfig.usdt.liveAddress
 
 const getUsdtBalance = async (phoneNumber) => {
   try {

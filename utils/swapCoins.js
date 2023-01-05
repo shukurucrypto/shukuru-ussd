@@ -58,7 +58,8 @@ const swapCoins = async (userText, phoneNumber, swap) => {
         return
       }
 
-      const tx = await getSwapQuote('ETH', 'USDT', amount)
+      // const tx = await getSwapQuote('ETH', 'USDT', amount)
+      const tx = await getSwapQuote('MATIC', 'USDT', amount)
 
       const txObj = {
         from: tx.from,
@@ -91,7 +92,8 @@ const swapCoins = async (userText, phoneNumber, swap) => {
         return
       }
 
-      const tx = await getSwapQuote('USDT', 'ETH', Number(amount).toFixed(6))
+      // const tx = await getSwapQuote('USDT', 'ETH', Number(amount).toFixed(6))
+      const tx = await getSwapQuote('USDT', 'MATIC', Number(amount).toFixed(6))
 
       const txObj = {
         from: tx.from,
@@ -142,7 +144,8 @@ const swapCoinsQuote = async (userText, phoneNumber, swap) => {
         return msg
       }
 
-      const swapQuote = await getSwapPrices('ETH', 'USDT', amount)
+      // const swapQuote = await getSwapPrices('ETH', 'USDT', amount)
+      const swapQuote = await getSwapPrices('MATIC', 'USDT', amount)
       return swapQuote
     }
 
@@ -165,9 +168,14 @@ const swapCoinsQuote = async (userText, phoneNumber, swap) => {
         return msg
       }
 
+      // const swapQuote = await getSwapPrices(
+      //   'USDT',
+      //   'ETH',
+      //   Number(amount).toFixed(6)
+      // )
       const swapQuote = await getSwapPrices(
         'USDT',
-        'ETH',
+        'MATIC',
         Number(amount).toFixed(6)
       )
       return swapQuote
