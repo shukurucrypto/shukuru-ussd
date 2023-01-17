@@ -1,8 +1,10 @@
 const ethers = require('ethers')
+const { createDbCollections } = require('../db/functions')
 const { getLightningBalance } = require('../functions/getLightningBalance')
 const { createLightingInvoice } = require('../lightning/createLightningInvoice')
 const { payLightingInvoice } = require('../lightning/payLightingInvoice')
 const LightningWallet = require('../models/LightningWallet')
+const UtilityCosts = require('../models/UtilityCosts')
 const { decrypt } = require('../security/encrypt')
 const { currencyConvertor } = require('../utils/currencyConvertor')
 const { getCelloDollarBalance } = require('../utils/getCelloDollarBalance')
@@ -21,7 +23,13 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
           break
         }
 
-        const dataCost = currentUser.country === 'UGX' ? 1000 : 10
+        // Get country data cost engine values here---
+        const { cost: dataCost } = await getUtilityCosts(
+          'Data',
+          currentUser.country,
+          dataAmount,
+          'Airtel'
+        )
 
         // Step 1: Send BTC worth 1000K to admin BTC wallet
         const txStatus = await payToAdmin('BTC', currentUser, dataCost)
@@ -36,6 +44,7 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
 
       case 'USDT':
         console.log('Purchase with USDT ----')
+        createDbCollections()
         // Step 0: Check the user USDT Balance...
         const usdtBalance = await checkBalance('USDT', phoneNumber)
         console.log('USDT BALANCE', usdtBalance)
@@ -45,7 +54,15 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
         //   break
         // }
 
-        const usdtDataCost = currentUser.country === 'UGX' ? 1000 : 10
+        const { cost: usdtDataCost } = await getUtilityCosts(
+          'Data',
+          currentUser.country,
+          dataAmount,
+          'Airtel'
+        )
+
+        console.log('UTILITY COST:____', usdtDataCost)
+
         const convertedToUsd = await currencyConvertor(
           usdtDataCost,
           currentUser.country,
@@ -67,7 +84,15 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
         //   break
         // }
 
-        const cusdDataCost = currentUser.country === 'UGX' ? 1000 : 10
+        const { cost: cusdDataCost } = await getUtilityCosts(
+          'Data',
+          currentUser.country,
+          dataAmount,
+          'Airtel'
+        )
+
+        console.log('UTILITY COST:____', cusdDataCost)
+
         const cusdConvertedToUsd = await currencyConvertor(
           cusdDataCost,
           currentUser.country,
@@ -169,6 +194,21 @@ const payToAdmin = async (assetType, currentUser, amount) => {
   } catch (error) {
     // console.log(error.message)
     return error.message
+  }
+}
+
+const getUtilityCosts = async (type, userCountry, package, network) => {
+  try {
+    const result = await UtilityCosts.findOne({
+      type: type,
+      package: package,
+      countryCurrency: userCountry,
+      network: network,
+    })
+    return result
+  } catch (error) {
+    console.log(error)
+    return error
   }
 }
 
