@@ -25,7 +25,6 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
       case 'BTC':
         // Step 0: Check the user BTC Balance...
         const balance = await checkBalance('BTC', phoneNumber)
-        console.log('BTC PAYMENT ACTIVE', phoneNumber)
 
         if (balance <= 0.0) {
           console.log('You do not have enough BTC to buy this bundle')

@@ -338,7 +338,7 @@ const markets = async (req, res) => {
           },
           // User select buy 80MB with BTC Option ------> 1.
           '1*6*2*1*1': async () => {
-            response = `CON Initiate buy 80MB worth 5000 sats (1000 ${user.country}) \n`
+            response = `CON Initiate buy 80MB worth 5000 sats (500 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
@@ -356,7 +356,7 @@ const markets = async (req, res) => {
 
           // User select buy 80MB with USDT Option ------> 2.
           '1*6*2*1*2': async () => {
-            response = `CON Initiate buy 80MB worth 0.25 USDT (1000 ${user.country}) \n`
+            response = `CON Initiate buy 80MB worth 0.25 USDT (500 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
@@ -369,7 +369,7 @@ const markets = async (req, res) => {
 
           // User select buy 80MB with Celo Dolar Option ------> 3.
           '1*6*2*1*3': async () => {
-            response = `CON Initiate buy 80MB worth 0.25 cUSD (1000 ${user.country}) \n`
+            response = `CON Initiate buy 80MB worth 0.25 cUSD (500 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
@@ -389,7 +389,7 @@ const markets = async (req, res) => {
           },
           // User select buy 180MB with BTC Option ------> 1.
           '1*6*2*2*1': async () => {
-            response = `CON Initiate buy 180MB worth 8000 sats (2000 ${user.country}) \n`
+            response = `CON Initiate buy 180MB worth 8000 sats (1000 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
@@ -402,13 +402,13 @@ const markets = async (req, res) => {
 
           // User select buy 180MB with USDT Option ------> 2.
           '1*6*2*2*2': async () => {
-            response = `CON Initiate buy 180MB worth 0.25 USDT (2000 ${user.country}) \n`
+            response = `CON Initiate buy 180MB worth 0.25 USDT (1000 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
           // User select buy 180MB with Celo Dolar Option ------> 3.
           '1*6*2*2*3': async () => {
-            response = `CON Initiate buy 180MB worth 0.25 cUSD (2000 ${user.country}) \n`
+            response = `CON Initiate buy 180MB worth 0.25 cUSD (1000 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
@@ -428,7 +428,7 @@ const markets = async (req, res) => {
           },
           // User select buy 750MB with BTC Option ------> 1.
           '1*6*2*3*1': async () => {
-            response = `CON Initiate buy 750MB worth 12000 sats (4000 ${user.country}) \n`
+            response = `CON Initiate buy 750MB worth 12000 sats (2000 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
@@ -441,13 +441,13 @@ const markets = async (req, res) => {
 
           // User select buy 750MB with USDT Option ------> 2.
           '1*6*2*3*2': async () => {
-            response = `CON Initiate buy 700MB worth 0.35 USDT (4000 ${user.country}) \n`
+            response = `CON Initiate buy 700MB worth 0.35 USDT (2000 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
           // User select buy 750MB with Celo Dolar Option ------> 3.
           '1*6*2*3*3': async () => {
-            response = `CON Initiate buy 700MB worth 0.35 cUSD (4000 ${user.country}) \n`
+            response = `CON Initiate buy 700MB worth 0.35 cUSD (2000 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
