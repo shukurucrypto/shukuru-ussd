@@ -6,7 +6,7 @@ const {
   useMatchEthAmountEntered,
   useMatchBTCNumberEntered,
   useMatchETHNumberEntered,
-useMatchConfirmcUSDGas,
+  useMatchConfirmcUSDGas,
   useMatchUSDTEntered,
   useMatchConfirmUSDTGas,
   useMatchConfirmUSDTPay,
@@ -17,6 +17,10 @@ useMatchConfirmcUSDGas,
   useSwapUsdtToEthConfirmed,
   useMatchcUSDAmountEntered,
   useMatchConfirmCelloUSDPay,
+  useBTCTopupMethodExternalWallet,
+  useBTCTopupMethodMomo,
+  useMatchCancelBTCTopupMomo,
+  useMatchAcceptBTCTopupMomo,
 } = require('../regex/ussdRegex')
 
 const switchKey = async (entryText) => {
@@ -29,10 +33,9 @@ const switchKey = async (entryText) => {
     entry = 'sendUsdt'
   }
 
-  if (await useMatchConfirmCelloUSDPay(entryText)){
-    entry = "sendcUSD"
+  if (await useMatchConfirmCelloUSDPay(entryText)) {
+    entry = 'sendcUSD'
   }
-
 
   if (await useMatchAcceptGasFees(entryText)) {
     entry = 'sendEth'
@@ -46,7 +49,7 @@ const switchKey = async (entryText) => {
     entry = 'confirmUSDTGas'
   }
 
-  if(await useMatchConfirmcUSDGas(entryText)) {
+  if (await useMatchConfirmcUSDGas(entryText)) {
     entry = 'confirmcUSDGas'
   }
 
@@ -62,13 +65,28 @@ const switchKey = async (entryText) => {
     entry = 'ethNumber'
   }
 
-  if(await useMatchcUSDAmountEntered(entryText)){
-  
+  if (await useMatchcUSDAmountEntered(entryText)) {
     entry = 'cUsdNumber'
   }
 
   if (await useMatchBTCNumberEntered(entryText)) {
     entry = 'confirmBtcGas'
+  }
+
+  if (await useBTCTopupMethodExternalWallet(entryText)) {
+    entry = 'confirmTopUpBTCExternalWallet'
+  }
+
+  if (await useBTCTopupMethodMomo(entryText)) {
+    entry = 'confirmTopUpBTCMomo'
+  }
+
+  if (await useMatchAcceptBTCTopupMomo(entryText)) {
+    entry = 'acceptTopUpBTCMomo'
+  }
+
+  if (await useMatchCancelBTCTopupMomo(entryText)) {
+    entry = 'cancelTopUpBTCMomo'
   }
 
   if (await useBTCTopAmountEntered(entryText)) {

@@ -207,22 +207,42 @@ const markets = async (req, res) => {
             response = `CON Enter the amount of BTC in ${user.country} to recieve. \n`
           },
           createTopUpInvoice: () => {
+            response += `CON How do you want to top-up? \n`
+            response += `1. External Wallet \n`
+            response += `2. Mobile Money \n`
+          },
+          confirmTopUpBTCExternalWallet: () => {
             createBTCInvoice(phoneNumber, text)
             response = `END Shuku ${user.name}, We've sent you a invoice to recieve your BTC\n`
           },
+          confirmTopUpBTCMomo: () => {
+            const regex = /1\*2\*1\*(\d+(\.\d+)?)\*2/ // defining the regex pattern
+            const match = regex.exec(text) // applying the regex on the string
+            const price = parseFloat(match[1]) // extracting the price and parsing it as a float
+            response += `CON Confirm Top-up ${price} sats on Momo\n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+          acceptTopUpBTCMomo: () => {
+            // Add top-up BTC momo transaction here...
+            response += `END Successfully initiated BTC Momo Top-up transaction. \n`
+          },
+          cancelTopUpBTCMomo: () => {
+            response += `END You can always top-up from your Momo. \n`
+          },
           '1*2*2': () => {
             response += `END Thank you for being an early testor. \n`
-            response += `*Your rewards are on the way*\n`
+            // response += `*Your rewards are on the way*\n`
             response += `You can also top-up with your address  \n`
           },
           '1*2*3': () => {
             response += `END Thank you for being an early testor. \n`
-            response += `*Your rewards are on the way*\n`
+            // response += `*Your rewards are on the way*\n`
             response += `You can also top-up with your address  \n`
           },
           '1*2*4': () => {
             response += `END Thank you for being an early testor. \n`
-            response += `*Your rewards are on the way*\n`
+            // response += `*Your rewards are on the way*\n`
             response += `You can also top-up with your address  \n`
           },
           '1*3': async () => {

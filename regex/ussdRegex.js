@@ -66,6 +66,16 @@ async function useMatchBtcAndNumberEntered(input) {
   return regex.test(input)
 }
 
+async function useMatchCancelBTCTopupMomo(input) {
+  const regex = /1\*2\*1\*(\d+(\.\d+)?)\*2\*2/ // defining the regex pattern
+  return regex.test(input)
+}
+
+async function useMatchAcceptBTCTopupMomo(input) {
+  const regex = /1\*2\*1\*(\d+(\.\d+)?)\*2\*1/ // defining the regex pattern
+  return regex.test(input)
+}
+
 async function useMatchETHNumberEntered(input) {
   // /^1\*1\*2\*[0-9]*\.[0-9]+\*[0-9]+$/is;
   let regex =
@@ -148,6 +158,19 @@ async function useBTCTopAmountEntered(input) {
   return regex.test(input)
 }
 
+async function useBTCTopupMethodExternalWallet(input) {
+  let regex =
+    /1\*2\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))?\*1/i
+  return regex.test(input)
+}
+
+async function useBTCTopupMethodMomo(input) {
+  let regex =
+    /1\*2\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))?\*2/i
+
+  return regex.test(input)
+}
+
 async function useSwapEthToUsdtAmountEntered(input) {
   let regex =
     /^1\*5\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?$/is
@@ -207,8 +230,10 @@ async function getUserPaymentAmountBefore(text) {
 }
 
 async function getTopupBTCAmount(text) {
-  let words = text.match(/[.\d]+/g)
-  let price = words[words.length - 1]
+  const regex = /1\*2\*1\*(\d+(\.\d+)?)\*1/ // defining the regex pattern
+  const match = regex.exec(text) // applying the regex on the string
+  const price = parseFloat(match[1]) // extracting the price and parsing it as a float
+  console.log(price)
   return price
 }
 // Initialized payment 8000 BTC
@@ -296,7 +321,11 @@ module.exports = {
   useSwapEthToUsdtAmountEntered,
   useSwapEthToUsdtConfirmed,
   useSwapUsdtToEthConfirmed,
-useMatchConfirmcUSDGas,
-useMatchcUSDAmountEntered,
- useMatchConfirmCelloUSDPay
+  useMatchConfirmcUSDGas,
+  useMatchcUSDAmountEntered,
+  useBTCTopupMethodExternalWallet,
+  useMatchConfirmCelloUSDPay,
+  useBTCTopupMethodMomo,
+  useMatchCancelBTCTopupMomo,
+  useMatchAcceptBTCTopupMomo,
 }
