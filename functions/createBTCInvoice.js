@@ -42,9 +42,11 @@ const createBTCInvoice = async (phoneNumber, text) => {
       // const qrUri = await QRCode.toDataURL(bipEncoded)
       // console.log(qrUri)
       // const qrCode = await generateQR(response.payment_request)
-      // console.log(response.payment_hash)
+      // console.log('DEBUG HERE: ', response)
       // const invoiceUrl = shortenUrl(`https://shukuru.vercel.app/qr/${response.payment_hash}`)
-      const invoiceUrl = await linkShortener(`https://shukuru.vercel.app/qr/${response.payment_hash}`)
+      const invoiceUrl = await linkShortener(
+        `https://shukuru.vercel.app/qr/${response.payment_hash}`
+      )
       sendSMS(
         `Shuku ${currentUser.name}, Your invoice is here: ${invoiceUrl}`,
         phoneNumber
@@ -68,23 +70,23 @@ const createBTCInvoice = async (phoneNumber, text) => {
 
 const shortenUrl = (urlToShorten) => {
   shortUrl.short(urlToShorten, (err, url) => {
-    console.log(url);
+    console.log(url)
     return url
   })
 }
 
 const linkShortener = (url) => {
-  const result = Shortener.Shorten(url, ).then((res) => {
-    if(typeof res === "undefined"){
-      console.log("Titlenot available");
-      return "0xErr"
-    }else {
+  const result = Shortener.Shorten(url).then((res) => {
+    if (typeof res === 'undefined') {
+      console.log('Titlenot available')
+      return '0xErr'
+    } else {
       return res
     }
   })
   return result
 }
-module.exports = { 
+module.exports = {
   createBTCInvoice,
 }
 
