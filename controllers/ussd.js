@@ -318,112 +318,144 @@ const markets = async (req, res) => {
             response += `2. Data Bundles \n`
           },
           '1*6*1': async () => {
-            response = `CON Enter amount \n`
+            // response = `CON Enter amount \n`
+            response = `CON Coming soon... \n`
           },
           '1*6*2': async () => {
             response = `CON Select your (Daily) bundles\n`
-            response += `1. 70MB \n`
-            response += `2. 170MB \n`
-            response += `3. 500MB \n`
-            response += `4. 2.6GB \n`
+            response += `1. 80MB \n`
+            response += `2. 180MB \n`
+            response += `3. 750MB \n`
+            response += `4. 2.2GB \n`
           },
 
-          // 70MB MENU
+          // 80MB MENU
           '1*6*2*1': async () => {
-            response = `CON Choose to buy 70MB with? \n`
+            response = `CON Choose to buy 80MB with? \n`
             response += `1. BTC \n`
             response += `2. USDT \n`
             response += `3. Celo Dolar (cUSD)\n`
           },
-          // User select buy 70MB with BTC Option ------> 1.
+          // User select buy 80MB with BTC Option ------> 1.
           '1*6*2*1*1': async () => {
-            response = `CON Initiate buy 70MB worth 5000 sats (1000 ${user.country}) \n`
+            response = `CON Initiate buy 80MB worth 5000 sats (1000 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
 
-          // Confirm buy 70MB BTC
+          // Confirm buy 80MB BTC
           '1*6*2*1*1*1': async () => {
-            buyData('BTC', '70MB', phoneNumber, user)
-            response = `END Initiated purchase of 70MB data with BTC\n`
+            const res = await buyData('BTC', '70MB', phoneNumber, user)
+            response = res
           },
 
-          // User select buy 70MB with USDT Option ------> 2.
+          // Confirm buy 80MB BTC
+          '1*6*2*1*1*2': () => {
+            response = `END No stress WGMI\n`
+          },
+
+          // User select buy 80MB with USDT Option ------> 2.
           '1*6*2*1*2': async () => {
-            response = `CON Initiate buy 70MB worth 0.25 USDT (1000 ${user.country}) \n`
+            response = `CON Initiate buy 80MB worth 0.25 USDT (1000 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
 
-          // Confirm buy 70MB USDT
+          // Confirm buy 80MB USDT
           '1*6*2*1*2*1': async () => {
-            buyData('USDT', '70MB', phoneNumber, user)
-            response = `END Initiated purchase of 70MB data with USDT\n`
+            const res = await buyData('USDT', '70MB', phoneNumber, user)
+            response = res
           },
 
-          // User select buy 70MB with Celo Dolar Option ------> 3.
+          // User select buy 80MB with Celo Dolar Option ------> 3.
           '1*6*2*1*3': async () => {
-            response = `CON Initiate buy 70MB worth 0.25 cUSD (1000 ${user.country}) \n`
+            response = `CON Initiate buy 80MB worth 0.25 cUSD (1000 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
 
-          // Confirm buy 70MB Celo Dolar
+          // Confirm buy 80MB Celo Dolar
           '1*6*2*1*3*1': async () => {
-            buyData('cUSD', '70MB', phoneNumber, user)
-            response = `END Initiated purchase of 70MB data with USDT\n`
+            const res = await buyData('cUSD', '70MB', phoneNumber, user)
+            response = res
           },
 
-          // 170 MB MENU
+          // 180 MB MENU
           '1*6*2*2': async () => {
-            response = `CON Choose to buy 170MB with? \n`
+            response = `CON Choose to buy 180MB with? \n`
             response += `1. BTC \n`
             response += `2. USDT \n`
             response += `3. Celo Dolar (cUSD)\n`
           },
-          // User select buy 170MB with BTC Option ------> 1.
+          // User select buy 180MB with BTC Option ------> 1.
           '1*6*2*2*1': async () => {
-            response = `CON Initiate buy 170MB worth 8000 sats (2000 ${user.country}) \n`
-            response += `1. Confirm \n`
-            response += `2. Cancel \n`
-          },
-          // User select buy 170MB with USDT Option ------> 2.
-          '1*6*2*2*2': async () => {
-            response = `CON Initiate buy 170MB worth 0.25 USDT (2000 ${user.country}) \n`
-            response += `1. Confirm \n`
-            response += `2. Cancel \n`
-          },
-          // User select buy 170MB with Celo Dolar Option ------> 3.
-          '1*6*2*2*3': async () => {
-            response = `CON Initiate buy 170MB worth 0.25 cUSD (2000 ${user.country}) \n`
+            response = `CON Initiate buy 180MB worth 8000 sats (2000 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
 
-          // 500 MENU
+          // Confirm buy 180MB BTC
+          '1*6*2*2*1*1': async () => {
+            const result = await buyData('BTC', '170MB', phoneNumber, user)
+            response = result
+          },
+
+          // User select buy 180MB with USDT Option ------> 2.
+          '1*6*2*2*2': async () => {
+            response = `CON Initiate buy 180MB worth 0.25 USDT (2000 ${user.country}) \n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+          // User select buy 180MB with Celo Dolar Option ------> 3.
+          '1*6*2*2*3': async () => {
+            response = `CON Initiate buy 180MB worth 0.25 cUSD (2000 ${user.country}) \n`
+            response += `1. Confirm \n`
+            response += `2. Cancel \n`
+          },
+
+          // Confirm buy 180MB Celo Dollar
+          '1*6*2*2*3*1': async () => {
+            const result = await buyData('cUSD', '170MB', phoneNumber, user)
+            response = result
+          },
+
+          // 750MB MENU
           '1*6*2*3': async () => {
-            response = `CON Choose to buy 500MB with? \n`
+            response = `CON Choose to buy 750MB with? \n`
             response += `1. BTC \n`
             response += `2. USDT \n`
             response += `3. Celo Dolar (cUSD)\n`
           },
-          // User select buy 500MB with BTC Option ------> 1.
+          // User select buy 750MB with BTC Option ------> 1.
           '1*6*2*3*1': async () => {
-            response = `CON Initiate buy 500MB worth 12000 sats (4000 ${user.country}) \n`
+            response = `CON Initiate buy 750MB worth 12000 sats (4000 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
-          // User select buy 500MB with USDT Option ------> 2.
+
+          // Confirm buy 750MB BTC
+          '1*6*2*3*1*1': async () => {
+            const result = await buyData('BTC', '500MB', phoneNumber, user)
+            response = result
+          },
+
+          // User select buy 750MB with USDT Option ------> 2.
           '1*6*2*3*2': async () => {
-            response = `CON Initiate buy 500MB worth 0.35 USDT (4000 ${user.country}) \n`
+            response = `CON Initiate buy 700MB worth 0.35 USDT (4000 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
-          // User select buy 500MB with Celo Dolar Option ------> 3.
+          // User select buy 750MB with Celo Dolar Option ------> 3.
           '1*6*2*3*3': async () => {
-            response = `CON Initiate buy 500MB worth 0.35 cUSD (4000 ${user.country}) \n`
+            response = `CON Initiate buy 700MB worth 0.35 cUSD (4000 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
+          },
+
+          // Confirm buy 750MB Celo Dollar
+          '1*6*2*3*3*1': async () => {
+            const result = await buyData('cUSD', '500MB', phoneNumber, user)
+            response = result
           },
 
           // 2.6 GB MENU
@@ -439,6 +471,13 @@ const markets = async (req, res) => {
             response += `1. Confirm \n`
             response += `2. Cancel \n`
           },
+
+          // Confirm buy 2.6 BTC
+          '1*6*2*4*1*1': async () => {
+            const result = await buyData('BTC', '2.6GB', phoneNumber, user)
+            response = result
+          },
+
           // User select buy 2.6GB with USDT Option ------> 2.
           '1*6*2*4*2': async () => {
             response = `CON Initiate buy 2.6GB worth 1.24 USDT (5000 ${user.country}) \n`
@@ -450,6 +489,12 @@ const markets = async (req, res) => {
             response = `CON Initiate buy 2.6GB worth 1.24 cUSD (5000 ${user.country}) \n`
             response += `1. Confirm \n`
             response += `2. Cancel \n`
+          },
+
+          // Confirm buy 2.6 Celo Dollar
+          '1*6*2*4*3*1': async () => {
+            const result = await buyData('cUSD', '2.6GB', phoneNumber, user)
+            response = result
           },
 
           // UTILITIES CONFIRMATIONS

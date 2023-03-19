@@ -24,6 +24,7 @@ const getLightningWalletBalance = async (userKey) => {
         },
       }
     )
+    console.log('LIGTNING BTC: ', response.balance)
     return response.data.balance
   } catch (error) {
     console.log(error.response)

@@ -12,7 +12,7 @@ async function sendWalletInfo(phoneNumber) {
         ` 
           Shuku ${currentUser.name},\r\n
           A/C: ${currentUser.address}\r\n
-          Chain: Arbitrum One\n
+        
         `,
         phoneNumber
       )

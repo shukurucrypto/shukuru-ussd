@@ -1,26 +1,36 @@
 const ethers = require('ethers')
+const Web3 = require('web3')
+const ContractKit = require('@celo/contractkit')
 const { createDbCollections } = require('../db/functions')
 const { getLightningBalance } = require('../functions/getLightningBalance')
 const { createLightingInvoice } = require('../lightning/createLightningInvoice')
 const { payLightingInvoice } = require('../lightning/payLightingInvoice')
 const LightningWallet = require('../models/LightningWallet')
+const AdminData = require('../models/Admin')
 const UtilityCosts = require('../models/UtilityCosts')
 const { decrypt } = require('../security/encrypt')
 const { currencyConvertor } = require('../utils/currencyConvertor')
 const { getCelloDollarBalance } = require('../utils/getCelloDollarBalance')
 const { getUsdtBalance } = require('../utils/getUsdtBalance')
+const { celoProviderUrl } = require('../settings/settings')
 require('dotenv').config()
+
+const web3 = new Web3(celoProviderUrl)
+const kit = ContractKit.newKitFromWeb3(web3)
 
 const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
   try {
+    let response
     switch (payType) {
       case 'BTC':
         // Step 0: Check the user BTC Balance...
         const balance = await checkBalance('BTC', phoneNumber)
+        console.log('BTC PAYMENT ACTIVE', phoneNumber)
 
         if (balance <= 0.0) {
           console.log('You do not have enough BTC to buy this bundle')
-          break
+          return (response = 'You do not have enough BTC to buy this bundle')
+          // break
         }
 
         // Get country data cost engine values here---
@@ -40,7 +50,8 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
           // send the user their data bundle here
         }
         console.log(`Buying ${dataAmount} with ${payType}`)
-        break
+        // break
+        return `Buying ${dataAmount} with ${payType}`
 
       case 'USDT':
         console.log('Purchase with USDT ----')
@@ -49,10 +60,11 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
         const usdtBalance = await checkBalance('USDT', phoneNumber)
         console.log('USDT BALANCE', usdtBalance)
 
-        // if (usdtBalance <= 0.0) {
-        //   console.log('You do not have enough USDT to buy this bundle')
-        //   break
-        // }
+        if (usdtBalance <= 0.0) {
+          // console.log('You do not have enough USDT to buy this bundle')
+          return (response = 'You do not have enough USDT to buy this bundle')
+          // break
+        }
 
         const { cost: usdtDataCost } = await getUtilityCosts(
           'Data',
@@ -70,19 +82,23 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
         )
         console.log('Converted USDT Cost: ', convertedToUsd)
 
-        console.log(`Buying ${dataAmount} with ${payType}`)
-        break
+        // console.log(`Buying ${dataAmount} with ${payType}`)
+        return (response = `Buying ${dataAmount} with ${payType}`)
+      // break
+
       case 'cUSD':
         console.log('Purchase with cUSD ----')
 
         // Step 0: Check the user USDT Balance...
-        const cusdBalance = await checkBalance('USDT', phoneNumber)
+        const cusdBalance = await checkBalance('CUSD', phoneNumber)
+        // const cusdBalance = await getCelloDollarBalance(phoneNumber)
         console.log('CUSD BALANCE', cusdBalance)
 
-        // if (cusdBalance <= 0.0) {
-        //   console.log('You do not have enough cUSD to buy this bundle')
-        //   break
-        // }
+        if (cusdBalance <= 0.0) {
+          // console.log('You do not have enough cUSD to buy this bundle')
+          return (response = 'You do not have enough cUSD to buy this bundle')
+          // break
+        }
 
         const { cost: cusdDataCost } = await getUtilityCosts(
           'Data',
@@ -101,7 +117,11 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
 
         console.log('Converted CUSD Cost: ', cusdConvertedToUsd)
         console.log(`Buying ${dataAmount} with ${payType}`)
-        break
+
+        const result = await payToAdmin('CUSD', currentUser, cusdConvertedToUsd)
+        console.log('TX Status: ', result)
+
+        return (response = `Initiated purchase of ${dataAmount}, wait for confirmation SMS`)
       default:
         return 0
     }
@@ -186,8 +206,33 @@ const payToAdmin = async (assetType, currentUser, amount) => {
         console.log('Pay with USDT')
         return 2
       case 'CUSD':
-        console.log('Pay with Celo')
-        return 3
+        let cUSDtoken = await kit.contracts.getStableToken()
+
+        const admin = await AdminData.findOne()
+        // Get the current user / payer passkey
+        const dbPrivateKey = currentUser.passKey
+
+        // Decrypt the passKey
+        const privateKey = await decrypt(dbPrivateKey)
+
+        const convertedEthAmount = ethers.utils.parseEther(amount)
+
+        // tx object
+        await kit.connection.addAccount(privateKey)
+
+        let txRecipt
+        // send
+        // const result = await signedWallet.sendTransaction(tx)
+        const result = await cUSDtoken
+          .transfer(admin.evmAddress, convertedEthAmount)
+          .send({ from: currentUser.address })
+
+        // txRecipt = await result.wait(1)
+        txRecipt = await result.waitReceipt()
+
+        console.log('Pay with Celo', txRecipt)
+
+        return txRecipt
       default:
         return 0
     }
@@ -205,7 +250,9 @@ const getUtilityCosts = async (type, userCountry, package, network) => {
       countryCurrency: userCountry,
       network: network,
     })
-    return result
+    const fee = Number(result.cost) * (1 / 100)
+    const cost = fee + result.cost
+    return { cost, ...result }
   } catch (error) {
     console.log(error)
     return error
