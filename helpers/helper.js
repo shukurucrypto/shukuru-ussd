@@ -21,6 +21,9 @@ const {
   useBTCTopupMethodMomo,
   useMatchCancelBTCTopupMomo,
   useMatchAcceptBTCTopupMomo,
+  useBTCTopupMethodExternalWalletSelect,
+  useBTCTopupMethodExternalLightning,
+  useBTCTopupMethodExternalOnChain,
 } = require('../regex/ussdRegex')
 
 const switchKey = async (entryText) => {
@@ -56,7 +59,7 @@ const switchKey = async (entryText) => {
   if (await useMatchBTCAmountEntered(entryText)) {
     entry = 'btcNumber'
   }
-
+  // confirmTopUpBTCExternalWallet
   if (await useMatchUSDTEntered(entryText)) {
     entry = 'usdtNumber'
   }
@@ -77,6 +80,13 @@ const switchKey = async (entryText) => {
     entry = 'confirmTopUpBTCExternalWallet'
   }
 
+  if (await useBTCTopupMethodExternalLightning(entryText)) {
+    entry = 'useBTCTopupMethodExternalLightning'
+  }
+
+  if (await useBTCTopupMethodExternalOnChain(entryText)) {
+    entry = 'useBTCTopupMethodExternalLightning'
+  }
   if (await useBTCTopupMethodMomo(entryText)) {
     entry = 'confirmTopUpBTCMomo'
   }

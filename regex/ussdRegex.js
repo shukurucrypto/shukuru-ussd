@@ -164,6 +164,19 @@ async function useBTCTopupMethodExternalWallet(input) {
   return regex.test(input)
 }
 
+async function useBTCTopupMethodExternalLightning(input) {
+  let regex =
+    /1\*2\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))?\*1\*1/i
+
+  return regex.test(input)
+}
+
+async function useBTCTopupMethodExternalOnChain(input) {
+  let regex =
+    /1\*2\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))?\*1\*2/i
+  return regex.test(input)
+}
+
 async function useBTCTopupMethodMomo(input) {
   let regex =
     /1\*2\*1\*([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))?\*2/i
@@ -328,4 +341,6 @@ module.exports = {
   useBTCTopupMethodMomo,
   useMatchCancelBTCTopupMomo,
   useMatchAcceptBTCTopupMomo,
+  useBTCTopupMethodExternalLightning,
+  useBTCTopupMethodExternalOnChain,
 }

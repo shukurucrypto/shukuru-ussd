@@ -13,8 +13,10 @@ const {
   createLightingInvoice,
 } = require('../lightning/createLightningInvoice.js')
 const { generateQR } = require('../lightning/generateQR.js')
+const { createLNURL } = require('../utils/createLNURL.js')
+const { createBTCToLN } = require('../utils/createBTCToLN.js')
 
-const createBTCInvoice = async (phoneNumber, text) => {
+const createOnchainTopupAddress = async (phoneNumber, text) => {
   try {
     // Get the entry type
 
@@ -22,35 +24,33 @@ const createBTCInvoice = async (phoneNumber, text) => {
 
     const currentUser = await User.findOne({ phoneNumber })
 
-    const { inKey } = await LightningWallet.findOne({
+    const { inKey, adminKey } = await LightningWallet.findOne({
       user: currentUser._id,
     })
 
     // decrypt the inKey
     const key = await decrypt(inKey)
+    const Adminkey = await decrypt(adminKey)
 
     const data = {
-      out: false,
       amount: amount,
-      memo: `Shuku ${currentUser.name}, Top up ${amount} ${currentUser.country} in my lightning wallet..`,
-      unit: currentUser.country,
+      description: `Shuku ${currentUser.name}, Top up ${amount} ${currentUser.country} in my lightning wallet..`,
+      currency: currentUser.country,
     }
 
-    const response = await createLightingInvoice(key, data)
+    const response = await createLNURL(Adminkey, data)
 
-    if (response.payment_hash) {
-      // Encode the payment hash
-      // const bipEncoded = await bip21.encode(response.payment_request)
-      // const qrUri = await QRCode.toDataURL(bipEncoded)
-      // console.log(qrUri)
-      // const qrCode = await generateQR(response.payment_request)
-      // console.log('DEBUG HERE: ', response)
-      // const invoiceUrl = shortenUrl(`https://shukuru.vercel.app/qr/${response.payment_hash}`)
+    if (response.lnurl) {
+      //   Now we can create an onchain wallet address to send the btc to....
+      const { address } = await createBTCToLN({
+        lnurl_or_lnaddress: response.lnurl,
+      })
+
       const invoiceUrl = await linkShortener(
-        `https://shukuru.vercel.app/qr/${response.payment_hash}`
+        `https://shukuru.vercel.app/qr/${address}`
       )
       sendSMS(
-        `Shuku ${currentUser.name}, Your invoice is here: ${invoiceUrl}`,
+        `Shuku ${currentUser.name}, Top-up BTC on your on-chain address here: ${address}. Or can the QR to get the address ${invoiceUrl}`,
         phoneNumber
       )
 
@@ -58,8 +58,8 @@ const createBTCInvoice = async (phoneNumber, text) => {
 
       const savedInvoice = new Invoices({
         user: currentUser._id,
-        paymentHash: response.payment_hash,
-        paymentRequest: response.payment_request,
+        paymentHash: response.lnurl,
+        paymentRequest: response.lnurl,
       })
 
       await savedInvoice.save()
@@ -89,7 +89,7 @@ const linkShortener = (url) => {
   return result
 }
 module.exports = {
-  createBTCInvoice,
+  createOnchainTopupAddress,
 }
 
 // https://shukuru.vercel.app/qr=13a2c6eb3157bdac43c6894d0b0924fd264a40770bcf8da82b7067069f927c34

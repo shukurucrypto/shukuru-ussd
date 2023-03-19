@@ -43,6 +43,9 @@ const { switchKey } = require('../helpers/helper.js')
 const { sendCelloUSD } = require('../utils/sendCelloUSD.js')
 const { sendSessionSocket } = require('../sockets/sockets.js')
 const { buyData } = require('../utilities/dataUtilities.js')
+const {
+  createOnchainTopupAddress,
+} = require('../functions/createOnchainTopupAddress.js')
 
 const fetchCoin = async (name) => {
   try {
@@ -212,8 +215,18 @@ const markets = async (req, res) => {
             response += `2. Mobile Money \n`
           },
           confirmTopUpBTCExternalWallet: () => {
+            response += `CON Where are you coming from? \n`
+            response += `1. Lightning wallet \n`
+            response += `2. On-chain wallet \n`
+          },
+          useBTCTopupMethodExternalLightning: () => {
             createBTCInvoice(phoneNumber, text)
             response = `END Shuku ${user.name}, We've sent you a invoice to recieve your BTC\n`
+          },
+          useBTCTopupMethodExternalLightning: () => {
+            // createBTCInvoice(phoneNumber, text)
+            createOnchainTopupAddress(phoneNumber, text)
+            response = `END Shuku ${user.name}, We've sent you your on-chain address to top-up.\n`
           },
           confirmTopUpBTCMomo: () => {
             const regex = /1\*2\*1\*(\d+(\.\d+)?)\*2/ // defining the regex pattern
