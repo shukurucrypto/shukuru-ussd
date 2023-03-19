@@ -345,8 +345,8 @@ const markets = async (req, res) => {
 
           // Confirm buy 80MB BTC
           '1*6*2*1*1*1': async () => {
-            const res = await buyData('BTC', '70MB', phoneNumber, user)
-            response = res
+            buyData('BTC', '70MB', phoneNumber, user)
+            response = `Initiated! Wait for a confirmation SMS`
           },
 
           // Confirm buy 80MB BTC
@@ -363,8 +363,8 @@ const markets = async (req, res) => {
 
           // Confirm buy 80MB USDT
           '1*6*2*1*2*1': async () => {
-            const res = await buyData('USDT', '70MB', phoneNumber, user)
-            response = res
+            buyData('USDT', '70MB', phoneNumber, user)
+            response = `Initiated! Wait for a confirmation SMS`
           },
 
           // User select buy 80MB with Celo Dolar Option ------> 3.
@@ -376,8 +376,8 @@ const markets = async (req, res) => {
 
           // Confirm buy 80MB Celo Dolar
           '1*6*2*1*3*1': async () => {
-            const res = await buyData('cUSD', '70MB', phoneNumber, user)
-            response = res
+            buyData('cUSD', '70MB', phoneNumber, user)
+            response = `Initiated! Wait for a confirmation SMS`
           },
 
           // 180 MB MENU
@@ -396,8 +396,8 @@ const markets = async (req, res) => {
 
           // Confirm buy 180MB BTC
           '1*6*2*2*1*1': async () => {
-            const result = await buyData('BTC', '170MB', phoneNumber, user)
-            response = result
+            buyData('BTC', '170MB', phoneNumber, user)
+            response = `Initiated! Wait for a confirmation SMS`
           },
 
           // User select buy 180MB with USDT Option ------> 2.
@@ -415,8 +415,8 @@ const markets = async (req, res) => {
 
           // Confirm buy 180MB Celo Dollar
           '1*6*2*2*3*1': async () => {
-            const result = await buyData('cUSD', '170MB', phoneNumber, user)
-            response = result
+            buyData('cUSD', '170MB', phoneNumber, user)
+            response = `Initiated! Wait for a confirmation SMS`
           },
 
           // 750MB MENU
@@ -435,8 +435,8 @@ const markets = async (req, res) => {
 
           // Confirm buy 750MB BTC
           '1*6*2*3*1*1': async () => {
-            const result = await buyData('BTC', '500MB', phoneNumber, user)
-            response = result
+            buyData('BTC', '500MB', phoneNumber, user)
+            response = `Initiated! Wait for a confirmation SMS`
           },
 
           // User select buy 750MB with USDT Option ------> 2.
@@ -454,8 +454,8 @@ const markets = async (req, res) => {
 
           // Confirm buy 750MB Celo Dollar
           '1*6*2*3*3*1': async () => {
-            const result = await buyData('cUSD', '500MB', phoneNumber, user)
-            response = result
+            buyData('cUSD', '500MB', phoneNumber, user)
+            response = `Initiated! Wait for a confirmation SMS`
           },
 
           // 2.6 GB MENU
@@ -474,8 +474,8 @@ const markets = async (req, res) => {
 
           // Confirm buy 2.6 BTC
           '1*6*2*4*1*1': async () => {
-            const result = await buyData('BTC', '2.6GB', phoneNumber, user)
-            response = result
+            buyData('BTC', '2.6GB', phoneNumber, user)
+            response = `Initiated! Wait for a confirmation SMS`
           },
 
           // User select buy 2.6GB with USDT Option ------> 2.
@@ -493,8 +493,8 @@ const markets = async (req, res) => {
 
           // Confirm buy 2.6 Celo Dollar
           '1*6*2*4*3*1': async () => {
-            const result = await buyData('cUSD', '2.6GB', phoneNumber, user)
-            response = result
+            buyData('cUSD', '2.6GB', phoneNumber, user)
+            response = `Initiated! Wait for a confirmation SMS`
           },
 
           // UTILITIES CONFIRMATIONS

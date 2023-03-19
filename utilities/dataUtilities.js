@@ -27,8 +27,11 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
         const balance = await checkBalance('BTC', phoneNumber)
 
         if (balance <= 0.0) {
-          console.log('You do not have enough BTC to buy this bundle')
-          return (response = 'You do not have enough BTC to buy this bundle')
+          sendSMS(
+            `You dont have enough BTC balance to buy this bundle`,
+            phoneNumber
+          )
+          return
           // break
         }
 
@@ -50,8 +53,12 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
         }
         console.log(`Buying ${dataAmount} with ${payType}`)
         // break
-        return `Buying ${dataAmount} with ${payType}`
 
+        sendSMS(
+          `Shuku ${currentUser.name}, You have successfully bought ${dataAmount} using ${payType}`,
+          phoneNumber
+        )
+        return
       case 'USDT':
         console.log('Purchase with USDT ----')
         createDbCollections()
@@ -60,8 +67,12 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
         console.log('USDT BALANCE', usdtBalance)
 
         if (usdtBalance <= 0.0) {
+          sendSMS(
+            `You dont have enough USDT balance to buy this bundle`,
+            phoneNumber
+          )
           // console.log('You do not have enough USDT to buy this bundle')
-          return (response = 'You do not have enough USDT to buy this bundle')
+          return
           // break
         }
 
@@ -82,11 +93,18 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
         console.log('Converted USDT Cost: ', convertedToUsd)
 
         // console.log(`Buying ${dataAmount} with ${payType}`)
-        return (response = `Buying ${dataAmount} with ${payType}`)
-      // break
+        sendSMS(
+          `Shuku ${currentUser.name}, You have successfully bought ${dataAmount} using ${payType}`,
+          phoneNumber
+        )
+        return
 
       case 'cUSD':
         console.log('Purchase with cUSD ----')
+        sendSMS(
+          `Shuku ${currentUser.name}, You have successfully bought ${dataAmount} using ${payType}`,
+          phoneNumber
+        )
 
         // Step 0: Check the user USDT Balance...
         const cusdBalance = await checkBalance('CUSD', phoneNumber)
@@ -94,9 +112,12 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
         console.log('CUSD BALANCE', cusdBalance)
 
         if (cusdBalance <= 0.0) {
+          sendSMS(
+            `You dont have enough Celo Dollar balance to buy this bundle`,
+            phoneNumber
+          )
           // console.log('You do not have enough cUSD to buy this bundle')
-          return (response = 'You do not have enough cUSD to buy this bundle')
-          // break
+          return
         }
 
         const { cost: cusdDataCost } = await getUtilityCosts(
@@ -120,7 +141,11 @@ const buyData = async (payType, dataAmount, phoneNumber, currentUser) => {
         const result = await payToAdmin('CUSD', currentUser, cusdConvertedToUsd)
         console.log('TX Status: ', result)
 
-        return (response = `Initiated purchase of ${dataAmount}, wait for confirmation SMS`)
+        sendSMS(
+          `Shuku ${currentUser.name}, You have successfully bought ${dataAmount} using ${payType}`,
+          phoneNumber
+        )
+        return
       default:
         return 0
     }
