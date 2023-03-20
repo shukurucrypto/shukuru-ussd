@@ -85,7 +85,7 @@ const switchKey = async (entryText) => {
   }
 
   if (await useBTCTopupMethodExternalOnChain(entryText)) {
-    entry = 'useBTCTopupMethodExternalLightning'
+    entry = 'useBTCTopupMethodExternalOnChain'
   }
   if (await useBTCTopupMethodMomo(entryText)) {
     entry = 'confirmTopUpBTCMomo'

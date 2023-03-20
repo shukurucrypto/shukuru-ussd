@@ -14,6 +14,12 @@ const AccountSecretsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  btcAddress: {
+    type: String,
+  },
+  deezyAccessKey: {
+    type: String,
+  },
 })
 
 const AccountSecrets = mongoose.model('AccountSecrets', AccountSecretsSchema)

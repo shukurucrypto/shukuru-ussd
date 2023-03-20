@@ -15,6 +15,7 @@ const {
 const { generateQR } = require('../lightning/generateQR.js')
 const { createLNURL } = require('../utils/createLNURL.js')
 const { createBTCToLN } = require('../utils/createBTCToLN.js')
+const AccountSecrets = require('../models/AccountSecrets.js')
 
 const createOnchainTopupAddress = async (phoneNumber, text) => {
   try {
@@ -28,23 +29,40 @@ const createOnchainTopupAddress = async (phoneNumber, text) => {
       user: currentUser._id,
     })
 
+    const accountSecrets = await AccountSecrets.findOne({
+      user: currentUser._id,
+    })
+
     // decrypt the inKey
     const key = await decrypt(inKey)
     const Adminkey = await decrypt(adminKey)
 
-    const data = {
-      amount: amount,
-      description: `Shuku ${currentUser.name}, Top up ${amount} ${currentUser.country} in my lightning wallet..`,
-      currency: currentUser.country,
+    let data
+
+    if (accountSecrets.deezyAccessKey) {
+      data = {
+        amount: amount,
+        description: `Shuku ${currentUser.name}, Top up ${amount} ${currentUser.country} in my lightning wallet..`,
+        currency: currentUser.country,
+        secret_access_key: accountSecrets.deezyAccessKey,
+      }
+    } else {
+      data = {
+        amount: amount,
+        description: `Shuku ${currentUser.name}, Top up ${amount} ${currentUser.country} in my lightning wallet..`,
+        currency: currentUser.country,
+      }
     }
 
     const response = await createLNURL(Adminkey, data)
 
     if (response.lnurl) {
       //   Now we can create an onchain wallet address to send the btc to....
-      const { address } = await createBTCToLN({
+      const { address, secret_access_key, signature } = await createBTCToLN({
         lnurl_or_lnaddress: response.lnurl,
       })
+
+      // console.log(address, secret_access_key, signature)
 
       const invoiceUrl = await linkShortener(
         `https://shukuru.vercel.app/qr/${address}`
@@ -63,6 +81,13 @@ const createOnchainTopupAddress = async (phoneNumber, text) => {
       })
 
       await savedInvoice.save()
+
+      if (!accountSecrets.deezyAccessKey) {
+        await accountSecrets.update({
+          deezyAccessKey: secret_access_key,
+          btcAddress: address,
+        })
+      }
     }
   } catch (err) {
     console.log(err.message)

@@ -223,7 +223,7 @@ const markets = async (req, res) => {
             createBTCInvoice(phoneNumber, text)
             response = `END Shuku ${user.name}, We've sent you a invoice to recieve your BTC\n`
           },
-          useBTCTopupMethodExternalLightning: () => {
+          useBTCTopupMethodExternalOnChain: () => {
             // createBTCInvoice(phoneNumber, text)
             createOnchainTopupAddress(phoneNumber, text)
             response = `END Shuku ${user.name}, We've sent you your on-chain address to top-up.\n`
