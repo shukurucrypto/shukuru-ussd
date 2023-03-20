@@ -77,7 +77,7 @@ const createOnchainTopupAddress = async (phoneNumber, text) => {
       const savedInvoice = new Invoices({
         user: currentUser._id,
         paymentHash: response.lnurl,
-        paymentRequest: response.lnurl,
+        paymentRequest: address,
       })
 
       await savedInvoice.save()
