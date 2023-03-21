@@ -36,7 +36,7 @@ async function walletBalance(phoneNumber) {
 
       // const btcBalance = await getBTCBalance(currentUser.btcAddress)
       let usdtBalance = await getUsdtBalance(phoneNumber)
-      let lightningBalance = await getLightningBalance(phoneNumber)
+      let btcLightningBalance = await getLightningBalance(phoneNumber)
       let celloDollarBalance = await getCelloDollarBalance(phoneNumber)
 
       const userBalance = ethers.utils.formatEther(balance)
@@ -45,6 +45,14 @@ async function walletBalance(phoneNumber) {
 
       const convertedCello = await currencyConvertor(
         celloDollarBalance_,
+        'USD',
+        currentUser.country
+      )
+
+      // console.log('TEST DEBUG HERE: ', btcLightningBalance)
+
+      const lightningBalance = await currencyConvertor(
+        btcLightningBalance,
         'USD',
         currentUser.country
       )
