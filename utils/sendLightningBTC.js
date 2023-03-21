@@ -17,6 +17,11 @@ const AccountSecrets = require('../models/AccountSecrets.js')
 const { sendBitcoinTx } = require('../functions/sendBitcoinTx.js')
 const LightningWallet = require('../models/LightningWallet.js')
 const { payLightingInvoice } = require('../lightning/payLightingInvoice.js')
+const { getLightningWalletBalance } = require('../lightning/walletBalance.js')
+const {
+  createBTCPlatformTxFeeInvoice,
+  lightningTxCosts,
+} = require('../platformPayout/platformPayout.js')
 require('dotenv').config()
 
 const sendLightningBtc = async (userText, phoneNumber) => {
@@ -64,6 +69,21 @@ const sendLightningBtc = async (userText, phoneNumber) => {
     // decrypt the inKey
     const keyReciever = await decrypt(recieverKey)
 
+    const currentUserBalance = await getLightningWalletBalance(keyPayer)
+
+    const totalSpend = Number(amount) + Number(lightningTxCosts)
+
+    console.log(Number(currentUserBalance) <= Number(totalSpend))
+
+    if (Number(currentUserBalance) <= Number(totalSpend)) {
+      console.log('Not enough funds')
+      sendSMS(
+        `You do not have enough sats to pay out.`,
+        currentUser.phoneNumber
+      )
+      return
+    }
+
     // Create the invoice from the reciever
     const data = {
       out: false,
@@ -94,6 +114,18 @@ const sendLightningBtc = async (userText, phoneNumber) => {
           `Recieved! You have recived ${amount} BTC from ${currentUser.phoneNumber}.`,
           reciever.phoneNumber
         )
+        const platformTxInvoice = await createBTCPlatformTxFeeInvoice(
+          currentUser
+        )
+
+        // console.log(platformFeeTxData.payment_request)
+
+        const platformFeeTxData = {
+          out: true,
+          bolt11: platformTxInvoice.payment_request,
+        }
+
+        await payLightingInvoice(keyPayer, platformFeeTxData)
       }
     } else {
       await sendSMS(
