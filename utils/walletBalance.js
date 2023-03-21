@@ -49,16 +49,18 @@ async function walletBalance(phoneNumber) {
         currentUser.country
       )
 
-      // console.log('TEST DEBUG HERE: ', btcLightningBalance)
-
       const lightningBalance = await currencyConvertor(
         btcLightningBalance,
         'USD',
         currentUser.country
       )
 
+      // console.log('TEST DEBUG HERE: ', lightningBalance)
+
       response = `END Shuku ${currentUser.name}, your wallet has:\n`
-      response += ` ${Number(lightningBalance).toFixed(3)} BTC \n`
+      response += ` ${Math.round(lightningBalance)} BTC (${
+        currentUser.country
+      })\n`
       response += ` ${Number(userBalance).toFixed(3)} ETH \n`
       response += ` ${Number(usdtBalance).toFixed(3)} Tether (${
         currentUser.country
