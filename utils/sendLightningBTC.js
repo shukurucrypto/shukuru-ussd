@@ -20,7 +20,7 @@ const { payLightingInvoice } = require('../lightning/payLightingInvoice.js')
 const { getLightningWalletBalance } = require('../lightning/walletBalance.js')
 const {
   createBTCPlatformTxFeeInvoice,
-  lightningTxCosts,
+  platformPayoutFeeAmount,
 } = require('../platformPayout/platformPayout.js')
 require('dotenv').config()
 
@@ -71,6 +71,8 @@ const sendLightningBtc = async (userText, phoneNumber) => {
 
     const currentUserBalance = await getLightningWalletBalance(keyPayer)
 
+    const lightningTxCosts = platformPayoutFeeAmount(amount)
+
     const totalSpend = Number(amount) + Number(lightningTxCosts)
 
     console.log(Number(currentUserBalance) <= Number(totalSpend))
@@ -115,7 +117,8 @@ const sendLightningBtc = async (userText, phoneNumber) => {
           reciever.phoneNumber
         )
         const platformTxInvoice = await createBTCPlatformTxFeeInvoice(
-          currentUser
+          currentUser,
+          amount
         )
 
         // console.log(platformFeeTxData.payment_request)

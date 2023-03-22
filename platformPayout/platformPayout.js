@@ -3,15 +3,20 @@ require('dotenv').config
 
 const ADMIN_INKEY = process.env.ADMIN_INKEY
 
-const lightningTxCosts = 1
+const lightningTxCostsPercentage = 1
 
-const platformPayout = async () => {}
+const platformPayoutFeeAmount = (amount) => {
+  const fee = Number(amount) * (lightningTxCostsPercentage / 100)
+  return fee
+}
 
-const createBTCPlatformTxFeeInvoice = async (currentUser) => {
+const createBTCPlatformTxFeeInvoice = async (currentUser, amount) => {
   // Create the invoice from the reciever
+  const fee = Number(amount) * (lightningTxCostsPercentage / 100)
+
   const data = {
     out: false,
-    amount: lightningTxCosts,
+    amount: fee,
     memo: `${currentUser.name} pays network fee`,
     unit: 'sat',
   }
@@ -23,5 +28,5 @@ const createBTCPlatformTxFeeInvoice = async (currentUser) => {
 
 module.exports = {
   createBTCPlatformTxFeeInvoice,
-  lightningTxCosts,
+  platformPayoutFeeAmount,
 }
