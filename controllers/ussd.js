@@ -200,7 +200,7 @@ const markets = async (req, res) => {
           '1*2': () => {
             // ============================= OPTION 1/2 BUY =============================
             response += `CON What do you want to top-up? \n`
-            response += `1. BTC (Lightning) \n`
+            response += `1. BTC \n`
             response += `2. ETH \n`
             response += `3. cUSD (Celo Dollar) \n`
             response += `4. USDT (Tether)`
@@ -238,7 +238,8 @@ const markets = async (req, res) => {
           },
           acceptTopUpBTCMomo: () => {
             // Add top-up BTC momo transaction here...
-            response += `END Successfully initiated BTC Momo Top-up transaction. \n`
+            // response += `END Successfully initiated BTC Momo Top-up transaction. \n`
+            response += `END Momo top-up coming soon. \n`
           },
           cancelTopUpBTCMomo: () => {
             response += `END You can always top-up from your Momo. \n`

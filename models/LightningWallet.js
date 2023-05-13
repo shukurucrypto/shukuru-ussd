@@ -21,6 +21,9 @@ const LightningWalletSchema = new mongoose.Schema({
     required: true,
     unique: false,
   },
+  walletId: {
+    type: String,
+  },
 })
 
 const LightningWallet = mongoose.model('LightningWallet', LightningWalletSchema)

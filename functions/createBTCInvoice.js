@@ -54,6 +54,7 @@ const createBTCInvoice = async (phoneNumber, text) => {
         phoneNumber
       )
 
+      console.log('Invoice sent: ', invoiceUrl)
       // console.log(`https://shukuru.vercel.app/ussd/qr=${response.payment_hash}`)
 
       const savedInvoice = new Invoices({

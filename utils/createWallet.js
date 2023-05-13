@@ -79,8 +79,6 @@ async function createWalletSigner(userText, phoneNumber) {
 
       const res = await user.save()
 
-      // console.log(lightningWallet)
-
       // Encrypt lightning admin and in Key
       const encryptedLightningAdminKey = await encrypt(
         lightningWallet.wallets[0].adminkey
@@ -95,6 +93,7 @@ async function createWalletSigner(userText, phoneNumber) {
         i_id: lightningWallet.id,
         adminKey: encryptedLightningAdminKey,
         inKey: encryptedLightningInKey,
+        walletId: lightningWallet.wallets[0].id,
       })
 
       // Save to user screts Schema

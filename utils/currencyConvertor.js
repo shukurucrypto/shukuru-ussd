@@ -19,7 +19,8 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
 
     return convertedAmount.toString()
   } catch (error) {
-    console.log(error.response)
+    // console.log(error.response)
+    return error.response
   }
 }
 

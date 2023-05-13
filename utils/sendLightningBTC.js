@@ -75,8 +75,6 @@ const sendLightningBtc = async (userText, phoneNumber) => {
 
     const totalSpend = Number(amount) + Number(lightningTxCosts)
 
-    console.log(Number(currentUserBalance) <= Number(totalSpend))
-
     if (Number(currentUserBalance) <= Number(totalSpend)) {
       console.log('Not enough funds')
       sendSMS(

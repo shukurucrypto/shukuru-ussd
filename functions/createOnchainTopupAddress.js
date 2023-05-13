@@ -60,6 +60,7 @@ const createOnchainTopupAddress = async (phoneNumber, text) => {
       //   Now we can create an onchain wallet address to send the btc to....
       const { address, secret_access_key, signature } = await createBTCToLN({
         lnurl_or_lnaddress: response.lnurl,
+        // webhook_url: ""
       })
 
       // console.log(address, secret_access_key, signature)
@@ -73,6 +74,9 @@ const createOnchainTopupAddress = async (phoneNumber, text) => {
       )
 
       // console.log(`https://shukuru.vercel.app/ussd/qr=${response.payment_hash}`)
+
+      // console.log('Address: ', address)
+      console.log('Invoice Url: ', invoiceUrl)
 
       const savedInvoice = new Invoices({
         user: currentUser._id,

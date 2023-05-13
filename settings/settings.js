@@ -13,11 +13,14 @@ const {
   CELO_TESTNET,
   CELO_MAINNET,
   ADMIN_KEY,
+  BSC_TESTNET_RPC_URL,
   ADMIN_INKEY,
+  BUSD_TESTNET_CONTRACT_ADDRESS,
 } = process.env
 
 // const providerRPCURL = ARBITRUM_GOERLI
 const providerRPCURL = POLYGON_MUMBAI
+const bscProviderURL = BSC_TESTNET_RPC_URL
 
 const networkServer = 1
 const ENVIRONMENT = 'testnet'
@@ -28,6 +31,7 @@ const network = {
 
 // const celoProviderUrl = ENVIRONMENT === 'testnet' ? CELO_TESTNET : CELO_MAINNET
 const celoProviderUrl = CELO_TESTNET
+const busdAddress = BUSD_TESTNET_CONTRACT_ADDRESS
 
 module.exports = {
   providerRPCURL,
@@ -35,4 +39,6 @@ module.exports = {
   celoProviderUrl,
   network,
   ENVIRONMENT,
+  bscProviderURL,
+  busdAddress,
 }

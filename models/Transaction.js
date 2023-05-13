@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
 // console.log(`Gas Used: ${gasPrice}`);
 // console.log(`Tx hash: ${txRecipt.transactionHash}`);
@@ -13,10 +13,24 @@ const TransactionSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  asset: {
+    type: String,
+    required: true,
+  },
   amount: {
     type: Number,
     required: true,
     default: 0,
+  },
+  currency: {
+    type: String,
+    default: 'USD',
+  },
+  txType: {
+    type: String,
+  },
+  phoneNumber: {
+    type: String,
   },
   coin: {
     type: String,
@@ -24,22 +38,22 @@ const TransactionSchema = new mongoose.Schema({
   },
   gasUsed: {
     type: String,
-    required: true,
+    // required: true,
   },
   txHash: {
     type: String,
-    required: true,
+    // required: true,
   },
   blockNumber: {
     type: Number,
-    required: true,
+    // required: true,
     default: 0,
   },
   date: {
     type: Date,
     default: Date.now,
   },
-});
+})
 
-const Transaction = mongoose.model("Transaction", TransactionSchema);
-module.exports = Transaction;
+const Transaction = mongoose.model('Transaction', TransactionSchema)
+module.exports = Transaction

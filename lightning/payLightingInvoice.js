@@ -13,7 +13,8 @@ const payLightingInvoice = async (userKey, data) => {
     })
     return response.data
   } catch (error) {
-    console.log(error.response)
+    // console.log(error.response)
+    return error.response
   }
 }
 
