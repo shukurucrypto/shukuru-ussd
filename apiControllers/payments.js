@@ -376,17 +376,17 @@ const nfcPayAPI = async (req, res) => {
     // decrypt the inKey
     const keyPayer = await decrypt(payerKey)
 
-    // const currentUserBalance = await getLightningWalletBalance(keyPayer)
+    const currentUserBalance = await getLightningWalletBalance(keyPayer)
 
-    // const lightningTxCosts = platformPayoutFeeAmount(amount)
+    const lightningTxCosts = platformPayoutFeeAmount(amount)
 
-    // const totalSpend = Number(amount) + Number(lightningTxCosts)
+    const totalSpend = Number(amount) + Number(lightningTxCosts)
 
-    // if (Number(currentUserBalance) <= Number(totalSpend)) {
-    //   return res
-    //     .status(403)
-    //     .json({ response: 'You do not have enough sats to pay out.' })
-    // }
+    if (Number(currentUserBalance) <= Number(totalSpend)) {
+      return res
+        .status(403)
+        .json({ response: 'You do not have enough sats to pay out.' })
+    }
 
     if (invoice) {
       // console.log('Invoice valid!')
@@ -411,13 +411,13 @@ const nfcPayAPI = async (req, res) => {
         })
 
         const reciever = await User.findById(activeInvoice.user)
-        // const platformFeeTxData = {
-        //   out: true,
-        //   bolt11: platformTxInvoice.payment_request,
-        // }
+        const platformFeeTxData = {
+          out: true,
+          bolt11: platformTxInvoice.payment_request,
+        }
 
         // Sender pay platform fees here
-        // await payLightingInvoice(keyPayer, platformFeeTxData)
+        await payLightingInvoice(keyPayer, platformFeeTxData)
 
         // Create TX Objects here...
         const senderTx = await new Transaction({
@@ -888,13 +888,13 @@ const sendLightningApiPayment = async (req, res) => {
       const result = await payLightingInvoice(keyPayer, payData)
 
       if (result?.payment_hash) {
-        // const platformFeeTxData = {
-        //   out: true,
-        //   bolt11: platformTxInvoice.payment_request,
-        // }
+        const platformFeeTxData = {
+          out: true,
+          bolt11: platformTxInvoice.payment_request,
+        }
 
-        // // Sender pay platform fees here
-        // await payLightingInvoice(keyPayer, platformFeeTxData)
+        // Sender pay platform fees here
+        await payLightingInvoice(keyPayer, platformFeeTxData)
 
         // Create TX Objects here...
         const senderTx = await new Transaction({
