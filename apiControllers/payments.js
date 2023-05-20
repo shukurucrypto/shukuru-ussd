@@ -477,7 +477,7 @@ const nfcPayAPI = async (req, res) => {
 
 const payBTCInvoiceAPI = async (req, res) => {
   try {
-    const { from, invoice } = req.body
+    const { from, invoice, amount } = req.body
 
     const sender = await User.findById(from)
 
