@@ -492,18 +492,6 @@ const payBTCInvoiceAPI = async (req, res) => {
     // decrypt the inKey
     const keyPayer = await decrypt(payerKey)
 
-    const currentUserBalance = await getLightningWalletBalance(keyPayer)
-
-    const lightningTxCosts = platformPayoutFeeAmount(amount)
-
-    const totalSpend = Number(amount) + Number(lightningTxCosts)
-
-    if (Number(currentUserBalance) <= Number(totalSpend)) {
-      return res
-        .status(403)
-        .json({ response: 'You do not have enough sats to pay out.' })
-    }
-
     if (invoice) {
       // console.log('Invoice valid!')
 
