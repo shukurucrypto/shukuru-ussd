@@ -336,7 +336,7 @@ const nfcPayBUSDAPI = async (req, res) => {
 
 const nfcPayAPI = async (req, res) => {
   try {
-    const { tagNo, invoice } = req.body
+    const { tagNo, invoice, amount } = req.body
 
     const currencyUser = req.user
 
@@ -376,18 +376,6 @@ const nfcPayAPI = async (req, res) => {
     // decrypt the inKey
     const keyPayer = await decrypt(payerKey)
 
-    const currentUserBalance = await getLightningWalletBalance(keyPayer)
-
-    const lightningTxCosts = platformPayoutFeeAmount(amount)
-
-    const totalSpend = Number(amount) + Number(lightningTxCosts)
-
-    if (Number(currentUserBalance) <= Number(totalSpend)) {
-      return res
-        .status(403)
-        .json({ response: 'You do not have enough sats to pay out.' })
-    }
-
     if (invoice) {
       // console.log('Invoice valid!')
 
@@ -405,10 +393,28 @@ const nfcPayAPI = async (req, res) => {
           .json({ success: false, response: 'Forbidden transaction' })
       }
 
+      const currentUserBalance = await getLightningWalletBalance(keyPayer)
+
+      const lightningTxCosts = platformPayoutFeeAmount(amount)
+
+      const totalSpend = Number(amount) + Number(lightningTxCosts)
+
+      if (Number(currentUserBalance) <= Number(totalSpend)) {
+        return res.status(403).json({
+          success: false,
+          response: 'You do not have enough sats to pay out.',
+        })
+      }
+
       if (result?.payment_hash) {
         const activeInvoice = await ActiveInvoice.findOne({
           hash: result.payment_hash,
         })
+
+        const platformTxInvoice = await createBTCPlatformTxFeeInvoice(
+          sender,
+          amount
+        )
 
         const reciever = await User.findById(activeInvoice.user)
         const platformFeeTxData = {
