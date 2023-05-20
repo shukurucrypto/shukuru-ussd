@@ -853,7 +853,7 @@ const sendLightningApiPayment = async (req, res) => {
 
     const totalSpend = Number(amount) + Number(lightningTxCosts)
 
-    if (Number(currentUserBalance) <= Number(totalSpend)) {
+    if (Number(currentUserBalance) < Number(totalSpend)) {
       return res.status(403).json({
         success: false,
         response: 'You do not have enough sats to pay out.',
