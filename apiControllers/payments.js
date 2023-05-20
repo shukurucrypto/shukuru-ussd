@@ -847,18 +847,18 @@ const sendLightningApiPayment = async (req, res) => {
     // decrypt the inKey
     const keyReciever = await decrypt(recieverKey)
 
-    const currentUserBalance = await getLightningWalletBalance(keyPayer)
+    // const currentUserBalance = await getLightningWalletBalance(keyPayer)
 
-    const lightningTxCosts = platformPayoutFeeAmount(amount)
+    // const lightningTxCosts = platformPayoutFeeAmount(amount)
 
-    const totalSpend = Number(amount) + Number(lightningTxCosts)
+    // const totalSpend = Number(amount) + Number(lightningTxCosts)
 
-    if (Number(currentUserBalance) < Number(totalSpend)) {
-      return res.status(403).json({
-        success: false,
-        response: 'You do not have enough sats to pay out.',
-      })
-    }
+    // if (Number(currentUserBalance) < Number(totalSpend)) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     response: 'You do not have enough sats to pay out.',
+    //   })
+    // }
 
     // Create the invoice from the reciever
     const data = {
@@ -870,11 +870,11 @@ const sendLightningApiPayment = async (req, res) => {
 
     const invoiceResponse = await createLightingInvoice(keyReciever, data)
 
-    if (invoiceResponse.status === 403) {
-      return res
-        .status(403)
-        .json({ success: false, response: 'Forbidden transaction' })
-    }
+    // if (invoiceResponse.status === 403) {
+    //   return res
+    //     .status(403)
+    //     .json({ success: false, response: 'Forbidden transaction' })
+    // }
 
     if (invoiceResponse.payment_hash) {
       console.log('Invoice created!')
