@@ -393,18 +393,18 @@ const nfcPayAPI = async (req, res) => {
           .json({ success: false, response: 'Forbidden transaction' })
       }
 
-      const currentUserBalance = await getLightningWalletBalance(keyPayer)
+      // const currentUserBalance = await getLightningWalletBalance(keyPayer)
 
-      const lightningTxCosts = platformPayoutFeeAmount(amount)
+      // const lightningTxCosts = platformPayoutFeeAmount(amount)
 
-      const totalSpend = Number(amount) + Number(lightningTxCosts)
+      // const totalSpend = Number(amount) + Number(lightningTxCosts)
 
-      if (Number(currentUserBalance) <= Number(totalSpend)) {
-        return res.status(403).json({
-          success: false,
-          response: 'You do not have enough sats to pay out.',
-        })
-      }
+      // if (Number(currentUserBalance) <= Number(totalSpend)) {
+      //   return res.status(403).json({
+      //     success: false,
+      //     response: 'You do not have enough sats to pay out.',
+      //   })
+      // }
 
       if (result?.payment_hash) {
         const activeInvoice = await ActiveInvoice.findOne({
@@ -526,7 +526,7 @@ const payBTCInvoiceAPI = async (req, res) => {
           bolt11: platformTxInvoice.payment_request,
         }
 
-        // Sender pay platform fees here
+        // Sender pays platform fees here
         await payLightingInvoice(keyPayer, platformFeeTxData)
 
         // Create TX Objects here...
