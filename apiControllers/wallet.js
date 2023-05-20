@@ -14,6 +14,7 @@ const {
   getSatsLightningBalance,
 } = require('../functions/getLightningBalance')
 
+const Redis = require('redis')
 const BUSDABI = require('../abiData/erc20.json')
 const { getCelloDollarBalance } = require('../utils/getCelloDollarBalance')
 const UserTransactions = require('../models/UserTransactions')
@@ -21,6 +22,10 @@ const { currencyConvertor } = require('../utils/currencyConvertor')
 require('dotenv').config()
 
 const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
+
+// const redisClient = Redis.createClient()
+
+const DEFAULT_REDIS_EXPIRATION = 36000
 
 async function getApiProfileTx(req, res) {
   try {
@@ -32,11 +37,41 @@ async function getApiProfileTx(req, res) {
       return res.status(404).json({ response: 'User not found' })
     }
 
+    // redisClient.get('uTxs', async (error, data) => {
+    //   if (error) return console.log(error)
+    //   if (data != null) {
+    //     console.log('====================================')
+    //     console.log('REDIS')
+    //     console.log('====================================')
+    //     return res.status(200).json({
+    //       success: true,
+    //       data: JSON.parse(data),
+    //     })
+    //   } else {
+    //     console.log('====================================')
+    //     console.log('NOTING')
+    //     console.log('====================================')
+    //     const txTo = await UserTransactions.findOne({ user: userId }).populate({
+    //       path: 'transactions',
+    //       options: { sort: { date: 'desc' } },
+    //     })
+    //     redisClient.setEx(
+    //       'uTxs',
+    //       DEFAULT_REDIS_EXPIRATION,
+    //       JSON.stringify(txTo)
+    //     )
+
+    //     return res.status(200).json({
+    //       success: true,
+    //       data: txTo,
+    //     })
+    //   }
+    // })
+
     const txTo = await UserTransactions.findOne({ user: userId }).populate({
       path: 'transactions',
       options: { sort: { date: 'desc' } },
     })
-
     return res.status(200).json({
       success: true,
       data: txTo,
@@ -114,6 +149,7 @@ async function getWalletApiBalance(req, res) {
     let convertedCello = 0
     let convertedBusd = 0
     let sats = await getSatsLightningBalance(phoneNumber)
+
     let celloDollarBalance = await getCelloDollarBalance(phoneNumber)
     celloDollarBalance_ = ethers.utils.formatEther(celloDollarBalance)
 

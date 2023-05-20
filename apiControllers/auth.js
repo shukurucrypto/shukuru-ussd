@@ -3,6 +3,7 @@ const User = require('../models/User.js')
 const Assets = require('../models/Assets.js')
 const UserTransactions = require('../models/UserTransactions.js')
 
+const Redis = require('redis')
 const { encrypt, decrypt } = require('../security/encrypt.js')
 const {
   getCreateUserWalletInfo,
@@ -23,6 +24,8 @@ const { newSignup } = require('../sockets/sockets.js')
 require('dotenv').config()
 
 const provider = new ethers.providers.JsonRpcProvider(providerRPCURL)
+const redisClient = Redis.createClient()
+const DEFAULT_REDIS_EXPIRATION = 36000
 
 async function createApiUser(req, res) {
   try {
