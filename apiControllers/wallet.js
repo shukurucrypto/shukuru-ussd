@@ -82,6 +82,27 @@ async function getApiProfileTx(req, res) {
   }
 }
 
+async function getApiProfileUsername(req, res) {
+  try {
+    const name = req.params.name
+
+    const cleaned = name.replace(/\s+/g, '').toLowerCase()
+
+    const user = await User.findOne({ name: cleaned })
+
+    if (!user) {
+      return res.status(404).json({ response: 'User not found' })
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: user,
+    })
+  } catch (error) {
+    res.status(500).json(error.message)
+  }
+}
+
 async function getApiProfile(req, res) {
   try {
     const phone = req.params.phone
@@ -243,4 +264,5 @@ module.exports = {
   getApiProfile,
   getApiProfileTx,
   currencyConvertorApi,
+  getApiProfileUsername,
 }
