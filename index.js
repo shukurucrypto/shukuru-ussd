@@ -51,7 +51,7 @@ dbConnection.once('open', () => console.log('Connected to DB!'))
 let activeUsers = []
 
 io.on('connection', (socket) => {
-  // console.log(`New user connected: ${socket.id}`)
+  console.log(`New user connected: ${socket.id}`)
 
   socket.on('joinedActive', ({ joinedUser }) => {
     const userExists = activeUsers.some(
