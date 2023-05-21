@@ -96,7 +96,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('disconnect', () => {
-    console.log(`User ${socket.id} disconnected`)
+    // console.log(`User ${socket.id} disconnected`)
   })
 })
 
