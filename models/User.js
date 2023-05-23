@@ -21,6 +21,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: 'UGX',
   },
+  accountType: {
+    type: String,
+    default: 'Personal',
+  },
   walletPin: {
     type: String,
     // required: true,

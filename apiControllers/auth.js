@@ -29,7 +29,7 @@ const DEFAULT_REDIS_EXPIRATION = 36000
 
 async function createApiUser(req, res) {
   try {
-    const { username, phone, email, password } = req.body
+    const { username, phone, email, password, accountType, country } = req.body
     let token
 
     const currentUser = await User.findOne({ phoneNumber: phone })
@@ -66,9 +66,6 @@ async function createApiUser(req, res) {
     // Create lightning wallet for the user
     const lightningWallet = await createLightningWallet(username)
 
-    // Get the user default currency
-    const currency = await getUserCurrency(phone)
-
     // // save the wallet to the database
     const user = new User({
       name: username,
@@ -76,11 +73,12 @@ async function createApiUser(req, res) {
       email: email,
       password: encryptedPassword,
       phoneNumber: phone,
+      accountType: accountType,
       address: createdWallet.address,
       btcAddress: address.toString(),
       passKey: encryptedPassKey,
       mnemonic: encryptedMnemonic,
-      country: currency,
+      country: country,
     })
 
     const savedUser = await user.save()
