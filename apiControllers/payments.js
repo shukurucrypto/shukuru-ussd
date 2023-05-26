@@ -943,6 +943,8 @@ const sendLightningApiPayment = async (req, res) => {
         return res.status(200).json({
           success: true,
           data: sender,
+          senderTx: senderTx,
+          receiverTx: receiverTx,
         })
       }
     } else {
