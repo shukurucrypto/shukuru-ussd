@@ -1,0 +1,36 @@
+{
+  "data": {
+    "__v": 0,
+    "_id": "645f3080f686496260b2032a",
+    "accountType": "Personal",
+    "address": "0x4cc51cFd470E8Ce5fEccF9A2F4db9C624CfE3252",
+    "balance": 0,
+    "btcAddress": "n3p9w32xkLyTwjKZM4a1U6abKNEoWCEi2P",
+    "btcBalance": 0,
+    "country": "UGX",
+    "email": "john@shukuru.com",
+    "mnemonic": "U2FsdGVkX18/qZkpZw1zYmYNETg0eJVqVDsOGoPChW28XKos0+E0dfIk2gxcF0wUG2nD8JVs2wceqaDPO5qfD3vINNmzdsXk4ATgT02A0qOkeufK2jQ7+UQh6mcSF8xD",
+    "name": "johndoe",
+    "passKey": "U2FsdGVkX199T2WkjrkW7HjjmlAlmKSNQU6tMIR7jIRLSfO0ft/IdLCjdYw0hSOa7o5sWtIBHIULpnwC/zr/IKZKcbZf8yS8Vp3bpa4MNMO8I3DW96XvkYKUl6A3+aJK",
+    "password": "U2FsdGVkX1/b8SX3IgvgwBblfTA/Vqw6U8ThjvVuQus=",
+    "phoneNumber": "256779280949",
+    "wrappedChains": {
+      "ethereum": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "polygon": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"
+    }
+  },
+  "success": true,
+  "tx": {
+    "__v": 0,
+    "_id": "6470992cf59f68f2c1e3cd04",
+    "amount": 100,
+    "asset": "Lightning",
+    "blockNumber": 0,
+    "currency": "UGX",
+    "date": "2023-05-26T11:34:04.806Z",
+    "phoneNumber": "256700719619",
+    "receiver": "645f30dcf686496260b20340",
+    "sender": "645f3080f686496260b2032a",
+    "txType": "sent"
+  }
+}

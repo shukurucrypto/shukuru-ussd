@@ -467,6 +467,7 @@ const nfcPayAPI = async (req, res) => {
         return res.status(200).json({
           success: true,
           data: sender,
+          tx: tx,
         })
       }
     } else {
@@ -685,6 +686,7 @@ async function sendApiBUSD(req, res) {
       return res.status(200).json({
         success: true,
         data: txRecipt,
+        tx: tx,
       })
     } else {
       return res.status(403).json({
@@ -811,6 +813,7 @@ async function sendApiCeloUSD(req, res) {
     return res.status(200).json({
       success: true,
       data: txRecipt,
+      tx: tx,
     })
   } catch (error) {
     console.log(error.message)

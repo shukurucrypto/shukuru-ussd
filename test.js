@@ -10,8 +10,9 @@ const options = {
   },
   data: {
     app_id: 'bdb34439-82ae-4091-bcb3-664874f10810',
+    // app_id: 'bdb34439-82ae-4091-bcb3-664874f10810',
     // include_player_ids: ['6bac8ac3-f7b8-4017-8ee5-36f60588e731'],
-    include_external_user_ids: ['645f3080f686496260b2032a'],
+    include_external_user_ids: ['645f30dcf686496260b20340'],
     headings: {
       en: 'You sent a payment!',
       es: 'You sent a payment!',
