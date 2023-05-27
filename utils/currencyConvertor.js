@@ -1,5 +1,6 @@
 const { default: axios } = require('axios')
 const CC = require('currency-converter-lt')
+const { exchangeRates } = require('../db/data')
 
 const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
   let convertedAmount = 0
@@ -30,7 +31,7 @@ const satsConvertor = async (sats, userCurrency) => {
     const btc = sats / 100000000
 
     // Convert to BTC to USD
-    const exchangeRate = 26669.855
+    const exchangeRate = exchangeRates.rates.usd.value
     const usdAmount = btc * exchangeRate
 
     if (Number(usdAmount) > 0) {
