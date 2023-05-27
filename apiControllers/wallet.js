@@ -18,7 +18,10 @@ const Redis = require('redis')
 const BUSDABI = require('../abiData/erc20.json')
 const { getCelloDollarBalance } = require('../utils/getCelloDollarBalance')
 const UserTransactions = require('../models/UserTransactions')
-const { currencyConvertor } = require('../utils/currencyConvertor')
+const {
+  currencyConvertor,
+  satsConvertor,
+} = require('../utils/currencyConvertor')
 require('dotenv').config()
 
 const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
@@ -204,15 +207,18 @@ async function getWalletApiBalance(req, res) {
     //   )
     // }
 
-    const total = Number(convertedCello) + Number(convertedBusd) + sats
-    // Number(convertedCello) + Number(userBalance) + Number(usdtBalance)
+    // const total = Number(convertedCello) + Number(userBalance) + Number(usdtBalance) + sats
     // Number(lightningBalance) +
+    const convertedSats = await satsConvertor(sats, currentUser.country)
+
+    const total = Number(convertedCello) + Number(convertedBusd) + convertedSats
 
     return res.status(200).json({
       success: true,
       data: {
         userId: currentUser._id,
-        lightning: sats,
+        lightning: convertedSats,
+        // lightning: sats,
         cusd: Number(celloDollarBalance_),
         // eth: Number(userBalance),
         // usdt: Number(usdtBalance),

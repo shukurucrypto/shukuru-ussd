@@ -23,7 +23,25 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
     return error.response
   }
 }
+const satsConvertor = async (sats, userCurrency) => {
+  try {
+    // Convert sats to BTC
+    const btc = sats / 100000000
+
+    // Convert to BTC to USD
+    const exchangeRate = 26669.855
+    const usdAmount = btc * exchangeRate
+
+    if (Number(usdAmount) > 0) {
+      convertedSats = await currencyConvertor(usdAmount, 'USD', userCurrency)
+    }
+    return Number(convertedSats)
+  } catch (error) {
+    return error.message
+  }
+}
 
 module.exports = {
   currencyConvertor,
+  satsConvertor,
 }
