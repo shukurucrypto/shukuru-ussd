@@ -1,3 +1,4 @@
+const { default: axios } = require('axios')
 const CC = require('currency-converter-lt')
 
 const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
@@ -25,11 +26,16 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
 }
 const satsConvertor = async (sats, userCurrency) => {
   try {
+    const getExchangeRate = await axios.get(
+      'https://api.coingecko.com/api/v3/exchange_rates'
+    )
+
     // Convert sats to BTC
     const btc = sats / 100000000
 
     // Convert to BTC to USD
-    const exchangeRate = 26669.855
+    // const exchangeRate = 26669.855
+    const exchangeRate = getExchangeRate.data.rates.usd.value
     const usdAmount = btc * exchangeRate
 
     if (Number(usdAmount) > 0) {
