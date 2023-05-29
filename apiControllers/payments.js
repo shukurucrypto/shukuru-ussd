@@ -107,11 +107,12 @@ const decodeInvoiceAPI = async (req, res) => {
     const invoiceResponse = await decodeLightningInvoice(keyReciever, data)
 
     if (invoiceResponse.payment_hash) {
+      const stats = invoiceResponse.amount_msat / 1000
       return res.status(201).json({
         success: true,
         data: {
           hash: invoiceResponse.payment_hash,
-          amount: invoiceResponse.amount_msat,
+          amount: stats,
           memo: invoiceResponse.description,
           date: invoiceResponse.date,
           expiry: invoiceResponse.expiry,
