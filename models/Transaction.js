@@ -7,11 +7,9 @@ const mongoose = require('mongoose')
 const TransactionSchema = new mongoose.Schema({
   sender: {
     type: String,
-    required: true,
   },
   receiver: {
     type: String,
-    required: true,
   },
   asset: {
     type: String,
@@ -43,6 +41,11 @@ const TransactionSchema = new mongoose.Schema({
   txHash: {
     type: String,
     // required: true,
+  },
+  external: {
+    type: Boolean,
+    required: true,
+    default: false,
   },
   blockNumber: {
     type: Number,

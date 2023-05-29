@@ -334,6 +334,57 @@ const nfcPayBUSDAPI = async (req, res) => {
   }
 }
 
+const createExternalBTCTXAPI = async (req, res) => {
+  try {
+    const { invoice, amount } = req.body
+
+    const { userId } = req.user
+
+    const currencyUser = await User.findById(userId)
+
+    if (!currencyUser) {
+      return res.status(403).json({
+        success: false,
+        response: 'Not Authorized',
+      })
+    }
+
+    if (!invoice) {
+      return res
+        .status(403)
+        .json({ success: false, response: 'Please enter a valid invoice' })
+    }
+
+    const receiverTx = await new Transaction({
+      receiver: currencyUser._id,
+      external: true,
+      currency: currencyUser.country,
+      asset: 'Lightning',
+      amount: amount,
+      txType: 'recieved',
+      phoneNumber: currencyUser.phoneNumber,
+    })
+
+    const tx = await receiverTx.save()
+
+    // Check to see if the user has a UserTransactions table
+    const userTx = await UserTransactions.findOne({ user: currencyUser._id })
+
+    await userTx.transactions.push(tx._id)
+
+    await userTx.save()
+
+    return res.status(200).json({
+      success: true,
+      data: currencyUser,
+      tx: tx,
+    })
+  } catch (error) {
+    // console.log(error.message)
+    res.status(500).json({ success: false, response: error.message })
+  }
+}
+
 const nfcPayAPI = async (req, res) => {
   try {
     const { tagNo, invoice, amount } = req.body
@@ -1096,4 +1147,5 @@ module.exports = {
   sendApiBUSD,
   nfcPayAPI,
   nfcPayBUSDAPI,
+  createExternalBTCTXAPI,
 }

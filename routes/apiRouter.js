@@ -27,6 +27,7 @@ const {
   nfcPayAPI,
   nfcPayEVMAPI,
   nfcPayBUSDAPI,
+  createExternalBTCTXAPI,
 } = require('../apiControllers/payments.js')
 const accessTokenBearer = require('../middleware/accessTokenBearer.js')
 const {
@@ -54,7 +55,12 @@ apiRouter.post('/auth/login', login)
 apiRouter.get('/wallet/:userId', getWalletApiBalance)
 apiRouter.post('/convert', currencyConvertorApi)
 apiRouter.get('/btc/txs/:userId', getBTCWalletTransactionsAPI)
-apiRouter.get('/wallet/btc/:userId', getBTCAPIBalance)
+apiRouter.get('/wallet/btc/:userId', authenticateToken, getBTCAPIBalance)
+apiRouter.post(
+  '/wallet/exbtc/create',
+  authenticateToken,
+  createExternalBTCTXAPI
+)
 
 // Profile
 apiRouter.get('/user/:userId', getProfile)
