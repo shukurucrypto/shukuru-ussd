@@ -144,6 +144,33 @@ async function getProfile(req, res) {
   }
 }
 
+async function getBTCAPIBalance(req, res) {
+  try {
+    const userId = req.params.userId
+
+    const currentUser = await User.findById(userId)
+
+    // let userBalance
+
+    if (!currentUser) {
+      return res.status(404).json({ response: 'User not found' })
+    }
+
+    const phoneNumber = currentUser.phoneNumber
+
+    let sats = await getSatsLightningBalance(phoneNumber)
+
+    const convertedSats = await satsConvertor(sats, currentUser.country)
+
+    return res.status(200).json({
+      success: true,
+      data: convertedSats,
+    })
+  } catch (error) {
+    return res.status(500).json({ success: false, response: error.message })
+  }
+}
+
 async function getWalletApiBalance(req, res) {
   try {
     const userId = req.params.userId
@@ -271,4 +298,5 @@ module.exports = {
   getApiProfileTx,
   currencyConvertorApi,
   getApiProfileUsername,
+  getBTCAPIBalance,
 }

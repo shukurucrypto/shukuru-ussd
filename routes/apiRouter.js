@@ -13,6 +13,7 @@ const {
   getApiProfileTx,
   currencyConvertorApi,
   getApiProfileUsername,
+  getBTCAPIBalance,
 } = require('../apiControllers/wallet.js')
 const {
   sendLightningApiPayment,
@@ -53,6 +54,7 @@ apiRouter.post('/auth/login', login)
 apiRouter.get('/wallet/:userId', getWalletApiBalance)
 apiRouter.post('/convert', currencyConvertorApi)
 apiRouter.get('/btc/txs/:userId', getBTCWalletTransactionsAPI)
+apiRouter.get('/wallet/btc/:userId', getBTCAPIBalance)
 
 // Profile
 apiRouter.get('/user/:userId', getProfile)

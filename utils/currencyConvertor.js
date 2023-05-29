@@ -29,6 +29,8 @@ const satsConvertor = async (sats, userCurrency) => {
     // Convert sats to BTC
     const btc = sats / 100000000
 
+    let convertedSats = 0
+
     // Convert to BTC to USD
     const exchangeRate = 26669.855
     const usdAmount = btc * exchangeRate
