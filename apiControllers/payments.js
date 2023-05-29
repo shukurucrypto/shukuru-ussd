@@ -108,6 +108,7 @@ const decodeInvoiceAPI = async (req, res) => {
 
     if (invoiceResponse.payment_hash) {
       const stats = invoiceResponse.amount_msat / 1000
+      // convert stats to readble division here...
       return res.status(201).json({
         success: true,
         data: {
