@@ -12,11 +12,12 @@ const platformPayoutFeeAmount = (amount) => {
 
 const createBTCPlatformTxFeeInvoice = async (currentUser, amount) => {
   // Create the invoice from the reciever
+
   const fee = Number(amount) * (lightningTxCostsPercentage / 100)
 
   const data = {
     out: false,
-    amount: fee,
+    amount: 1,
     memo: `${currentUser.name} pays network fee`,
     unit: 'sat',
   }

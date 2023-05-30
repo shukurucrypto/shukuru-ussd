@@ -22,6 +22,10 @@ const {
   currencyConvertor,
   satsConvertor,
 } = require('../utils/currencyConvertor')
+const AccountSecrets = require('../models/AccountSecrets')
+const ActiveInvoice = require('../models/ActiveInvoice')
+const LightningWallet = require('../models/LightningWallet')
+const NfcCard = require('../models/NfcCard')
 require('dotenv').config()
 
 const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
@@ -171,6 +175,35 @@ async function getBTCAPIBalance(req, res) {
   }
 }
 
+async function changeUserCurrencyAPI(req, res) {
+  try {
+    const { country } = req.body
+
+    const { userId } = req.user
+
+    const user = await User.findById(userId)
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        response: 'User does not exist',
+      })
+    }
+
+    // Change the user currency here
+    user.country = country
+
+    await user.save()
+
+    return res.status(201).json({
+      success: true,
+      data: user,
+    })
+  } catch (error) {
+    return res.status(500).json({ success: false, response: error.message })
+  }
+}
+
 async function getWalletApiBalance(req, res) {
   try {
     const userId = req.params.userId
@@ -291,6 +324,40 @@ const currencyConvertorApi = async (req, res) => {
   }
 }
 
+async function deleteUserAccount(req, res) {
+  try {
+    const { userId } = req.user
+
+    const user = await User.findById(userId)
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        response: 'Not authorized to this action!',
+      })
+    }
+
+    // Start deleting data...
+    await AccountSecrets.findOneAndDelete({ user: userId })
+    await LightningWallet.findOneAndDelete({
+      user: userId,
+    })
+
+    await NfcCard.findOneAndDelete({ user: userId })
+    await User.findByIdAndDelete(userId)
+
+    return res.status(204).json({
+      success: true,
+      response: 'Removed!',
+    })
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      response: error.message,
+    })
+  }
+}
+
 module.exports = {
   getWalletApiBalance,
   getProfile,
@@ -299,4 +366,6 @@ module.exports = {
   currencyConvertorApi,
   getApiProfileUsername,
   getBTCAPIBalance,
+  changeUserCurrencyAPI,
+  deleteUserAccount,
 }

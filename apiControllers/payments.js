@@ -401,7 +401,7 @@ const nfcPayAPI = async (req, res) => {
         .json({ success: false, response: 'Card not found' })
     }
 
-    if (currencyUser.userId === nfcCard.user) {
+    if (currencyUser.userId === nfcCard.user.toString()) {
       return res.status(400).json({
         success: false,
         response: 'Self payments are not permitted',
@@ -982,12 +982,29 @@ const sendLightningApiPayment = async (req, res) => {
 
         const toTx = await recieverTx.save()
 
-        // Check to see if the user has a UserTransactions table
-        const userTx = await UserTransactions.findOne({ user: sender._id })
+        let userTx
+        let receiverTx
 
-        const receiverTx = await UserTransactions.findOne({
+        // Check to see if the user has a UserTransactions table
+        userTx = await UserTransactions.findOne({ user: sender._id })
+
+        if (!userTx) {
+          const userTxes = new UserTransactions({
+            user: sender._id,
+          })
+          userTx = await userTxes.save()
+        }
+
+        receiverTx = await UserTransactions.findOne({
           user: reciever._id,
         })
+
+        if (!receiverTx) {
+          const receiverTxes = new UserTransactions({
+            user: reciever._id,
+          })
+          receiverTx = await receiverTxes.save()
+        }
 
         await userTx.transactions.push(tx._id)
 

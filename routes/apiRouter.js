@@ -14,6 +14,8 @@ const {
   currencyConvertorApi,
   getApiProfileUsername,
   getBTCAPIBalance,
+  changeUserCurrencyAPI,
+  deleteUserAccount,
 } = require('../apiControllers/wallet.js')
 const {
   sendLightningApiPayment,
@@ -67,6 +69,8 @@ apiRouter.get('/user/:userId', getProfile)
 apiRouter.get('/profile/:phone', getApiProfile)
 apiRouter.get('/profile/name/:name', getApiProfileUsername)
 apiRouter.get('/txs/:userId', getApiProfileTx)
+apiRouter.post('/user/country/update', authenticateToken, changeUserCurrencyAPI)
+apiRouter.delete('/user/delete', authenticateToken, deleteUserAccount)
 
 // Payments
 apiRouter.post('/send', authenticateToken, sendLightningApiPayment)
