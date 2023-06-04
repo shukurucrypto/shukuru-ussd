@@ -5,19 +5,26 @@ const { bscProviderURL, busdAddress } = require('./settings/settings')
 const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
 
 async function test() {
-  console.log('====================================')
-  console.log(bscProviderURL, busdAddress)
-  console.log('====================================')
+  // Create a new transaction object
+  const transaction = {
+    to: '0xce5Af15d59434EffB35237C7Fdf394d4e4FfC679',
+    value: ethers.utils.parseEther('0.049301752899959649'), // Set the value in ether
+  }
 
-  const busdContract = new ethers.Contract(busdAddress, BUSDABI, provider)
-
-  const busdWalletBalance = await busdContract.balanceOf(
-    '0xaB09A8c55fe3Ba62af926f15CDf24F97F6D48E99'
-  )
-
-  console.log('====================================')
-  console.log(busdWalletBalance)
-  console.log('====================================')
+  // Estimate the gas required for the transaction
+  provider
+    .estimateGas(transaction)
+    .then((gasEstimate) => {
+      console.log('Gas Estimate:', gasEstimate.toString())
+      console.log(
+        'Gas Fee:',
+        ethers.utils.formatUnits(gasEstimate, 'gwei'),
+        'gwei'
+      )
+    })
+    .catch((error) => {
+      console.error('Error estimating gas:', error)
+    })
 }
 
 test()

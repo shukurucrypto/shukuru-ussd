@@ -30,6 +30,8 @@ const {
   nfcPayEVMAPI,
   nfcPayBUSDAPI,
   createExternalBTCTXAPI,
+  getBUSDGasEstimateAPI,
+  getCeloGasEstimateAPI,
 } = require('../apiControllers/payments.js')
 const accessTokenBearer = require('../middleware/accessTokenBearer.js')
 const {
@@ -85,5 +87,9 @@ apiRouter.post('/invoice/status', getInvoiceStatusAPI)
 
 apiRouter.post('/invoice/active/create', createActiveInvoice)
 apiRouter.post('/invoice/active/info', getActiveInvoice)
+
+// Gas functions
+apiRouter.post('/gas/busd', getBUSDGasEstimateAPI)
+apiRouter.post('/gas/cusd', getCeloGasEstimateAPI)
 
 module.exports = apiRouter

@@ -4,6 +4,7 @@ const {
   celoProviderUrl,
   bscProviderURL,
   busdAddress,
+  cusdAddress,
 } = require('../settings/settings.js')
 
 const Web3 = require('web3')
@@ -51,6 +52,7 @@ const web3 = new Web3(celoProviderUrl)
 const kit = ContractKit.newKitFromWeb3(web3)
 
 const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
+const celoProvider = new ethers.providers.JsonRpcProvider(celoProviderUrl)
 
 const getInvoiceStatusAPI = async (req, res) => {
   try {
@@ -667,6 +669,172 @@ const payBTCInvoiceAPI = async (req, res) => {
   }
 }
 
+async function getCeloGasEstimateAPI(req, res) {
+  try {
+    const { from, to, amount, memo } = req.body
+
+    const currentUser = await User.findById(from)
+
+    const reciever = await User.findById(to)
+
+    // if (!reciever) {
+    //   return res
+    //     .status(404)
+    //     .json({ response: 'The User does not have a Shukuru Wallet' })
+    // }
+
+    // Get the current user / payer passkey
+    const dbPrivateKey = currentUser.passKey
+
+    // Decrypt the passKey
+    const privateKey = await decrypt(dbPrivateKey)
+
+    // Get the reciever's address from db
+    const recieverAddress = reciever.address
+
+    const convertedToUSDAmount = await currencyConvertor(
+      amount,
+      currentUser.country,
+      'USD'
+    )
+
+    const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
+
+    const amount_ = parsedAmount.toString()
+
+    // payer's wallet
+    const wallet = await new ethers.Wallet(privateKey, celoProvider)
+
+    const cusdContract = new ethers.Contract(cusdAddress, BUSDABI, wallet)
+
+    // get busd wallet balance
+    // const walletBalance = await signedWallet.getBalance()
+    // const walletBalance = await busdContract.balanceOf(currentUser.address)
+
+    // const convertedBalance = await ethers.utils.formatEther(walletBalance)
+
+    // if (Number(convertedBalance) == 0.0) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     response: 'You do not have enough BUSD to complete this transaction',
+    //   })
+    // }
+
+    const gasEstimate = await cusdContract.estimateGas.transfer(
+      recieverAddress,
+      amount_
+    )
+
+    if (gasEstimate) {
+      const formattedGas = ethers.utils.formatUnits(gasEstimate, 'gwei')
+
+      // Convert the gas fee here?...
+
+      const gasInLocal = await currencyConvertor(
+        formattedGas,
+        'USD',
+        currentUser.country
+      )
+
+      return res.status(200).json({
+        success: true,
+        data: gasInLocal,
+      })
+    } else {
+      return res.status(404).json({
+        success: false,
+        response: 'Failed to get gas estimate',
+      })
+    }
+  } catch (error) {
+    // console.log(error.message) .
+    return res.status(500).json(error.message)
+  }
+}
+
+async function getBUSDGasEstimateAPI(req, res) {
+  try {
+    const { from, to, amount, memo } = req.body
+
+    const currentUser = await User.findById(from)
+
+    const reciever = await User.findById(to)
+
+    // if (!reciever) {
+    //   return res
+    //     .status(404)
+    //     .json({ response: 'The User does not have a Shukuru Wallet' })
+    // }
+
+    // Get the current user / payer passkey
+    const dbPrivateKey = currentUser.passKey
+
+    // Decrypt the passKey
+    const privateKey = await decrypt(dbPrivateKey)
+
+    // Get the reciever's address from db
+    const recieverAddress = reciever.address
+
+    const convertedToUSDAmount = await currencyConvertor(
+      amount,
+      currentUser.country,
+      'USD'
+    )
+
+    const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
+
+    const amount_ = parsedAmount.toString()
+
+    // payer's wallet
+    const wallet = await new ethers.Wallet(privateKey, provider)
+
+    const busdContract = new ethers.Contract(busdAddress, BUSDABI, wallet)
+
+    // get busd wallet balance
+    // const walletBalance = await signedWallet.getBalance()
+    // const walletBalance = await busdContract.balanceOf(currentUser.address)
+
+    // const convertedBalance = await ethers.utils.formatEther(walletBalance)
+
+    // if (Number(convertedBalance) == 0.0) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     response: 'You do not have enough BUSD to complete this transaction',
+    //   })
+    // }
+
+    const gasEstimate = await busdContract.estimateGas.transfer(
+      recieverAddress,
+      amount_
+    )
+
+    if (gasEstimate) {
+      const formattedGas = ethers.utils.formatUnits(gasEstimate, 'gwei')
+
+      // Convert the gas fee here?...
+
+      const gasInLocal = await currencyConvertor(
+        formattedGas,
+        'USD',
+        currentUser.country
+      )
+
+      return res.status(200).json({
+        success: true,
+        data: gasInLocal,
+      })
+    } else {
+      return res.status(404).json({
+        success: false,
+        response: 'Failed to get gas estimate',
+      })
+    }
+  } catch (error) {
+    // console.log(error.message) .
+    return res.status(500).json(error.message)
+  }
+}
+
 async function sendApiBUSD(req, res) {
   try {
     const { from, to, amount, memo } = req.body
@@ -847,7 +1015,9 @@ async function sendApiCeloUSD(req, res) {
     // )
 
     if (!txRecipt.status) {
-      return res.status(403).json({ response: 'Transaction failed!' })
+      return res
+        .status(403)
+        .json({ success: false, response: 'Transaction failed!' })
     }
 
     // Create TX Objects here...
@@ -1063,125 +1233,125 @@ const sendLightningApiPayment = async (req, res) => {
   }
 }
 
-async function sendApiCeloUSD(req, res) {
-  try {
-    const { from, to, amount, memo } = req.body
+// async function sendApiCeloUSD(req, res) {
+//   try {
+//     const { from, to, amount, memo } = req.body
 
-    const sender = await User.findById(from)
+//     const sender = await User.findById(from)
 
-    const reciever = await User.findById(to)
+//     const reciever = await User.findById(to)
 
-    if (!reciever) {
-      return res
-        .status(404)
-        .json({ response: 'The User does not have a Shukuru Wallet' })
-    }
+//     if (!reciever) {
+//       return res
+//         .status(404)
+//         .json({ response: 'The User does not have a Shukuru Wallet' })
+//     }
 
-    let cUSDtoken = await kit.contracts.getStableToken()
+//     let cUSDtoken = await kit.contracts.getStableToken()
 
-    // This lines will convert the cUSD balance from the user's local currency back to USD
-    const convertedToUSDAmount = await currencyConvertor(
-      amount,
-      sender.country,
-      'USD'
-    )
-    const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
+//     // This lines will convert the cUSD balance from the user's local currency back to USD
+//     const convertedToUSDAmount = await currencyConvertor(
+//       amount,
+//       sender.country,
+//       'USD'
+//     )
+//     const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
 
-    const amount_ = parsedAmount.toString()
+//     const amount_ = parsedAmount.toString()
 
-    // Get the current user / payer passkey
-    const dbPrivateKey = sender.passKey
+//     // Get the current user / payer passkey
+//     const dbPrivateKey = sender.passKey
 
-    // Decrypt the passKey
-    const privateKey = await decrypt(dbPrivateKey)
+//     // Decrypt the passKey
+//     const privateKey = await decrypt(dbPrivateKey)
 
-    // tx object
-    await kit.connection.addAccount(privateKey)
+//     // tx object
+//     await kit.connection.addAccount(privateKey)
 
-    // get wallet balance
-    const walletBalance = await cUSDtoken.balanceOf(sender.address)
+//     // get wallet balance
+//     const walletBalance = await cUSDtoken.balanceOf(sender.address)
 
-    const convertedBalance = await ethers.utils.formatEther(
-      walletBalance.toString()
-    )
+//     const convertedBalance = await ethers.utils.formatEther(
+//       walletBalance.toString()
+//     )
 
-    if (Number(convertedBalance) === 0.0 || Number(convertedBalance) === 0) {
-      // response = `END Payment Failed\n`
-      // response += `Make sure you have enough ETH in your wallet\n`
-      // sendSMS(
-      //   `You dont have enough balance to pay ${amount_} cUSD to ${paidUserPhone}`,
-      //   currentUser.phoneNumber
-      // )
-      return res.status(403).json({ response: 'Insufficent cUSD balance' })
-    }
+//     if (Number(convertedBalance) === 0.0 || Number(convertedBalance) === 0) {
+//       // response = `END Payment Failed\n`
+//       // response += `Make sure you have enough ETH in your wallet\n`
+//       // sendSMS(
+//       //   `You dont have enough balance to pay ${amount_} cUSD to ${paidUserPhone}`,
+//       //   currentUser.phoneNumber
+//       // )
+//       return res.status(403).json({ response: 'Insufficent cUSD balance' })
+//     }
 
-    // SENDING
-    const result = await cUSDtoken
-      .transfer(reciever.address, amount_)
-      .send({ from: sender.address })
+//     // SENDING
+//     const result = await cUSDtoken
+//       .transfer(reciever.address, amount_)
+//       .send({ from: sender.address })
 
-    let txRecipt = await result.waitReceipt()
+//     let txRecipt = await result.waitReceipt()
 
-    // const convertedToReciever = await currencyConvertor(
-    //   convertedToUSDAmount,
-    //   'USD',
-    //   currentUser.country
-    // )
+//     // const convertedToReciever = await currencyConvertor(
+//     //   convertedToUSDAmount,
+//     //   'USD',
+//     //   currentUser.country
+//     // )
 
-    if (!txRecipt.status) {
-      return res.status(403).json({ response: 'Transaction failed!' })
-    }
+//     if (!txRecipt.status) {
+//       return res.status(403).json({ response: 'Transaction failed!' })
+//     }
 
-    // Create TX Objects here...
-    const senderTx = await new Transaction({
-      sender: sender._id,
-      receiver: reciever._id,
-      currency: sender.country,
-      asset: 'cUSD',
-      amount: amount,
-      txHash: txRecipt.transactionHash,
-      txType: 'sent',
-      phoneNumber: reciever.phoneNumber,
-    })
+//     // Create TX Objects here...
+//     const senderTx = await new Transaction({
+//       sender: sender._id,
+//       receiver: reciever._id,
+//       currency: sender.country,
+//       asset: 'cUSD',
+//       amount: amount,
+//       txHash: txRecipt.transactionHash,
+//       txType: 'sent',
+//       phoneNumber: reciever.phoneNumber,
+//     })
 
-    const recieverTx = await new Transaction({
-      sender: sender._id,
-      receiver: reciever._id,
-      currency: sender.country,
-      asset: 'cUSD',
-      amount: amount,
-      txHash: txRecipt.transactionHash,
-      txType: 'recieved',
-      phoneNumber: sender.phoneNumber,
-    })
+//     const recieverTx = await new Transaction({
+//       sender: sender._id,
+//       receiver: reciever._id,
+//       currency: sender.country,
+//       asset: 'cUSD',
+//       amount: amount,
+//       txHash: txRecipt.transactionHash,
+//       txType: 'recieved',
+//       phoneNumber: sender.phoneNumber,
+//     })
 
-    const tx = await senderTx.save()
+//     const tx = await senderTx.save()
 
-    const toTx = await recieverTx.save()
+//     const toTx = await recieverTx.save()
 
-    // Check to see if the user has a UserTransactions table
-    const userTx = await UserTransactions.findOne({ user: sender._id })
+//     // Check to see if the user has a UserTransactions table
+//     const userTx = await UserTransactions.findOne({ user: sender._id })
 
-    const receiverTx = await UserTransactions.findOne({
-      user: reciever._id,
-    })
+//     const receiverTx = await UserTransactions.findOne({
+//       user: reciever._id,
+//     })
 
-    await userTx.transactions.push(tx._id)
+//     await userTx.transactions.push(tx._id)
 
-    await receiverTx.transactions.push(toTx._id)
+//     await receiverTx.transactions.push(toTx._id)
 
-    await receiverTx.save()
-    await userTx.save()
+//     await receiverTx.save()
+//     await userTx.save()
 
-    return res.status(200).json({
-      success: true,
-      data: txRecipt,
-    })
-  } catch (error) {
-    console.log(error.message)
-    return res.status(500).json(error.message)
-  }
-}
+//     return res.status(200).json({
+//       success: true,
+//       data: txRecipt,
+//     })
+//   } catch (error) {
+//     console.log(error.message)
+//     return res.status(500).json(error.message)
+//   }
+// }
 
 module.exports = {
   sendLightningApiPayment,
@@ -1195,4 +1365,6 @@ module.exports = {
   nfcPayAPI,
   nfcPayBUSDAPI,
   createExternalBTCTXAPI,
+  getBUSDGasEstimateAPI,
+  getCeloGasEstimateAPI,
 }

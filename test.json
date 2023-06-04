@@ -1,36 +1,22 @@
 {
   "data": {
-    "__v": 0,
-    "_id": "645f3080f686496260b2032a",
-    "accountType": "Personal",
-    "address": "0x4cc51cFd470E8Ce5fEccF9A2F4db9C624CfE3252",
-    "balance": 0,
-    "btcAddress": "n3p9w32xkLyTwjKZM4a1U6abKNEoWCEi2P",
-    "btcBalance": 0,
-    "country": "UGX",
-    "email": "john@shukuru.com",
-    "mnemonic": "U2FsdGVkX18/qZkpZw1zYmYNETg0eJVqVDsOGoPChW28XKos0+E0dfIk2gxcF0wUG2nD8JVs2wceqaDPO5qfD3vINNmzdsXk4ATgT02A0qOkeufK2jQ7+UQh6mcSF8xD",
-    "name": "johndoe",
-    "passKey": "U2FsdGVkX199T2WkjrkW7HjjmlAlmKSNQU6tMIR7jIRLSfO0ft/IdLCjdYw0hSOa7o5sWtIBHIULpnwC/zr/IKZKcbZf8yS8Vp3bpa4MNMO8I3DW96XvkYKUl6A3+aJK",
-    "password": "U2FsdGVkX1/b8SX3IgvgwBblfTA/Vqw6U8ThjvVuQus=",
-    "phoneNumber": "256779280949",
-    "wrappedChains": {
-      "ethereum": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-      "polygon": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"
-    }
+    "blockHash": "0x62744cebe0974d476f16cfa4d45a67edd6ebc0af4d28a028d112e86e2a793b15",
+    "blockNumber": 18109137,
+    "contractAddress": null,
+    "cumulativeGasUsed": 51856,
+    "effectiveGasPrice": 25000000000,
+    "events": {
+      "Transfer": [Object
+      ]
+    },
+    "from": "0xce5af15d59434effb35237c7fdf394d4e4ffc679",
+    "gasUsed": 51856,
+    "logsBloom": "0x00000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008010000000000000000000000000008800000000000000000000000000000000000000000000000000000000000000010000000004000000800000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000002000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "status": true,
+    "to": "0x874069fa1eb16d44d622f2e0ca25eea172369bc1",
+    "transactionHash": "0x659bf343d9906838564f26f6c7fdbd280c169b1f074182ba6e6b8c34475bead2",
+    "transactionIndex": 0,
+    "type": "0x0"
   },
-  "success": true,
-  "tx": {
-    "__v": 0,
-    "_id": "6470992cf59f68f2c1e3cd04",
-    "amount": 100,
-    "asset": "Lightning",
-    "blockNumber": 0,
-    "currency": "UGX",
-    "date": "2023-05-26T11:34:04.806Z",
-    "phoneNumber": "256700719619",
-    "receiver": "645f30dcf686496260b20340",
-    "sender": "645f3080f686496260b2032a",
-    "txType": "sent"
-  }
+  "success": true
 }
