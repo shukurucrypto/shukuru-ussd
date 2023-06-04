@@ -564,16 +564,10 @@ const payBTCInvoiceAPI = async (req, res) => {
       const result = await payLightingInvoice(keyPayer, payData)
 
       if (result?.payment_hash) {
-        const activeInvoice = await ActiveInvoice.findOne({
-          hash: result.payment_hash,
-        })
-
         const platformTxInvoice = await createBTCPlatformTxFeeInvoice(
           sender,
           amount
         )
-
-        const reciever = await User.findById(activeInvoice.user)
 
         const platformFeeTxData = {
           out: true,
@@ -583,53 +577,87 @@ const payBTCInvoiceAPI = async (req, res) => {
         // Sender pays platform fees here
         await payLightingInvoice(keyPayer, platformFeeTxData)
 
-        // Create TX Objects here...
-        const senderTx = await new Transaction({
-          sender: sender._id,
-          receiver: reciever._id,
-          currency: sender.country,
-          asset: 'Lightning',
-          amount: activeInvoice.amount,
-          txType: 'sent',
-          phoneNumber: reciever.phoneNumber,
+        const activeInvoice = await ActiveInvoice.findOne({
+          hash: result.payment_hash,
         })
 
-        const recieverTx = await new Transaction({
-          sender: sender._id,
-          receiver: reciever._id,
-          currency: sender.country,
-          asset: 'Lightning',
-          amount: activeInvoice.amount,
-          txType: 'recieved',
-          phoneNumber: sender.phoneNumber,
-        })
+        if (!activeInvoice) {
+          // Create TX Objects here...
+          const senderTx = await new Transaction({
+            sender: sender._id,
+            receiver: 'lnbcExternal',
+            external: true,
+            currency: sender.country,
+            asset: 'Lightning',
+            amount: amount,
+            txType: 'sent',
+            phoneNumber: 'lnbc77777777777',
+          })
 
-        const tx = await senderTx.save()
+          const tx = await senderTx.save()
 
-        const toTx = await recieverTx.save()
+          // Check to see if the user has a UserTransactions table
+          const userTx = await UserTransactions.findOne({ user: sender._id })
 
-        // Check to see if the user has a UserTransactions table
-        const userTx = await UserTransactions.findOne({ user: sender._id })
+          await userTx.transactions.push(tx._id)
 
-        const receiverTx = await UserTransactions.findOne({
-          user: reciever._id,
-        })
+          await userTx.save()
 
-        await userTx.transactions.push(tx._id)
+          return res.status(200).json({
+            success: true,
+            // data: tx,
+          })
+        } else {
+          const reciever = await User.findById(activeInvoice.user)
 
-        await receiverTx.transactions.push(toTx._id)
+          // Create TX Objects here...
+          const senderTx = await new Transaction({
+            sender: sender._id,
+            receiver: reciever._id,
+            currency: sender.country,
+            asset: 'Lightning',
+            amount: activeInvoice.amount,
+            txType: 'sent',
+            phoneNumber: reciever.phoneNumber,
+          })
 
-        await receiverTx.save()
-        await userTx.save()
+          const recieverTx = await new Transaction({
+            sender: sender._id,
+            receiver: reciever._id,
+            currency: sender.country,
+            asset: 'Lightning',
+            amount: activeInvoice.amount,
+            txType: 'recieved',
+            phoneNumber: sender.phoneNumber,
+          })
 
-        return res.status(200).json({
-          success: true,
-          // data: tx,
-        })
+          const tx = await senderTx.save()
+
+          const toTx = await recieverTx.save()
+
+          // Check to see if the user has a UserTransactions table
+          const userTx = await UserTransactions.findOne({ user: sender._id })
+
+          const receiverTx = await UserTransactions.findOne({
+            user: reciever._id,
+          })
+
+          await userTx.transactions.push(tx._id)
+
+          await receiverTx.transactions.push(toTx._id)
+
+          await receiverTx.save()
+          await userTx.save()
+
+          return res.status(200).json({
+            success: true,
+            // data: tx,
+          })
+        }
       }
     } else {
       return res.status(200).json({
-        success: true,
+        success: false,
         data: `You do not have enough sats to pay out.`,
       })
     }
