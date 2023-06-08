@@ -324,6 +324,40 @@ const currencyConvertorApi = async (req, res) => {
   }
 }
 
+const currencyConvertorToEthersApi = async (req, res) => {
+  let convertedAmount = 0
+  try {
+    const { amount, from, to } = req.body
+
+    if (Number(amount) <= 0) {
+      return res.status(404).json({ response: 'Please enter a valid amount' })
+    }
+
+    let currencyConverter = new CC({
+      from: from,
+      to: to,
+      amount: Number(amount),
+    })
+
+    await currencyConverter.convert(Number(amount)).then((response) => {
+      convertedAmount = response
+    })
+
+    const bigAmount = ethers.utils.parseEther(convertedAmount.toString())
+
+    return res.status(200).json({
+      success: true,
+      // data: bigAmount.toString(),
+      data: convertedAmount,
+    })
+  } catch (error) {
+    // console.log(error.response)
+    return res.status(500).json({
+      success: false,
+    })
+  }
+}
+
 async function deleteUserAccount(req, res) {
   try {
     const { userId } = req.user
@@ -358,6 +392,75 @@ async function deleteUserAccount(req, res) {
   }
 }
 
+async function getBUSDWalletApiBalance(req, res) {
+  try {
+    const userId = req.params.userId
+
+    const currentUser = await User.findById(userId)
+
+    // let userBalance
+
+    if (!currentUser) {
+      return res.status(404).json({ response: 'User not found' })
+    }
+
+    const busdContract = new ethers.Contract(busdAddress, BUSDABI, provider)
+
+    const busdWalletBalance = await busdContract.balanceOf(currentUser.address)
+
+    if (Number(busdWalletBalance) > 0) {
+      convertedBusd = await currencyConvertor(
+        ethers.utils.formatEther(busdWalletBalance.toString()),
+        'USD',
+        currentUser.country
+      )
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: Number(convertedBusd),
+    })
+  } catch (error) {
+    res.status(500).json(error.message)
+  }
+}
+
+async function getRawCUSDWalletApiBalance(req, res) {
+  try {
+    const userId = req.params.userId
+
+    const currentUser = await User.findById(userId)
+
+    // let userBalance
+
+    if (!currentUser) {
+      return res.status(404).json({ response: 'User not found' })
+    }
+
+    const phoneNumber = currentUser.phoneNumber
+
+    let celloDollarBalance = await getCelloDollarBalance(phoneNumber)
+    celloDollarBalance_ = ethers.utils.formatEther(celloDollarBalance)
+
+    // IMPORTANT LINES ------- Coversion lines
+    if (Number(celloDollarBalance_) > 0) {
+      convertedCello = await currencyConvertor(
+        celloDollarBalance_,
+        'USD',
+        currentUser.country
+      )
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: Number(celloDollarBalance_),
+    })
+  } catch (error) {
+    console.log(error.message)
+    res.status(500).json(error.message)
+  }
+}
+
 module.exports = {
   getWalletApiBalance,
   getProfile,
@@ -368,4 +471,7 @@ module.exports = {
   getBTCAPIBalance,
   changeUserCurrencyAPI,
   deleteUserAccount,
+  currencyConvertorToEthersApi,
+  getBUSDWalletApiBalance,
+  getRawCUSDWalletApiBalance,
 }

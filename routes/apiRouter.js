@@ -16,6 +16,9 @@ const {
   getBTCAPIBalance,
   changeUserCurrencyAPI,
   deleteUserAccount,
+  currencyConvertorToEthersApi,
+  getBUSDWalletApiBalance,
+  getRawCUSDWalletApiBalance,
 } = require('../apiControllers/wallet.js')
 const {
   sendLightningApiPayment,
@@ -32,6 +35,10 @@ const {
   createExternalBTCTXAPI,
   getBUSDGasEstimateAPI,
   getCeloGasEstimateAPI,
+  getRawBUSDGasEstimateAPI,
+  getRawCUSDGasEstimateAPI,
+  sendRawApiCeloUSD,
+  sendRawApiBUSD,
 } = require('../apiControllers/payments.js')
 const accessTokenBearer = require('../middleware/accessTokenBearer.js')
 const {
@@ -58,12 +65,25 @@ apiRouter.post('/auth/login', login)
 // Wallet routes
 apiRouter.get('/wallet/:userId', getWalletApiBalance)
 apiRouter.post('/convert', currencyConvertorApi)
+apiRouter.post('/toethers', currencyConvertorToEthersApi)
 apiRouter.get('/btc/txs/:userId', getBTCWalletTransactionsAPI)
 apiRouter.get('/wallet/btc/:userId', authenticateToken, getBTCAPIBalance)
 apiRouter.post(
   '/wallet/exbtc/create',
   authenticateToken,
   createExternalBTCTXAPI
+)
+
+// raw wallet routes
+apiRouter.get(
+  '/raw/wallet/busd/:userId',
+  authenticateToken,
+  getBUSDWalletApiBalance
+)
+apiRouter.get(
+  '/raw/wallet/cusd/:userId',
+  authenticateToken,
+  getRawCUSDWalletApiBalance
 )
 
 // Profile
@@ -92,4 +112,11 @@ apiRouter.post('/invoice/active/info', getActiveInvoice)
 apiRouter.post('/gas/busd', getBUSDGasEstimateAPI)
 apiRouter.post('/gas/cusd', getCeloGasEstimateAPI)
 
+// Raw gas estimates
+apiRouter.post('/raw/gas/busd', getRawBUSDGasEstimateAPI)
+apiRouter.post('/raw/gas/cusd', getRawCUSDGasEstimateAPI)
+
+// Raw Tx
+apiRouter.post('/send/raw/cusd', authenticateToken, sendRawApiCeloUSD)
+apiRouter.post('/send/raw/busd', authenticateToken, sendRawApiBUSD)
 module.exports = apiRouter
