@@ -1513,14 +1513,16 @@ async function sendRawApiCeloUSD(req, res) {
   try {
     const { from, to, amount } = req.body
 
+    let receiverAddress
+
     const sender = await User.findOne({ address: from })
 
     const reciever = await User.findOne({ address: to })
 
     if (!reciever) {
-      return res
-        .status(404)
-        .json({ response: 'The User does not have a Shukuru Wallet' })
+      receiverAddress = to
+    } else {
+      receiverAddress = reciever.address
     }
 
     let cUSDtoken = await kit.contracts.getStableToken()
@@ -1531,7 +1533,9 @@ async function sendRawApiCeloUSD(req, res) {
       sender.country,
       'USD'
     )
-    const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
+    const roundedDecimalAmount = Number(convertedToUSDAmount).toFixed(3)
+
+    const parsedAmount = await ethers.utils.parseEther(roundedDecimalAmount)
 
     const amount_ = parsedAmount.toString()
 
@@ -1558,12 +1562,14 @@ async function sendRawApiCeloUSD(req, res) {
       //   `You dont have enough balance to pay ${amount_} cUSD to ${paidUserPhone}`,
       //   currentUser.phoneNumber
       // )
-      return res.status(403).json({ response: 'Insufficent cUSD balance' })
+      return res
+        .status(403)
+        .json({ success: false, response: 'Insufficent cUSD balance' })
     }
 
     // SENDING
     const result = await cUSDtoken
-      .transfer(reciever.address, amount_)
+      .transfer(receiverAddress, amount_)
       .send({ from: sender.address })
 
     let txRecipt = await result.waitReceipt()
@@ -1580,52 +1586,82 @@ async function sendRawApiCeloUSD(req, res) {
         .json({ success: false, response: 'Transaction failed!' })
     }
 
-    // Create TX Objects here...
-    const senderTx = await new Transaction({
-      sender: sender._id,
-      receiver: reciever._id,
-      currency: sender.country,
-      asset: 'cUSD',
-      amount: amount,
-      txHash: txRecipt.transactionHash,
-      txType: 'sent',
-      phoneNumber: reciever.phoneNumber,
-    })
+    if (reciever) {
+      // Create TX Objects here...
+      const senderTx = await new Transaction({
+        sender: sender._id,
+        receiver: reciever?._id,
+        currency: sender.country,
+        asset: 'cUSD',
+        amount: amount,
+        txHash: txRecipt.transactionHash,
+        txType: 'sent',
+        external: true,
+        phoneNumber: reciever?.phoneNumber,
+      })
 
-    const recieverTx = await new Transaction({
-      sender: sender._id,
-      receiver: reciever._id,
-      currency: sender.country,
-      asset: 'cUSD',
-      amount: amount,
-      txHash: txRecipt.transactionHash,
-      txType: 'recieved',
-      phoneNumber: sender.phoneNumber,
-    })
+      const recieverTx = await new Transaction({
+        sender: sender?._id,
+        receiver: reciever?._id,
+        currency: sender.country,
+        asset: 'cUSD',
+        amount: amount,
+        txHash: txRecipt.transactionHash,
+        txType: 'recieved',
+        external: true,
+        phoneNumber: sender.phoneNumber,
+      })
 
-    const tx = await senderTx.save()
+      const tx = await senderTx.save()
 
-    const toTx = await recieverTx.save()
+      const toTx = await recieverTx.save()
 
-    // Check to see if the user has a UserTransactions table
-    const userTx = await UserTransactions.findOne({ user: sender._id })
+      // Check to see if the user has a UserTransactions table
+      const userTx = await UserTransactions.findOne({ user: sender._id })
 
-    const receiverTx = await UserTransactions.findOne({
-      user: reciever._id,
-    })
+      const receiverTx = await UserTransactions.findOne({
+        user: reciever._id,
+      })
 
-    await userTx.transactions.push(tx._id)
+      await userTx.transactions.push(tx._id)
 
-    await receiverTx.transactions.push(toTx._id)
+      await receiverTx.transactions.push(toTx._id)
 
-    await receiverTx.save()
-    await userTx.save()
+      await receiverTx.save()
+      await userTx.save()
 
-    return res.status(200).json({
-      success: true,
-      data: txRecipt,
-      tx: tx,
-    })
+      return res.status(200).json({
+        success: true,
+        data: txRecipt,
+        tx: tx,
+      })
+    } else {
+      // Check to see if the user has a UserTransactions table
+      const userTx = await UserTransactions.findOne({ user: sender._id })
+
+      // Create TX Objects here...
+      const senderTx = await new Transaction({
+        sender: sender._id,
+        currency: sender.country,
+        asset: 'cUSD',
+        amount: amount,
+        txHash: txRecipt.transactionHash,
+        txType: 'sent',
+        external: true,
+      })
+
+      const tx = await senderTx.save()
+
+      await userTx.transactions.push(tx._id)
+
+      await userTx.save()
+
+      return res.status(200).json({
+        success: true,
+        data: txRecipt,
+        tx: tx,
+      })
+    }
   } catch (error) {
     console.log(error.message)
     return res.status(500).json(error.message)
@@ -1636,14 +1672,16 @@ async function sendRawApiBUSD(req, res) {
   try {
     const { from, to, amount } = req.body
 
+    let receiverAddress
+
     const currentUser = await User.findOne({ address: from })
 
     const reciever = await User.findOne({ address: to })
 
     if (!reciever) {
-      return res
-        .status(404)
-        .json({ response: 'The User does not have a Shukuru Wallet' })
+      receiverAddress = to
+    } else {
+      receiverAddress = reciever.address
     }
 
     // Get the current user / payer passkey
@@ -1652,16 +1690,15 @@ async function sendRawApiBUSD(req, res) {
     // Decrypt the passKey
     const privateKey = await decrypt(dbPrivateKey)
 
-    // Get the reciever's address from db
-    const recieverAddress = reciever.address
-
     const convertedToUSDAmount = await currencyConvertor(
       amount,
       currentUser.country,
       'USD'
     )
 
-    const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
+    const roundedDecimalAmount = Number(convertedToUSDAmount).toFixed(3)
+
+    const parsedAmount = await ethers.utils.parseEther(roundedDecimalAmount)
 
     const amount_ = parsedAmount.toString()
 
@@ -1683,57 +1720,86 @@ async function sendRawApiBUSD(req, res) {
       })
     }
 
-    const tx_ = await busdContract.transfer(recieverAddress, amount_)
+    const tx_ = await busdContract.transfer(receiverAddress, amount_)
 
     txRecipt = await tx_.wait(1)
 
     if (txRecipt.status === 1 || txRecipt.status === '1') {
       // Create TX Objects here...
-      const senderTx = await new Transaction({
-        sender: currentUser._id,
-        receiver: reciever._id,
-        currency: currentUser.country,
-        asset: 'BUSD',
-        amount: amount,
-        txHash: txRecipt.transactionHash,
-        txType: 'sent',
-        phoneNumber: reciever.phoneNumber,
-      })
 
-      const recieverTx = await new Transaction({
-        sender: currentUser._id,
-        receiver: reciever._id,
-        currency: currentUser.country,
-        asset: 'BUSD',
-        amount: amount,
-        txHash: txRecipt.transactionHash,
-        txType: 'recieved',
-        phoneNumber: currentUser.phoneNumber,
-      })
+      if (reciever) {
+        const senderTx = await new Transaction({
+          sender: currentUser._id,
+          receiver: reciever._id,
+          currency: currentUser.country,
+          asset: 'BUSD',
+          amount: amount,
+          txHash: txRecipt.transactionHash,
+          txType: 'sent',
+          phoneNumber: reciever.phoneNumber,
+        })
 
-      const tx = await senderTx.save()
+        const recieverTx = await new Transaction({
+          sender: currentUser._id,
+          receiver: reciever._id,
+          currency: currentUser.country,
+          asset: 'BUSD',
+          amount: amount,
+          txHash: txRecipt.transactionHash,
+          txType: 'recieved',
+          phoneNumber: currentUser.phoneNumber,
+        })
 
-      const toTx = await recieverTx.save()
+        const tx = await senderTx.save()
 
-      // Check to see if the user has a UserTransactions table
-      const userTx = await UserTransactions.findOne({ user: currentUser._id })
+        const toTx = await recieverTx.save()
 
-      const receiverTx = await UserTransactions.findOne({
-        user: reciever._id,
-      })
+        // Check to see if the user has a UserTransactions table
+        const userTx = await UserTransactions.findOne({ user: currentUser._id })
 
-      await userTx.transactions.push(tx._id)
+        const receiverTx = await UserTransactions.findOne({
+          user: reciever._id,
+        })
 
-      await receiverTx.transactions.push(toTx._id)
+        await userTx.transactions.push(tx._id)
 
-      await receiverTx.save()
-      await userTx.save()
+        await receiverTx.transactions.push(toTx._id)
 
-      return res.status(200).json({
-        success: true,
-        data: txRecipt,
-        tx: tx,
-      })
+        await receiverTx.save()
+        await userTx.save()
+
+        return res.status(200).json({
+          success: true,
+          data: txRecipt,
+          tx: tx,
+        })
+      } else {
+        // Check to see if the user has a UserTransactions table
+        const userTx = await UserTransactions.findOne({ user: currentUser._id })
+
+        // Create TX Objects here...
+        const senderTx = await new Transaction({
+          sender: currentUser._id,
+          currency: currentUser.country,
+          asset: 'BUSD',
+          amount: amount,
+          txHash: txRecipt.transactionHash,
+          txType: 'sent',
+          external: true,
+        })
+
+        const tx = await senderTx.save()
+
+        await userTx.transactions.push(tx._id)
+
+        await userTx.save()
+
+        return res.status(200).json({
+          success: true,
+          data: txRecipt,
+          tx: tx,
+        })
+      }
     } else {
       return res.status(403).json({
         success: false,
