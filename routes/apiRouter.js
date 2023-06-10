@@ -46,6 +46,11 @@ const {
   getActiveInvoice,
 } = require('../apiControllers/activeInvoice.js')
 const { authenticateToken } = require('../middleware/authToken.js')
+const {
+  sendReward,
+  claimReward,
+  checkReward,
+} = require('../apiControllers/rewards.js')
 
 const apiRouter = express.Router()
 
@@ -119,4 +124,9 @@ apiRouter.post('/raw/gas/cusd', getRawCUSDGasEstimateAPI)
 // Raw Tx
 apiRouter.post('/send/raw/cusd', authenticateToken, sendRawApiCeloUSD)
 apiRouter.post('/send/raw/busd', authenticateToken, sendRawApiBUSD)
+
+// Rewards
+apiRouter.post('/rewards', authenticateToken, sendReward)
+apiRouter.get('/claim', authenticateToken, claimReward)
+apiRouter.get('/rewards/check', authenticateToken, checkReward)
 module.exports = apiRouter
