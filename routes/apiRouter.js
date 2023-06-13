@@ -19,6 +19,7 @@ const {
   currencyConvertorToEthersApi,
   getBUSDWalletApiBalance,
   getRawCUSDWalletApiBalance,
+  clearAllTransactions,
 } = require('../apiControllers/wallet.js')
 const {
   sendLightningApiPayment,
@@ -39,6 +40,7 @@ const {
   getRawCUSDGasEstimateAPI,
   sendRawApiCeloUSD,
   sendRawApiBUSD,
+  buyUtility,
 } = require('../apiControllers/payments.js')
 const accessTokenBearer = require('../middleware/accessTokenBearer.js')
 const {
@@ -51,6 +53,7 @@ const {
   claimReward,
   checkReward,
 } = require('../apiControllers/rewards.js')
+const { telegramOrder } = require('../apiControllers/alerts.js')
 
 const apiRouter = express.Router()
 
@@ -78,6 +81,7 @@ apiRouter.post(
   authenticateToken,
   createExternalBTCTXAPI
 )
+apiRouter.delete('/tx/clear', authenticateToken, clearAllTransactions)
 
 // raw wallet routes
 apiRouter.get(
@@ -129,4 +133,7 @@ apiRouter.post('/send/raw/busd', authenticateToken, sendRawApiBUSD)
 apiRouter.post('/rewards', authenticateToken, sendReward)
 apiRouter.get('/claim', authenticateToken, claimReward)
 apiRouter.get('/rewards/check', authenticateToken, checkReward)
+
+// Utilities
+apiRouter.post('/utility/pay', authenticateToken, buyUtility)
 module.exports = apiRouter

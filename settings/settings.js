@@ -15,7 +15,7 @@ const {
   ADMIN_KEY,
   BSC_TESTNET_RPC_URL,
   ADMIN_INKEY,
-
+  ADMIN_ADDRESS,
   CUSD_CONTRACT_ADRESS,
   BUSD_TESTNET_CONTRACT_ADDRESS,
 } = process.env
@@ -35,6 +35,7 @@ const network = {
 const celoProviderUrl = CELO_TESTNET
 const busdAddress = BUSD_TESTNET_CONTRACT_ADDRESS
 const cusdAddress = CUSD_CONTRACT_ADRESS
+const adminAddress = ADMIN_ADDRESS
 
 module.exports = {
   providerRPCURL,
@@ -45,4 +46,5 @@ module.exports = {
   bscProviderURL,
   busdAddress,
   cusdAddress,
+  adminAddress,
 }

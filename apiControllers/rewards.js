@@ -113,46 +113,27 @@ async function claimReward(req, res) {
     if (reward.claimed) {
       return res
         .status(403)
-        .json({ success: false, response: 'You have no rewards this week' })
+        .json({ success: false, response: 'Reward already claimed' })
     }
 
-    // Validate to see the expiry date of the award
-    const rewardToClaim = await Rewards.findOne({
-      receiver: user.userId,
-      claimed: false,
-      expires: { $gt: new Date() },
-    })
+    // validate to see if the awards is not yet expired
+    const expired = reward.expires > new Date()
 
-    // const rewardToClaim = await Rewards.findOneAndUpdate(
-    //   {
-    //     receiver: user.userId, // Assuming you have the user's ID stored in req.user.userId
-    //     claimed: false,
-    //     expires: { $gt: new Date() },
-    //   },
-    //   {
-    //     claimed: true,
-    //     // Add any other fields you want to update here
-    //   }
-    // )
-
-    if (!rewardToClaim) {
-      // Reward not found or not eligible for claiming
-      return res
-        .status(404)
-        .json({ error: 'Reward not found or not eligible for claiming' })
+    if (expired) {
+      return res.status(404).json({ response: 'Reward  has expired' })
     }
 
     // Send the rewards Tx here....
     const rewardResponse = await sendCUSDReward(
-      rewardToClaim.amount,
+      reward.amount,
       user.userId,
-      rewardToClaim.asset
+      reward.asset
     )
 
     if (rewardResponse.success) {
       // Change the reward claimed to true
-      rewardToClaim.claimed = true
-      await rewardToClaim.save()
+      reward.claimed = true
+      await reward.save()
     }
 
     return res.status(200).json(rewardResponse)
@@ -269,15 +250,18 @@ async function checkReward(req, res) {
     }
 
     // Validate to see the expiry date of the award
-    const rewardToClaim = await Rewards.findOne({
-      receiver: user.userId,
-      claimed: false,
-      expires: { $gt: new Date() },
-    })
+    // const rewardToClaim = await Rewards.findOne({
+    //   receiver: user.userId,
+    //   claimed: false,
+    //   expires: { $gt: new Date() },
+    // })
+
+    const expired = reward.expires > new Date()
 
     return res.status(200).json({
       success: true,
-      response: rewardToClaim,
+      response: reward,
+      expired: expired,
     })
   } catch (error) {
     console.log(error.message)

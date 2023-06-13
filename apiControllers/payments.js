@@ -5,6 +5,7 @@ const {
   bscProviderURL,
   busdAddress,
   cusdAddress,
+  adminAddress,
 } = require('../settings/settings.js')
 
 const Web3 = require('web3')
@@ -45,6 +46,7 @@ const ActiveInvoice = require('../models/ActiveInvoice.js')
 const BUSDABI = require('../abiData/erc20.json')
 const NfcCard = require('../models/NfcCard.js')
 const { log } = require('console')
+const { telegramOrder } = require('./alerts.js')
 
 require('dotenv').config()
 
@@ -1812,6 +1814,95 @@ async function sendRawApiBUSD(req, res) {
   }
 }
 
+async function buyUtility(req, res) {
+  try {
+    const { network, package, asset, amount } = req.body
+
+    const user = req.user
+
+    const sender = await User.findById(user.userId)
+
+    let cUSDtoken = await kit.contracts.getStableToken()
+
+    // This lines will convert the cUSD balance from the user's local currency back to USD
+    const convertedToUSDAmount = await currencyConvertor(
+      amount,
+      sender.country,
+      'USD'
+    )
+    const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
+
+    const amount_ = parsedAmount.toString()
+
+    // Get the current user / payer passkey
+    const dbPrivateKey = sender.passKey
+
+    // Decrypt the passKey
+    const privateKey = await decrypt(dbPrivateKey)
+
+    // tx object
+    await kit.connection.addAccount(privateKey)
+
+    // get wallet balance
+    const walletBalance = await cUSDtoken.balanceOf(sender.address)
+
+    const convertedBalance = await ethers.utils.formatEther(
+      walletBalance.toString()
+    )
+
+    if (Number(convertedBalance) === 0.0 || Number(convertedBalance) === 0) {
+      return res.status(403).json({ response: 'Insufficent cUSD balance' })
+    }
+
+    // PAYING FOR DATA
+    const result = await cUSDtoken
+      .transfer(adminAddress, amount_)
+      .send({ from: sender.address })
+
+    let txRecipt = await result.waitReceipt()
+
+    if (!txRecipt.status) {
+      return res
+        .status(403)
+        .json({ success: false, response: 'Transaction failed!' })
+    }
+
+    // Send telegram order msg here...
+    const htmlText = `<b>Incoming Order</b>, <strong>${network} Data</strong>
+     Send +${sender.phoneNumber} ${package} data.`
+
+    await telegramOrder(htmlText)
+
+    // Create TX Objects here...
+    const senderTx = await new Transaction({
+      sender: sender._id,
+      currency: sender.country,
+      asset: asset,
+      amount: amount,
+      txHash: txRecipt.transactionHash,
+      txType: 'utility',
+    })
+
+    const tx = await senderTx.save()
+
+    // Check to see if the user has a UserTransactions table
+    const userTx = await UserTransactions.findOne({ user: sender._id })
+
+    await userTx.transactions.push(tx._id)
+
+    await userTx.save()
+
+    return res.status(200).json({
+      success: true,
+      data: txRecipt,
+      tx: tx,
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json(error.message)
+  }
+}
+
 module.exports = {
   sendLightningApiPayment,
   sendApiCeloUSD,
@@ -1830,4 +1921,5 @@ module.exports = {
   getRawCUSDGasEstimateAPI,
   sendRawApiCeloUSD,
   sendRawApiBUSD,
+  buyUtility,
 }
