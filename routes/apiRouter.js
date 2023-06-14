@@ -5,7 +5,13 @@ const {
   getUserLightningBalance,
 } = require('../controllers/invoices.js')
 const { markets, createWallet } = require('../controllers/ussd.js')
-const { createApiUser, login } = require('../apiControllers/auth.js')
+const {
+  createApiUser,
+  login,
+  verifyPhone,
+  verifyCode,
+  checkVerify,
+} = require('../apiControllers/auth.js')
 const {
   getWalletApiBalance,
   getProfile,
@@ -69,6 +75,9 @@ const apiRouter = express.Router()
 // App routes
 apiRouter.post('/auth/signup', createApiUser)
 apiRouter.post('/auth/login', login)
+apiRouter.post('/verify', authenticateToken, verifyPhone)
+apiRouter.post('/code', authenticateToken, verifyCode)
+apiRouter.get('/acc/verify', authenticateToken, checkVerify)
 
 // Wallet routes
 apiRouter.get('/wallet/:userId', getWalletApiBalance)

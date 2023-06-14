@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@celo/contractkit": "^2.3.0",
+    "@masa-finance/masa-sdk": "^3.3.7",
     "@uniswap/sdk": "^3.0.3",
     "@uniswap/sdk-core": "^3.0.2",
     "@uniswap/smart-order-router": "^2.9.3",

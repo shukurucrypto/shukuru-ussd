@@ -13,17 +13,18 @@ const jwt = require('jsonwebtoken')
 
 const passport = require('passport-local')
 const sendSMS = require('../SMS/smsFunctions.js')
-const { providerRPCURL } = require('../settings/settings.js')
+const { providerRPCURL, celoProviderUrl } = require('../settings/settings.js')
 const { createBitcoinWallet } = require('../functions/createBitcoinWallet.js')
 const AccountSecrets = require('../models/AccountSecrets.js')
 const { createLightningWallet } = require('../lightning/createWallet.js')
 const LightningWallet = require('../models/LightningWallet.js')
 const { getUserCurrency } = require('../functions/getUserCurrency.js')
 const { newSignup } = require('../sockets/sockets.js')
+const { Masa } = require('@masa-finance/masa-sdk')
 
 require('dotenv').config()
 
-const provider = new ethers.providers.JsonRpcProvider(providerRPCURL)
+const provider = new ethers.providers.JsonRpcProvider(celoProviderUrl)
 const redisClient = Redis.createClient()
 const DEFAULT_REDIS_EXPIRATION = 36000
 
@@ -218,7 +219,162 @@ async function login(req, res) {
   }
 }
 
+async function verifyPhone(req, res) {
+  try {
+    const { userId } = req.user
+
+    const { phoneNumber } = req.body
+
+    const existingUser = await User.findById(userId)
+
+    // Decrypt the passKey
+    const privateKey = await decrypt(existingUser.passKey)
+
+    const wallet = new ethers.Wallet(privateKey, provider)
+
+    const masa = new Masa({
+      signer: wallet,
+      networkName: process.env.MASA_NETWORK_NAME,
+    })
+
+    // Login user
+    await masa.session.login()
+
+    const fullPhone = `+${phoneNumber}`
+
+    const generateResult = await masa.green.generate(fullPhone)
+
+    if (generateResult.success) {
+      return res.status(200).json({
+        success: true,
+        response: 'Verified',
+        data: generateResult.data,
+      })
+    } else {
+      return res.status(204).json({
+        success: false,
+        response: 'failed',
+      })
+    }
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      response: error.message,
+    })
+  }
+}
+
+async function verifyCode(req, res) {
+  try {
+    const { userId } = req.user
+
+    const { phoneNumber, code } = req.body
+
+    const existingUser = await User.findById(userId)
+
+    // Decrypt the passKey
+    const privateKey = await decrypt(existingUser.passKey)
+
+    const wallet = new ethers.Wallet(privateKey, provider)
+
+    const masa = new Masa({
+      signer: wallet,
+      networkName: process.env.MASA_NETWORK_NAME,
+    })
+
+    // const userCode = await readLine(code)
+
+    await masa.session.login()
+
+    const fullPhone = `+${phoneNumber}`
+
+    const verifyGreenResult = await masa.green.verify(fullPhone, code)
+
+    if (!verifyGreenResult?.success) {
+      console.error(`Verifying Green failed! '${verifyGreenResult?.message}'`)
+
+      return res.status(204).json({
+        success: false,
+        response: verifyGreenResult?.message,
+      })
+    }
+
+    existingUser.verified = true
+    await existingUser.save()
+
+    return res.status(200).json({
+      success: true,
+      response: 'Verified',
+      data: verifyGreenResult,
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      response: error.message,
+    })
+  }
+}
+
+async function checkVerify(req, res) {
+  try {
+    const { userId } = req.user
+
+    const existingUser = await User.findById(userId)
+
+    // Decrypt the passKey
+    const privateKey = await decrypt(existingUser.passKey)
+
+    const wallet = new ethers.Wallet(privateKey, provider)
+
+    const masa = new Masa({
+      signer: wallet,
+      networkName: process.env.MASA_NETWORK_NAME,
+    })
+
+    // const userCode = await readLine(code)
+
+    await masa.session.login()
+
+    const greens = await masa.green.list()
+
+    if (greens.length === 0) {
+      console.warn('No Masa Green found')
+      return res.status(204).json({
+        success: false,
+        response: 'No Masa Green found',
+      })
+    }
+
+    let i = 1
+    for (const green of greens) {
+      console.log(`Token: ${i}`)
+      console.log(`Token ID: ${green.tokenId}`)
+      i++
+      if (green.metadata) {
+        console.log(`Metadata: ${JSON.stringify(green.metadata, null, 2)}`)
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      response: 'Verified',
+      // data: verifyGreenResult,
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      response: error.message,
+    })
+  }
+}
+
 module.exports = {
   createApiUser,
   login,
+  verifyPhone,
+  verifyCode,
+  checkVerify,
 }
