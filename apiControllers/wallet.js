@@ -93,7 +93,7 @@ async function getApiProfileUsername(req, res) {
   try {
     const name = req.params.name
 
-    const cleaned = name.replace(/\s+/g, '').toLowerCase()
+    const cleaned = name.replace(/\s+/g, '')
 
     const user = await User.findOne({ name: cleaned })
 
