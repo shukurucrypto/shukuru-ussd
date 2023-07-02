@@ -44,37 +44,6 @@ async function getApiProfileTx(req, res) {
       return res.status(404).json({ response: 'User not found' })
     }
 
-    // redisClient.get('uTxs', async (error, data) => {
-    //   if (error) return console.log(error)
-    //   if (data != null) {
-    //     console.log('====================================')
-    //     console.log('REDIS')
-    //     console.log('====================================')
-    //     return res.status(200).json({
-    //       success: true,
-    //       data: JSON.parse(data),
-    //     })
-    //   } else {
-    //     console.log('====================================')
-    //     console.log('NOTING')
-    //     console.log('====================================')
-    //     const txTo = await UserTransactions.findOne({ user: userId }).populate({
-    //       path: 'transactions',
-    //       options: { sort: { date: 'desc' } },
-    //     })
-    //     redisClient.setEx(
-    //       'uTxs',
-    //       DEFAULT_REDIS_EXPIRATION,
-    //       JSON.stringify(txTo)
-    //     )
-
-    //     return res.status(200).json({
-    //       success: true,
-    //       data: txTo,
-    //     })
-    //   }
-    // })
-
     const txTo = await UserTransactions.findOne({ user: userId }).populate({
       path: 'transactions',
       options: { sort: { date: 'desc' } },
@@ -562,6 +531,73 @@ async function getRawCUSDWalletApiBalance(req, res) {
   }
 }
 
+async function getApiBTCTxs(req, res) {
+  try {
+    const userId = req.params.userId
+
+    const user = await User.findById(userId)
+
+    if (!user) {
+      return res.status(404).json({ response: 'User not found' })
+    }
+
+    const txTo = await UserTransactions.findOne({ user: userId }).populate({
+      path: 'transactions',
+      options: { sort: { date: 'desc' } },
+    })
+
+    // Filter transactions with asset: 'Lightning' only
+    const lightningTransactions = txTo.transactions.filter((transaction) => {
+      return transaction.asset === 'Lightning'
+    })
+
+    return res.status(200).json({
+      success: true,
+      data: lightningTransactions,
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json(error.message)
+  }
+}
+
+async function getBTCWalletApiBalance(req, res) {
+  try {
+    const userId = req.params.userId
+
+    const currentUser = await User.findById(userId)
+
+    // let userBalance
+
+    if (!currentUser) {
+      return res.status(404).json({ response: 'User not found' })
+    }
+
+    const phoneNumber = currentUser.phoneNumber
+
+    let sats = await getSatsLightningBalance(phoneNumber)
+
+    const convertedSats = await satsConvertor(sats, currentUser.country)
+
+    const total = convertedSats
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        userId: currentUser._id,
+        lightning: convertedSats,
+        cusd: 0,
+        busd: 0,
+        eth: 0,
+        usdt: 0,
+        total: total,
+      },
+    })
+  } catch (error) {
+    res.status(500).json(error.message)
+  }
+}
+
 module.exports = {
   getWalletApiBalance,
   getProfile,
@@ -576,4 +612,6 @@ module.exports = {
   getBUSDWalletApiBalance,
   getRawCUSDWalletApiBalance,
   clearAllTransactions,
+  getApiBTCTxs,
+  getBTCWalletApiBalance,
 }

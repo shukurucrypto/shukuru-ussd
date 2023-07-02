@@ -371,10 +371,99 @@ async function checkVerify(req, res) {
   }
 }
 
+async function createBTCApiUser(req, res) {
+  try {
+    const { username, phone, email, password, accountType, country } = req.body
+    let token
+
+    const currentUser = await User.findOne({ phoneNumber: phone })
+
+    if (currentUser) {
+      return res.json({
+        response: 'User with account already exists',
+      })
+    }
+
+    // Encrypt the password of the user
+    const encryptedPassword = await encrypt(password)
+
+    // Create lightning wallet for the user
+    const lightningWallet = await createLightningWallet(username)
+
+    // // save the wallet to the database
+    const user = new User({
+      name: username,
+      email: email,
+      password: encryptedPassword,
+      phoneNumber: phone,
+      accountType: accountType,
+      country: country,
+    })
+
+    const savedUser = await user.save()
+
+    // Create jwt here...
+    token = await jwt.sign(
+      { userId: savedUser._id, phoneNumber: savedUser.phoneNumber },
+      process.env.ENCRYPTION_KEY
+    )
+
+    // console.log(lightningWallet)
+
+    // Encrypt lightning admin and in Key
+    const encryptedLightningAdminKey = await encrypt(
+      lightningWallet.wallets[0].adminkey
+    )
+    const encryptedLightningInKey = await encrypt(
+      lightningWallet.wallets[0].inkey
+    )
+
+    // Save the user to lightning address
+    const lightningUserWallet = new LightningWallet({
+      user: savedUser._id,
+      i_id: lightningWallet.id,
+      adminKey: encryptedLightningAdminKey,
+      walletId: lightningWallet.wallets[0].id,
+      inKey: encryptedLightningInKey,
+    })
+
+    // Save to user screts Schema
+    const userSecrets = new AccountSecrets({
+      user: savedUser._id,
+      btc: '0x',
+      eth: '0xbtc',
+    })
+
+    const userTx = new UserTransactions({
+      user: savedUser._id,
+    })
+
+    // Save to the secrets schema
+    await userSecrets.save()
+    await lightningUserWallet.save()
+
+    await userTx.save()
+
+    // newSignup(res)
+    return res.status(201).json({
+      success: true,
+      data: {
+        userId: savedUser._id,
+        email: savedUser.email,
+        token: token,
+        phone: savedUser.phoneNumber,
+      },
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.json(error.message)
+  }
+}
 module.exports = {
   createApiUser,
   login,
   verifyPhone,
   verifyCode,
   checkVerify,
+  createBTCApiUser,
 }

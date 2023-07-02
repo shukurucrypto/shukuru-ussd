@@ -11,6 +11,7 @@ const {
   verifyPhone,
   verifyCode,
   checkVerify,
+  createBTCApiUser,
 } = require('../apiControllers/auth.js')
 const {
   getWalletApiBalance,
@@ -26,6 +27,8 @@ const {
   getBUSDWalletApiBalance,
   getRawCUSDWalletApiBalance,
   clearAllTransactions,
+  getApiBTCTxs,
+  getBTCWalletApiBalance,
 } = require('../apiControllers/wallet.js')
 const {
   sendLightningApiPayment,
@@ -74,6 +77,7 @@ const apiRouter = express.Router()
 
 // App routes
 apiRouter.post('/auth/signup', createApiUser)
+apiRouter.post('/auth/btc/signup', createBTCApiUser)
 apiRouter.post('/auth/login', login)
 apiRouter.post('/verify', authenticateToken, verifyPhone)
 apiRouter.post('/code', authenticateToken, verifyCode)
@@ -81,6 +85,7 @@ apiRouter.get('/acc/verify', authenticateToken, checkVerify)
 
 // Wallet routes
 apiRouter.get('/wallet/:userId', getWalletApiBalance)
+apiRouter.get('/wallet/btc/:userId', getBTCWalletApiBalance)
 apiRouter.post('/convert', currencyConvertorApi)
 apiRouter.post('/toethers', currencyConvertorToEthersApi)
 apiRouter.get('/btc/txs/:userId', getBTCWalletTransactionsAPI)
@@ -109,6 +114,7 @@ apiRouter.get('/user/:userId', getProfile)
 apiRouter.get('/profile/:phone', getApiProfile)
 apiRouter.get('/profile/name/:name', getApiProfileUsername)
 apiRouter.get('/txs/:userId', getApiProfileTx)
+apiRouter.get('/txs/btc/:userId', getApiBTCTxs)
 apiRouter.post('/user/country/update', authenticateToken, changeUserCurrencyAPI)
 apiRouter.delete('/user/delete', authenticateToken, deleteUserAccount)
 
