@@ -384,6 +384,8 @@ async function createBTCApiUser(req, res) {
       })
     }
 
+    // here,...
+
     // Encrypt the password of the user
     const encryptedPassword = await encrypt(password)
 
