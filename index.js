@@ -24,6 +24,13 @@ const io = socketio(server)
 //   },
 // })
 
+// const io = socketIO(server, {
+//   cors: {
+//     origin: '*',
+//     credentials: true,
+//   },
+// })
+
 app.use(cors())
 
 app.use(bodyParser.json())
