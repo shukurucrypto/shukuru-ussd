@@ -375,6 +375,8 @@ async function getBUSDWalletApiBalance(req, res) {
 
     const busdWalletBalance = await busdContract.balanceOf(currentUser.address)
 
+    let convertedBusd
+
     if (Number(busdWalletBalance) > 0) {
       convertedBusd = await currencyConvertor(
         ethers.utils.formatEther(busdWalletBalance.toString()),
