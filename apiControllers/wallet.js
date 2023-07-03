@@ -375,7 +375,7 @@ async function getBUSDWalletApiBalance(req, res) {
 
     const busdWalletBalance = await busdContract.balanceOf(currentUser.address)
 
-    let convertedBusd
+    let convertedBusd = 0.0
 
     if (Number(busdWalletBalance) > 0) {
       convertedBusd = await currencyConvertor(
@@ -464,38 +464,38 @@ async function deleteUserAccount(req, res) {
   }
 }
 
-async function getBUSDWalletApiBalance(req, res) {
-  try {
-    const userId = req.params.userId
+// async function getBUSDWalletApiBalance(req, res) {
+//   try {
+//     const userId = req.params.userId
 
-    const currentUser = await User.findById(userId)
+//     const currentUser = await User.findById(userId)
 
-    // let userBalance
+//     // let userBalance
 
-    if (!currentUser) {
-      return res.status(404).json({ response: 'User not found' })
-    }
+//     if (!currentUser) {
+//       return res.status(404).json({ response: 'User not found' })
+//     }
 
-    const busdContract = new ethers.Contract(busdAddress, BUSDABI, provider)
+//     const busdContract = new ethers.Contract(busdAddress, BUSDABI, provider)
 
-    const busdWalletBalance = await busdContract.balanceOf(currentUser.address)
+//     const busdWalletBalance = await busdContract.balanceOf(currentUser.address)
 
-    if (Number(busdWalletBalance) > 0) {
-      convertedBusd = await currencyConvertor(
-        ethers.utils.formatEther(busdWalletBalance.toString()),
-        'USD',
-        currentUser.country
-      )
-    }
+//     if (Number(busdWalletBalance) > 0) {
+//       convertedBusd = await currencyConvertor(
+//         ethers.utils.formatEther(busdWalletBalance.toString()),
+//         'USD',
+//         currentUser.country
+//       )
+//     }
 
-    return res.status(200).json({
-      success: true,
-      data: Number(convertedBusd),
-    })
-  } catch (error) {
-    res.status(500).json(error.message)
-  }
-}
+//     return res.status(200).json({
+//       success: true,
+//       data: Number(convertedBusd),
+//     })
+//   } catch (error) {
+//     res.status(500).json(error.message)
+//   }
+// }
 
 async function getRawCUSDWalletApiBalance(req, res) {
   try {
