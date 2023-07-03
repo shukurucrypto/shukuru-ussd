@@ -50,6 +50,8 @@ const {
   sendRawApiCeloUSD,
   sendRawApiBUSD,
   buyUtility,
+  checkCeloGas,
+  requestForGas,
 } = require('../apiControllers/payments.js')
 const accessTokenBearer = require('../middleware/accessTokenBearer.js')
 const {
@@ -121,6 +123,7 @@ apiRouter.delete('/user/delete', authenticateToken, deleteUserAccount)
 // Payments
 apiRouter.post('/send', authenticateToken, sendLightningApiPayment)
 apiRouter.post('/send/cusd', authenticateToken, sendApiCeloUSD)
+apiRouter.get('/gas/:userId', checkCeloGas)
 apiRouter.post('/send/busd', authenticateToken, sendApiBUSD)
 apiRouter.post('/invoice/create', accessTokenBearer, createAPILightningInvoice)
 apiRouter.post('/invoice/decode', decodeInvoiceAPI)
@@ -151,4 +154,5 @@ apiRouter.get('/rewards/check', authenticateToken, checkReward)
 
 // Utilities
 apiRouter.post('/utility/pay', authenticateToken, buyUtility)
+apiRouter.post('/gas/request', requestForGas)
 module.exports = apiRouter
