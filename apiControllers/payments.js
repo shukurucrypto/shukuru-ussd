@@ -32,6 +32,7 @@ const { getLightningWalletBalance } = require('../lightning/walletBalance.js')
 const {
   createBTCPlatformTxFeeInvoice,
   platformPayoutFeeAmount,
+  sendAdminPayment,
 } = require('../platformPayout/platformPayout.js')
 const UserTransactions = require('../models/UserTransactions.js')
 const {
@@ -1741,50 +1742,80 @@ async function buyUtility(req, res) {
 
     const sender = await User.findById(user.userId)
 
-    let cUSDtoken = await kit.contracts.getStableToken()
+    let txRecipt
 
-    // This lines will convert the cUSD balance from the user's local currency back to USD
-    const convertedToUSDAmount = await currencyConvertor(
-      amount,
-      sender.country,
-      'USD'
-    )
-    const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
+    if (asset === 'lightning') {
+      // Send lightning payment here...
+      const { adminKey: payerKey } = await LightningWallet.findOne({
+        user: sender._id,
+      })
 
-    const amount_ = parsedAmount.toString()
+      // decrypt the inKey
+      const keyPayer = await decrypt(payerKey)
 
-    // Get the current user / payer passkey
-    const dbPrivateKey = sender.passKey
+      // Create the invoice from the reciever
+      const invoice = await sendAdminPayment(sender, amount)
 
-    // Decrypt the passKey
-    const privateKey = await decrypt(dbPrivateKey)
+      const invoiceData = {
+        out: true,
+        bolt11: invoice.payment_request,
+      }
 
-    // tx object
-    await kit.connection.addAccount(privateKey)
+      // Sender pay platform fees here
+      txRecipt = await payLightingInvoice(keyPayer, invoiceData)
 
-    // get wallet balance
-    const walletBalance = await cUSDtoken.balanceOf(sender.address)
+      if (!txRecipt?.payment_hash) {
+        return res.status(200).json({
+          success: false,
+        })
+      }
+    } else {
+      let cUSDtoken = await kit.contracts.getStableToken()
 
-    const convertedBalance = await ethers.utils.formatEther(
-      walletBalance.toString()
-    )
+      // This lines will convert the cUSD balance from the user's local currency back to USD
+      const convertedToUSDAmount = await currencyConvertor(
+        amount,
+        sender.country,
+        'USD'
+      )
+      const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
 
-    if (Number(convertedBalance) === 0.0 || Number(convertedBalance) === 0) {
-      return res.status(403).json({ response: 'Insufficent cUSD balance' })
+      const amount_ = parsedAmount.toString()
+
+      // Get the current user / payer passkey
+      const dbPrivateKey = sender.passKey
+
+      // Decrypt the passKey
+      const privateKey = await decrypt(dbPrivateKey)
+
+      // tx object
+      await kit.connection.addAccount(privateKey)
+
+      // get wallet balance
+      const walletBalance = await cUSDtoken.balanceOf(sender.address)
+
+      const convertedBalance = await ethers.utils.formatEther(
+        walletBalance.toString()
+      )
+
+      if (Number(convertedBalance) === 0.0 || Number(convertedBalance) === 0) {
+        return res.status(403).json({ response: 'Insufficent cUSD balance' })
+      }
+
+      // PAYING FOR DATA
+      const result = await cUSDtoken
+        .transfer(adminAddress, amount_)
+        .send({ from: sender.address })
+
+      txRecipt = await result.waitReceipt()
+
+      if (!txRecipt.status) {
+        return res
+          .status(403)
+          .json({ success: false, response: 'Transaction failed!' })
+      }
     }
-
-    // PAYING FOR DATA
-    const result = await cUSDtoken
-      .transfer(adminAddress, amount_)
-      .send({ from: sender.address })
-
-    let txRecipt = await result.waitReceipt()
-
-    if (!txRecipt.status) {
-      return res
-        .status(403)
-        .json({ success: false, response: 'Transaction failed!' })
-    }
+    // Notification goes here...
 
     // Send telegram order msg here...
     const htmlText = `<b>Incoming Order</b>, <strong>${network} Data</strong>
@@ -1798,7 +1829,7 @@ async function buyUtility(req, res) {
       currency: sender.country,
       asset: asset,
       amount: amount,
-      txHash: txRecipt.transactionHash,
+      txHash: txRecipt?.transactionHash,
       txType: 'utility',
     })
 

@@ -10,6 +10,21 @@ const platformPayoutFeeAmount = (amount) => {
   return fee
 }
 
+const sendAdminPayment = async (currentUser, amount) => {
+  // Create the invoice from the reciever
+
+  const data = {
+    out: false,
+    amount: amount,
+    memo: `${currentUser.name} has paid for a utitity`,
+    unit: currentUser.country,
+  }
+
+  const invoiceResponse = await createLightingInvoice(ADMIN_INKEY, data)
+
+  return invoiceResponse
+}
+
 const createBTCPlatformTxFeeInvoice = async (currentUser, amount) => {
   // Create the invoice from the reciever
 
@@ -30,4 +45,5 @@ const createBTCPlatformTxFeeInvoice = async (currentUser, amount) => {
 module.exports = {
   createBTCPlatformTxFeeInvoice,
   platformPayoutFeeAmount,
+  sendAdminPayment,
 }
