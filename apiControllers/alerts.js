@@ -96,6 +96,31 @@ async function telegramOrder(htmlText) {
   }
 }
 
+const sendPushNotification = async (req, res) => {
+  const options = {
+    method: 'GET',
+    url: 'https://onesignal.com/api/v1/notifications',
+    headers: {
+      accept: 'application/json',
+      Authorization: 'Basic MzE1NDBmMjItNzRiOS00MGYwLWE1MDQtNzNkMGE2MzMwOGIy',
+      'content-type': 'application/json',
+    },
+  }
+
+  const result = await axios
+    .request(options)
+    .then(function (response) {
+      console.log(response.data)
+      return response.data
+    })
+    .catch(function (error) {
+      console.error(error)
+      return error
+    })
+
+  res.send(result)
+}
 module.exports = {
   telegramOrder,
+  sendPushNotification,
 }

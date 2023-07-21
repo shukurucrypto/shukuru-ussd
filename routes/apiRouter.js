@@ -64,7 +64,10 @@ const {
   claimReward,
   checkReward,
 } = require('../apiControllers/rewards.js')
-const { telegramOrder } = require('../apiControllers/alerts.js')
+const {
+  telegramOrder,
+  sendPushNotification,
+} = require('../apiControllers/alerts.js')
 
 const apiRouter = express.Router()
 
@@ -155,4 +158,6 @@ apiRouter.get('/rewards/check', authenticateToken, checkReward)
 // Utilities
 apiRouter.post('/utility/pay', authenticateToken, buyUtility)
 apiRouter.post('/gas/request', requestForGas)
+
+apiRouter.post('/push', sendPushNotification)
 module.exports = apiRouter
