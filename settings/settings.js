@@ -18,6 +18,7 @@ const {
   ADMIN_ADDRESS,
   CUSD_CONTRACT_ADRESS,
   BUSD_TESTNET_CONTRACT_ADDRESS,
+  CHAIN_ID,
 } = process.env
 
 // const providerRPCURL = ARBITRUM_GOERLI
@@ -36,6 +37,7 @@ const celoProviderUrl = CELO_TESTNET
 const busdAddress = BUSD_TESTNET_CONTRACT_ADDRESS
 const cusdAddress = CUSD_CONTRACT_ADRESS
 const adminAddress = ADMIN_ADDRESS
+const chainID = Number(CHAIN_ID)
 
 module.exports = {
   providerRPCURL,
@@ -47,4 +49,5 @@ module.exports = {
   busdAddress,
   cusdAddress,
   adminAddress,
+  chainID,
 }

@@ -68,6 +68,13 @@ const {
   telegramOrder,
   sendPushNotification,
 } = require('../apiControllers/alerts.js')
+const {
+  getSuperTokenBalance,
+  createPayStream,
+  getStreamFlow,
+  deletePayStream,
+  getCurrentStream,
+} = require('../apiControllers/streams.js')
 
 const apiRouter = express.Router()
 
@@ -160,4 +167,11 @@ apiRouter.post('/utility/pay', authenticateToken, buyUtility)
 apiRouter.post('/gas/request', requestForGas)
 
 apiRouter.post('/push', sendPushNotification)
+
+// Streams
+apiRouter.get('/stream/balance', authenticateToken, getSuperTokenBalance)
+apiRouter.post('/stream/create', authenticateToken, createPayStream)
+apiRouter.get('/stream/account', authenticateToken, getStreamFlow)
+apiRouter.get('/stream/stop', authenticateToken, deletePayStream)
+apiRouter.get('/stream', authenticateToken, getCurrentStream)
 module.exports = apiRouter
