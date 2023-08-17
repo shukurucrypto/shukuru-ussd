@@ -68,6 +68,7 @@ const {
   telegramOrder,
   sendPushNotification,
 } = require('../apiControllers/alerts.js')
+const { getQuote } = require('../apiControllers/oneRamp.js')
 
 const apiRouter = express.Router()
 
@@ -160,4 +161,7 @@ apiRouter.post('/utility/pay', authenticateToken, buyUtility)
 apiRouter.post('/gas/request', requestForGas)
 
 apiRouter.post('/push', sendPushNotification)
+
+// OneRamp
+apiRouter.post('/quote', authenticateToken, getQuote)
 module.exports = apiRouter

@@ -1,45 +1,20 @@
 const ethers = require('ethers')
 const User = require('../models/User.js')
-const Assets = require('../models/Assets.js')
 const UserTransactions = require('../models/UserTransactions.js')
 
 const { currencyConvertor } = require('../utils/currencyConvertor.js')
 const Web3 = require('web3')
 const Redis = require('redis')
-const { encrypt, decrypt } = require('../security/encrypt.js')
-const {
-  getCreateUserWalletInfo,
-  truncateAddress,
-} = require('../regex/ussdRegex.js')
-const jwt = require('jsonwebtoken')
 
-const passport = require('passport-local')
-const sendSMS = require('../SMS/smsFunctions.js')
-const {
-  providerRPCURL,
-  celoProviderUrl,
-  bscProviderURL,
-} = require('../settings/settings.js')
-const { createBitcoinWallet } = require('../functions/createBitcoinWallet.js')
-const AccountSecrets = require('../models/AccountSecrets.js')
-const { createLightningWallet } = require('../lightning/createWallet.js')
-const LightningWallet = require('../models/LightningWallet.js')
-const { getUserCurrency } = require('../functions/getUserCurrency.js')
-const { newSignup } = require('../sockets/sockets.js')
+const { celoProviderUrl, bscProviderURL } = require('../settings/settings.js')
 const Rewards = require('../models/Rewards.js')
 const Transaction = require('../models/Transaction.js')
 const ContractKit = require('@celo/contractkit')
 
 require('dotenv').config()
 
-const redisClient = Redis.createClient()
-const DEFAULT_REDIS_EXPIRATION = 36000
-
 const web3 = new Web3(celoProviderUrl)
 const kit = ContractKit.newKitFromWeb3(web3)
-
-const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
-const celoProvider = new ethers.providers.JsonRpcProvider(celoProviderUrl)
 
 async function sendReward(req, res) {
   try {

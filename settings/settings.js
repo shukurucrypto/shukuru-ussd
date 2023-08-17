@@ -18,11 +18,15 @@ const {
   ADMIN_ADDRESS,
   CUSD_CONTRACT_ADRESS,
   BUSD_TESTNET_CONTRACT_ADDRESS,
+  CLIENT_KEY,
+  SECRET_KEY,
 } = process.env
 
 // const providerRPCURL = ARBITRUM_GOERLI
 const providerRPCURL = POLYGON_MUMBAI
 const bscProviderURL = BSC_TESTNET_RPC_URL
+const oneRampClient = CLIENT_KEY
+const oneRampSecret = SECRET_KEY
 
 const networkServer = 1
 const ENVIRONMENT = 'testnet'
@@ -47,4 +51,6 @@ module.exports = {
   busdAddress,
   cusdAddress,
   adminAddress,
+  oneRampClient,
+  oneRampSecret,
 }
