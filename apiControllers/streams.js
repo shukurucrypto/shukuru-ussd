@@ -63,6 +63,7 @@ async function createPayStream(req, res) {
     const { reciever, recieverId, amount, duration } = req.body
 
     const currentUser = await User.findById(user.userId)
+    // const currentUser = await User.findById(recieverId)
 
     // First convert the money to USD
     const amountConverted = await currencyConvertor(
