@@ -24,6 +24,7 @@ const {
 // const providerRPCURL = ARBITRUM_GOERLI
 const providerRPCURL = POLYGON_MUMBAI
 const bscProviderURL = BSC_TESTNET_RPC_URL
+const arbigoerli = ARBITRUM_GOERLI
 
 const networkServer = 1
 const ENVIRONMENT = 'testnet'
@@ -50,4 +51,5 @@ module.exports = {
   cusdAddress,
   adminAddress,
   chainID,
+  arbigoerli,
 }
