@@ -10,9 +10,11 @@ function authenticateToken(req, res, next) {
     return res.status(403).json({ success: false, message: 'Not Authorized.' })
   }
 
+  const cleanedToken = token.replace(/"/g, '')
+
   try {
     // Verify the token and get the decoded payload
-    const decoded = jwt.verify(token, process.env.ENCRYPTION_KEY)
+    const decoded = jwt.verify(cleanedToken, process.env.ENCRYPTION_KEY)
 
     // Set the user object on the request for use in downstream middleware and routes
     req.user = decoded

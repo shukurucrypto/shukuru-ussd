@@ -1,51 +1,7 @@
-const ContractKit = require('@celo/contractkit')
-const {
-  providerRPCURL,
-  celoProviderUrl,
-  bscProviderURL,
-  busdAddress,
-  cusdAddress,
-} = require('../settings/settings.js')
-
-const Web3 = require('web3')
-const ethers = require('ethers')
-const User = require('../models/User.js')
-const Transaction = require('../models/Transaction.js')
-const {
-  createLightingInvoice,
-} = require('../lightning/createLightningInvoice.js')
-const bcrypt = require('bcrypt')
-const { decrypt } = require('../security/encrypt.js')
-const sendSMS = require('../SMS/smsFunctions.js')
-const {
-  extractPhoneNumber,
-  getUserPaymentAmount,
-  getUserToPayPhoneNumber,
-  truncateAddress,
-} = require('../regex/ussdRegex.js')
-const AccountSecrets = require('../models/AccountSecrets.js')
-const { sendBitcoinTx } = require('../functions/sendBitcoinTx.js')
-const LightningWallet = require('../models/LightningWallet.js')
-const { payLightingInvoice } = require('../lightning/payLightingInvoice.js')
-const { getLightningWalletBalance } = require('../lightning/walletBalance.js')
-const {
-  createBTCPlatformTxFeeInvoice,
-  platformPayoutFeeAmount,
-} = require('../platformPayout/platformPayout.js')
-const UserTransactions = require('../models/UserTransactions.js')
-const {
-  decodeLightningInvoice,
-} = require('../lightning/decodeLightningInvoice.js')
-const { currencyConvertor } = require('../utils/currencyConvertor.js')
-const {
-  getLightningWalletTransactions,
-} = require('../lightning/getWalletTransactions.js')
-const { invoiceStatus } = require('../lightning/invoiceStatusHash.js')
-const ActiveInvoice = require('../models/ActiveInvoice.js')
-const BUSDABI = require('../abiData/erc20.json')
-const NfcCard = require('../models/NfcCard.js')
-const { log } = require('console')
+const User = require('../models/User')
 const { default: axios } = require('axios')
+
+const sdk = require('api')('@onesignal/v11.0#18i3iim3olli9343r')
 
 require('dotenv').config()
 
@@ -120,7 +76,66 @@ const sendPushNotification = async (req, res) => {
 
   res.send(result)
 }
+
+const sendUserPush = async (req, res) => {
+  try {
+    const { user, msg, name } = req.body
+
+    const targetedUser = await User.findOne({ name: user })
+
+    if (!targetedUser) {
+      return res
+        .status(404)
+        .json({ success: false, response: 'User not found' })
+    }
+
+    const result = await sendPush(targetedUser._id, msg, name)
+
+    res.status(200).json({ success: true, response: result })
+  } catch (error) {
+    return res.status(500).json({ success: false, response: error.message })
+  }
+}
+
+const sendPush = async (userId, msg, name) => {
+  try {
+    const options = {
+      method: 'POST',
+      url: 'https://onesignal.com/api/v1/notifications',
+      headers: {
+        accept: 'application/json',
+        Authorization: 'Basic MzE1NDBmMjItNzRiOS00MGYwLWE1MDQtNzNkMGE2MzMwOGIy',
+        'content-type': 'application/json',
+      },
+      data: {
+        app_id: 'bdb34439-82ae-4091-bcb3-664874f10810',
+
+        include_external_user_ids: [userId],
+        contents: {
+          en: msg,
+        },
+        name,
+      },
+    }
+
+    const result = await axios
+      .request(options)
+      .then(function (response) {
+        return response.data
+      })
+      .catch(function (error) {
+        return error
+      })
+
+    return result
+  } catch (error) {
+    return error
+  }
+}
+
 module.exports = {
   telegramOrder,
   sendPushNotification,
+  sendUserPush,
+  sendPush,
 }

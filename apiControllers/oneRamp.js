@@ -10,6 +10,9 @@ const {
   celoProviderUrl,
 } = require('../settings/settings')
 const { createSigner } = require('../helpers/signer')
+const Transaction = require('../models/Transaction')
+const { sendPush } = require('./alerts')
+const UserTransactions = require('../models/UserTransactions')
 
 const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
 const celoProvider = new ethers.providers.JsonRpcProvider(celoProviderUrl)
@@ -31,19 +34,134 @@ async function getQuote(req, res) {
       wallet
     )
 
-    const quote = await oneRamp.quote(amount, tokenAddress)
+    const quote = await oneRamp.quote(amount, 'stable')
 
     return res.status(200).json({
+      success: true,
       response: quote,
     })
   } catch (error) {
     console.log(error.message)
     return res.status(500).json({
+      success: false,
       response: error,
     })
   }
 }
 
+async function withdrawCUSD(req, res) {
+  try {
+    const user = req.user
+
+    const { amount, tokenAddress, phoneNumber, asset } = req.body
+
+    const wallet = await createSigner(user.userId, 'celo')
+
+    let oneRamp
+
+    if (asset === 'cUSD') {
+      // Initialize oneramp here...
+      oneRamp = new OneRamp(
+        'alfajores',
+        oneRampClient,
+        oneRampSecret,
+        celoProvider,
+        wallet
+      )
+    } else {
+      // Initialize oneramp here...
+      oneRamp = new OneRamp(
+        'bscTestnet',
+        oneRampClient,
+        oneRampSecret,
+        provider,
+        wallet
+      )
+    }
+
+    const { success, response } = await oneRamp.offramp(
+      'stable',
+      amount,
+      phoneNumber
+    )
+
+    if (!success) {
+      return res
+        .status(401)
+        .json({ success: false, response: 'Transaction failed!' })
+    }
+
+    const newTx = new Transaction({
+      sender: user.userId,
+      txHash: response.txHash,
+      asset: asset,
+      amount: response.fiat,
+      currency: user.country,
+      txType: 'withdraw',
+      phoneNumber: response.phone,
+      external: true,
+    })
+
+    const saved = await newTx.save()
+
+    const userTx = await UserTransactions.findOne({ user: user.userId })
+
+    await userTx.transactions.push(saved._id)
+
+    await userTx.save()
+
+    return res.status(200).json({
+      success: true,
+      response: response,
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      response: error,
+    })
+  }
+}
+
+async function confirmedTxCallback(req, res) {
+  try {
+    const { txHash } = req.body
+
+    const activeTx = await Transaction.findOne({ txHash: txHash })
+
+    if (!activeTx) {
+      return res
+        .status(404)
+        .json({ success: false, response: 'Transaction not found!' })
+    }
+
+    activeTx.status = 'DONE'
+
+    activeTx.save()
+
+    const user = await User.findById(activeTx.sender)
+
+    const data = {
+      name: 'PAYOUT',
+      msg: `🎉 Your ${user.country} ${Number(activeTx.amount).toFixed()} (${
+        activeTx.asset
+      }) withdraw has been sent to your ${
+        activeTx.phoneNumber
+      } mobile money! 😌`,
+    }
+
+    // Send the user a push notification
+    const result = await sendPush(activeTx.sender, data.msg, data.name)
+
+    return res.status(200).json({ success: true, response: result })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ success: false, response: error })
+  }
+}
+
 module.exports = {
   getQuote,
+  withdrawCUSD,
+  confirmedTxCallback,
 }
