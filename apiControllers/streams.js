@@ -103,6 +103,9 @@ async function createPayStream(req, res) {
       sender: currentUser.address,
       receiver: reciever,
       flowRate: flowRate,
+      overrides: {
+        gasLimit: 50000,
+      },
     })
 
     const txnResponse = await createFlowOperation.exec(signer)
