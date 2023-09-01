@@ -1736,7 +1736,7 @@ async function sendRawApiBUSD(req, res) {
 
 async function buyUtility(req, res) {
   try {
-    const { network, package, asset, amount } = req.body
+    const { network, package, asset, amount, phone } = req.body
 
     const user = req.user
 
@@ -1819,7 +1819,7 @@ async function buyUtility(req, res) {
 
     // Send telegram order msg here...
     const htmlText = `<b>Incoming Order</b>, <strong>${network} Data</strong>
-     Send +${sender.phoneNumber} ${package} data.`
+     Send +${phone} ${package} data.`
 
     await telegramOrder(htmlText)
 
