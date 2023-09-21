@@ -4,8 +4,10 @@ const { decrypt } = require('../security/encrypt')
 const {
   bscProviderURL,
   celoProviderUrl,
-  oneRampClient,
-  oneRampSecret,
+  alfajoresRPC,
+  celo,
+  polygon,
+  bnb,
 } = require('../settings/settings')
 
 const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
@@ -13,17 +15,13 @@ const celoProvider = new ethers.providers.JsonRpcProvider(celoProviderUrl)
 
 const createSigner = async (userId, network) => {
   try {
-    let provider
+    // let provider
 
     const currenctUser = await User.findById(userId)
 
     const privateKey = await decrypt(currenctUser.passKey)
 
-    if (network === 'celo') {
-      provider = celoProvider
-    } else {
-      provider = provider
-    }
+    const provider = getProvider(network)
 
     const signer = await new ethers.Wallet(privateKey, provider)
 
@@ -33,25 +31,25 @@ const createSigner = async (userId, network) => {
   }
 }
 
-const initialiseOneRamp = async (wallet, network) => {
-  try {
-    let provider
+const getProvider = (network) => {
+  switch (network) {
+    case 'celo':
+      return new ethers.providers.JsonRpcProvider(celo)
 
-    // Initialize oneramp here...
-    const oneRamp = new OneRamp(
-      network,
-      oneRampClient,
-      oneRampSecret,
-      celoProvider,
-      wallet
-    )
+    case 'polygon':
+      return new ethers.providers.JsonRpcProvider(polygon)
 
-    return oneRamp
-  } catch (error) {
-    return error
+    case 'bnb':
+      return new ethers.providers.JsonRpcProvider(bnb)
+
+    // Main nets
+
+    default:
+      return new ethers.providers.JsonRpcProvider(celo)
   }
 }
 
 module.exports = {
   createSigner,
+  getProvider,
 }

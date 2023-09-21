@@ -1,5 +1,4 @@
-const { OneRamp } = require('oneramp')
-
+const { OneRamp } = require('@oneramp/sdk')
 const ethers = require('ethers')
 const User = require('../models/User')
 const { decrypt } = require('../security/encrypt')
@@ -8,33 +7,37 @@ const {
   oneRampSecret,
   bscProviderURL,
   celoProviderUrl,
+  mumbaiProvider,
 } = require('../settings/settings')
-const { createSigner } = require('../helpers/signer')
+const { createSigner, getProvider } = require('../helpers/signer')
 const Transaction = require('../models/Transaction')
 const { sendPush } = require('./alerts')
 const UserTransactions = require('../models/UserTransactions')
 
 const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
 const celoProvider = new ethers.providers.JsonRpcProvider(celoProviderUrl)
+const polygonMumbaiProvider = new ethers.providers.JsonRpcProvider(
+  mumbaiProvider
+)
 
 async function getQuote(req, res) {
   try {
     const user = req.user
 
-    const { amount, tokenAddress } = req.body
+    const { amount, asset, network } = req.body
 
-    const wallet = await createSigner(user.userId, 'celo')
+    const wallet = await createSigner(user.userId, network)
 
     // Initialize oneramp here...
     const oneRamp = new OneRamp(
-      'alfajores',
+      'mumbai',
       oneRampClient,
       oneRampSecret,
-      celoProvider,
+      polygonMumbaiProvider,
       wallet
     )
 
-    const quote = await oneRamp.quote(amount, 'stable')
+    const quote = await oneRamp.quote(amount, asset)
 
     return res.status(200).json({
       success: true,
@@ -53,35 +56,37 @@ async function withdrawCUSD(req, res) {
   try {
     const user = req.user
 
-    const { amount, tokenAddress, phoneNumber, asset } = req.body
+    const { amount, tokenAddress, phoneNumber, asset, network } = req.body
 
-    const wallet = await createSigner(user.userId, 'celo')
+    const testingNetwork = 'polygon'
+
+    const wallet = await createSigner(user.userId, testingNetwork) // <-- Change to the asset
 
     let oneRamp
 
     if (asset === 'cUSD') {
       // Initialize oneramp here...
       oneRamp = new OneRamp(
-        'alfajores',
+        'mumbai', /// <-- Change to celo
         oneRampClient,
         oneRampSecret,
-        celoProvider,
+        polygonMumbaiProvider, /// <--- Change the provider to celo
         wallet
       )
     } else {
       // Initialize oneramp here...
       oneRamp = new OneRamp(
-        'bscTestnet',
+        'mumbai', /// <-- Change the provider to polygon
         oneRampClient,
         oneRampSecret,
-        provider,
+        polygonMumbaiProvider, /// <--- Change the provider to polygon main
         wallet
       )
     }
 
     const { success, response } = await oneRamp.offramp(
-      'stable',
-      amount,
+      'usdt',
+      Number(amount),
       phoneNumber
     )
 
@@ -149,6 +154,18 @@ async function confirmedTxCallback(req, res) {
         activeTx.phoneNumber
       } mobile money! 😌`,
     }
+
+    // const { user, msg, name } = req.body
+
+    // const targetedUser = await User.findOne({ name: user })
+
+    // if (!targetedUser) {
+    //   return res
+    //     .status(404)
+    //     .json({ success: false, response: 'User not found' })
+    // }
+
+    // const result = await sendPush(targetedUser._id, msg, name)
 
     // Send the user a push notification
     const result = await sendPush(activeTx.sender, data.msg, data.name)
