@@ -1388,10 +1388,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@oneramp/sdk@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.npmjs.org/@oneramp/sdk/-/sdk-1.0.4.tgz#f7269ab6e30b99342fe383e39184cdd4a3e21d01"
-  integrity sha512-9jJ1LjpvuxIMWZ3DChZzRnASXrwbwd2n6eANemsnaVg/f+P61Gc9AygCX37svXLx+7fQ8Nbl8ic6DkXvbSLbeg==
+"@oneramp/sdk@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.npmjs.org/@oneramp/sdk/-/sdk-1.0.5.tgz#fb0c884f97b03b0823baed90823579171863e89f"
+  integrity sha512-v444RGwzDs92RFQyZvJkibbmBxFrzNMoLyT6eLYd/m6zz1Q+Gv2sIarw9f874xDzAGaOyZfN37tAm3wwH/2cUQ==
   dependencies:
     axios "^1.5.0"
     easy-currencies "^1.7.0"
