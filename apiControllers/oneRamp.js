@@ -65,6 +65,12 @@ async function withdrawCUSD(req, res) {
     if (asset === 'cUSD') {
       // Initialize oneramp here...
 
+      console.log('====================================')
+      console.log('DEBUG HERE....', wallet)
+      console.log('====================================')
+
+      return res.status(404).json({ success: false })
+
       oneRamp = new OneRamp(
         'celo', /// <-- Change to celo
         oneRampClient,
