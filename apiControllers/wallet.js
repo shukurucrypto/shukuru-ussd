@@ -203,6 +203,10 @@ async function getWalletApiBalance(req, res) {
     let convertedBusd = 0
     let sats = await getSatsLightningBalance(phoneNumber)
 
+    console.log('====================================')
+    console.log(sats)
+    console.log('====================================')
+
     let celloDollarBalance = await getCelloDollarBalance(phoneNumber)
     celloDollarBalance_ = ethers.utils.formatEther(celloDollarBalance)
 
