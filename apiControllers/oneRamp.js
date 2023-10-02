@@ -83,14 +83,6 @@ async function withdrawCUSD(req, res) {
       )
     }
 
-    const result = await oneRamp.offramp('stable', Number(amount), phoneNumber)
-
-    console.log('====================================')
-    console.log('DEBUG HERE....', result)
-    console.log('====================================')
-
-    return res.status(404).json({ success: false })
-
     const { success, response } = await oneRamp.offramp(
       'stable',
       Number(amount),
