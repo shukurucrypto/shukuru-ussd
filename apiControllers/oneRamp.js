@@ -58,14 +58,13 @@ async function withdrawCUSD(req, res) {
 
     const { amount, tokenAddress, phoneNumber, asset, network } = req.body
 
-    const testingNetwork = 'polygon'
-
-    const wallet = await createSigner(user.userId, testingNetwork) // <-- Change to the asset
+    const wallet = await createSigner(user.userId, network) // <-- Change to the asset
 
     let oneRamp
 
     if (asset === 'cUSD') {
       // Initialize oneramp here...
+
       oneRamp = new OneRamp(
         'celo', /// <-- Change to celo
         oneRampClient,
