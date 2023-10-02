@@ -13,11 +13,13 @@
   "dependencies": {
     "@celo/contractkit": "^2.3.0",
     "@masa-finance/masa-sdk": "^3.3.7",
+    "@oneramp/sdk": "^1.0.4",
     "@uniswap/sdk": "^3.0.3",
     "@uniswap/sdk-core": "^3.0.2",
     "@uniswap/smart-order-router": "^2.9.3",
     "@uniswap/v3-sdk": "^3.9.0",
     "africastalking": "^0.6.2",
+    "api": "^6.1.1",
     "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
     "bip21": "^2.0.3",
