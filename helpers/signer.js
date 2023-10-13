@@ -2,13 +2,18 @@ const ethers = require('ethers')
 const User = require('../models/User')
 const { decrypt } = require('../security/encrypt')
 const {
-  bscProviderURL,
-  celoProviderUrl,
-  alfajoresRPC,
   celo,
   polygon,
   bnb,
+  celoProviderUrl,
+  bscProviderURL,
 } = require('../settings/settings')
+const ContractKit = require('@celo/contractkit')
+const { currencyConvertor } = require('../utils/currencyConvertor')
+const Web3 = require('web3')
+
+const web3 = new Web3(celoProviderUrl)
+const kit = ContractKit.newKitFromWeb3(web3)
 
 const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
 const celoProvider = new ethers.providers.JsonRpcProvider(celoProviderUrl)
@@ -49,7 +54,70 @@ const getProvider = (network) => {
   }
 }
 
+const sendcUSDKit = async (sender, receiver, amount) => {
+  try {
+    let cUSDtoken = await kit.contracts.getStableToken()
+
+    // This lines will convert the cUSD balance from the user's local currency back to USD
+    const convertedToUSDAmount = await currencyConvertor(
+      amount,
+      sender.country,
+      'USD'
+    )
+    const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
+
+    const amount_ = parsedAmount.toString()
+
+    // Get the current user / payer passkey
+    const dbPrivateKey = sender.passKey
+
+    // Decrypt the passKey
+    const privateKey = await decrypt(dbPrivateKey)
+
+    await kit.setFeeCurrency(ContractKit.CeloContract.StableToken)
+
+    // tx object
+    await kit.connection.addAccount(privateKey)
+
+    await kit.setFeeCurrency(ContractKit.CeloContract.StableToken)
+
+    // tx object
+    await kit.connection.addAccount(privateKey)
+
+    // get wallet balance
+    const walletBalance = await cUSDtoken.balanceOf(sender.address)
+
+    const convertedBalance = await ethers.utils.formatEther(
+      walletBalance.toString()
+    )
+
+    if (Number(convertedBalance) === 0.0 || Number(convertedBalance) === 0) {
+      return 'Insufficent cUSD balance'
+    }
+
+    // SENDING
+    if (receiver.address) {
+      const result = await cUSDtoken
+        .transfer(receiver.address, amount_)
+        .send({ from: sender.address })
+
+      let txRecipt = await result.waitReceipt()
+      return txRecipt
+    } else {
+      const result = await cUSDtoken
+        .transfer(receiver, amount_)
+        .send({ from: sender.address })
+
+      let txRecipt = await result.waitReceipt()
+      return txRecipt
+    }
+  } catch (error) {
+    return error
+  }
+}
+
 module.exports = {
   createSigner,
   getProvider,
+  sendcUSDKit,
 }

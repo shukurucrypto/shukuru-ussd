@@ -1,6 +1,5 @@
 const ContractKit = require('@celo/contractkit')
 const {
-  providerRPCURL,
   celoProviderUrl,
   bscProviderURL,
   busdAddress,
@@ -15,23 +14,11 @@ const Transaction = require('../models/Transaction.js')
 const {
   createLightingInvoice,
 } = require('../lightning/createLightningInvoice.js')
-const bcrypt = require('bcrypt')
 const { decrypt } = require('../security/encrypt.js')
-const sendSMS = require('../SMS/smsFunctions.js')
-const {
-  extractPhoneNumber,
-  getUserPaymentAmount,
-  getUserToPayPhoneNumber,
-  truncateAddress,
-} = require('../regex/ussdRegex.js')
-const AccountSecrets = require('../models/AccountSecrets.js')
-const { sendBitcoinTx } = require('../functions/sendBitcoinTx.js')
 const LightningWallet = require('../models/LightningWallet.js')
 const { payLightingInvoice } = require('../lightning/payLightingInvoice.js')
-const { getLightningWalletBalance } = require('../lightning/walletBalance.js')
 const {
   createBTCPlatformTxFeeInvoice,
-  platformPayoutFeeAmount,
   sendAdminPayment,
 } = require('../platformPayout/platformPayout.js')
 const UserTransactions = require('../models/UserTransactions.js')
@@ -46,8 +33,8 @@ const { invoiceStatus } = require('../lightning/invoiceStatusHash.js')
 const ActiveInvoice = require('../models/ActiveInvoice.js')
 const BUSDABI = require('../abiData/erc20.json')
 const NfcCard = require('../models/NfcCard.js')
-const { log } = require('console')
 const { telegramOrder } = require('./alerts.js')
+const { sendcUSDKit } = require('../helpers/signer.js')
 
 require('dotenv').config()
 
@@ -962,22 +949,7 @@ async function checkCeloGas(req, res) {
 
     const bnbBalance = await provider.getBalance(user.address)
 
-    // get wallet balance
-    // const walletBalance = await cUSDtoken.balanceOf(user.address)
-
     const formattedGas = walletBalance.CELO.toNumber() / 10 ** 18
-    // const formattedGas = ethers.utils.formatUnits(
-    //   walletBalance.CELO.toString(),
-    //   'gwei'
-    // )
-
-    // Convert the gas fee here?...
-
-    // const celoInLocal = await currencyConvertor(
-    //   formattedGas.toString(),
-    //   'USD',
-    //   user.country
-    // )
 
     const balance = ethers.utils.formatEther(bnbBalance)
 
@@ -1447,60 +1419,7 @@ async function sendRawApiCeloUSD(req, res) {
       receiverAddress = reciever.address
     }
 
-    let cUSDtoken = await kit.contracts.getStableToken()
-
-    // This lines will convert the cUSD balance from the user's local currency back to USD
-    const convertedToUSDAmount = await currencyConvertor(
-      amount,
-      sender.country,
-      'USD'
-    )
-    const roundedDecimalAmount = Number(convertedToUSDAmount).toFixed(3)
-
-    const parsedAmount = await ethers.utils.parseEther(roundedDecimalAmount)
-
-    const amount_ = parsedAmount.toString()
-
-    // Get the current user / payer passkey
-    const dbPrivateKey = sender.passKey
-
-    // Decrypt the passKey
-    const privateKey = await decrypt(dbPrivateKey)
-
-    // tx object
-    await kit.connection.addAccount(privateKey)
-
-    // get wallet balance
-    const walletBalance = await cUSDtoken.balanceOf(sender.address)
-
-    const convertedBalance = await ethers.utils.formatEther(
-      walletBalance.toString()
-    )
-
-    if (Number(convertedBalance) === 0.0 || Number(convertedBalance) === 0) {
-      // response = `END Payment Failed\n`
-      // response += `Make sure you have enough ETH in your wallet\n`
-      // sendSMS(
-      //   `You dont have enough balance to pay ${amount_} cUSD to ${paidUserPhone}`,
-      //   currentUser.phoneNumber
-      // )
-      return res
-        .status(403)
-        .json({ success: false, response: 'Insufficent cUSD balance' })
-    }
-
-    // SENDING
-    const result = await cUSDtoken
-      .transfer(receiverAddress, amount_)
-      .send({ from: sender.address })
-
-    let txRecipt = await result.waitReceipt()
-
-    // const convertedToReciever = await currencyConvertor(
-    //   convertedToUSDAmount,
-    //   'USD',
-    //   currentUser.country
-    // )
+    let txRecipt = await sendcUSDKit(sender, reciever, amount)
 
     if (!txRecipt.status) {
       return res
@@ -1805,44 +1724,7 @@ async function buyUtility(req, res) {
 
       txRecipt = await tx_.wait(1)
     } else {
-      let cUSDtoken = await kit.contracts.getStableToken()
-
-      // This lines will convert the cUSD balance from the user's local currency back to USD
-      const convertedToUSDAmount = await currencyConvertor(
-        amount,
-        sender.country,
-        'USD'
-      )
-      const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
-
-      const amount_ = parsedAmount.toString()
-
-      // Get the current user / payer passkey
-      const dbPrivateKey = sender.passKey
-
-      // Decrypt the passKey
-      const privateKey = await decrypt(dbPrivateKey)
-
-      // tx object
-      await kit.connection.addAccount(privateKey)
-
-      // get wallet balance
-      const walletBalance = await cUSDtoken.balanceOf(sender.address)
-
-      const convertedBalance = await ethers.utils.formatEther(
-        walletBalance.toString()
-      )
-
-      if (Number(convertedBalance) <= 0 || Number(convertedBalance) <= 0) {
-        return res.status(403).json({ response: 'Insufficent cUSD balance' })
-      }
-
-      // PAYING FOR DATA
-      const result = await cUSDtoken
-        .transfer(adminAddress, amount_)
-        .send({ from: sender.address })
-
-      txRecipt = await result.waitReceipt()
+      txRecipt = await sendcUSDKit(sender, adminAddress, amount)
 
       if (!txRecipt.status) {
         return res
@@ -1927,61 +1809,11 @@ async function sendApiCeloUSD(req, res) {
         .json({ response: 'The User does not have a Shukuru Wallet' })
     }
 
-    let cUSDtoken = await kit.contracts.getStableToken()
-
-    // This lines will convert the cUSD balance from the user's local currency back to USD
-    const convertedToUSDAmount = await currencyConvertor(
-      amount,
-      sender.country,
-      'USD'
-    )
-    const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
-
-    const amount_ = parsedAmount.toString()
-
-    // Get the current user / payer passkey
-    const dbPrivateKey = sender.passKey
-
-    // Decrypt the passKey
-    const privateKey = await decrypt(dbPrivateKey)
-
-    // tx object
-    await kit.connection.addAccount(privateKey)
-
-    // get wallet balance
-    const walletBalance = await cUSDtoken.balanceOf(sender.address)
-
-    const convertedBalance = await ethers.utils.formatEther(
-      walletBalance.toString()
-    )
-
-    if (Number(convertedBalance) === 0.0 || Number(convertedBalance) === 0) {
-      // response = `END Payment Failed\n`
-      // response += `Make sure you have enough ETH in your wallet\n`
-      // sendSMS(
-      //   `You dont have enough balance to pay ${amount_} cUSD to ${paidUserPhone}`,
-      //   currentUser.phoneNumber
-      // )
-      return res.status(403).json({ response: 'Insufficent cUSD balance' })
-    }
-
-    // SENDING
-    const result = await cUSDtoken
-      .transfer(reciever.address, amount_)
-      .send({ from: sender.address })
-
-    let txRecipt = await result.waitReceipt()
-
-    // const convertedToReciever = await currencyConvertor(
-    //   convertedToUSDAmount,
-    //   'USD',
-    //   currentUser.country
-    // )
+    // This is the sendcUSD KIT
+    let txRecipt = await sendcUSDKit(sender, reciever, amount)
 
     if (!txRecipt.status) {
-      return res
-        .status(403)
-        .json({ success: false, response: 'Transaction failed!' })
+      return res.status(403).json({ success: false, response: txRecipt })
     }
 
     // Create TX Objects here...
