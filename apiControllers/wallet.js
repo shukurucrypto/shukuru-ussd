@@ -213,15 +213,15 @@ async function getWalletApiBalance(req, res) {
       )
     }
 
-    // const convertedSats = await satsConvertor(sats, currentUser.country)
+    const convertedSats = await satsConvertor(sats, currentUser.country)
 
-    // console.log('====================================')
-    // console.log(convertedSats)
-    // console.log('====================================')
+    console.log('====================================')
+    console.log(convertedSats)
+    console.log('====================================')
 
     // let total
 
-    // if (!convertedSats) {
+    // if (!convertedSats && typeof convertedSats !== Number ) {
     //   total = Number(convertedCello) + Number(convertedBusd)
     // } else {
     //   total = Number(convertedCello) + Number(convertedBusd) + convertedSats

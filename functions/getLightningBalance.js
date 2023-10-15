@@ -36,6 +36,7 @@ const getLightningBalance = async (phoneNumber) => {
     const walletInfo = await getLightningWalletBalance(key)
     const btcWalletBalance = await btcBalConverter(walletInfo)
     // console.log(btcWalletBalance)
+
     return btcWalletBalance
   } catch (err) {
     console.log(err.message)
