@@ -179,23 +179,11 @@ async function getWalletApiBalance(req, res) {
 
     const currentUser = await User.findById(userId)
 
-    // let userBalance
-
     if (!currentUser) {
       return res.status(404).json({ response: 'User not found' })
     }
 
     const phoneNumber = currentUser.phoneNumber
-
-    // const signer = await getCurrentUserSigner(phoneNumber)
-
-    // const balance = await provider.getBalance(signer.address)
-
-    // let lightningBalance = 0
-
-    // const btcBalance = await getBTCBalance(currentUser.btcAddress)
-    // let usdtBalance = await getUsdtBalance(phoneNumber)
-    // let btcLightningBalance = await getLightningBalance(phoneNumber)
 
     const busdContract = new ethers.Contract(busdAddress, BUSDABI, provider)
 
@@ -207,9 +195,6 @@ async function getWalletApiBalance(req, res) {
     celloDollarBalance_ = ethers.utils.formatEther(celloDollarBalance)
 
     const busdWalletBalance = await busdContract.balanceOf(currentUser.address)
-
-    // const userBalance = ethers.utils.formatEther(balance)
-    // const usdtUserBalance = ethers.utils.formatEther(usdtBalance)
 
     // IMPORTANT LINES ------- Coversion lines
     if (Number(celloDollarBalance_) > 0) {
@@ -228,19 +213,15 @@ async function getWalletApiBalance(req, res) {
       )
     }
 
-    // if (btcLightningBalance > 0) {
-    //   lightningBalance = await currencyConvertor(
-    //     sats,
-    //     'USD',
-    //     currentUser.country
-    //   )
-    // }
-
-    // const total = Number(convertedCello) + Number(userBalance) + Number(usdtBalance) + sats
-    // Number(lightningBalance) +
     const convertedSats = await satsConvertor(sats, currentUser.country)
 
-    const total = Number(convertedCello) + Number(convertedBusd) + convertedSats
+    let total
+
+    if (!convertedSats) {
+      total = Number(convertedCello) + Number(convertedBusd)
+    } else {
+      total = Number(convertedCello) + Number(convertedBusd) + convertedSats
+    }
 
     return res.status(200).json({
       success: true,

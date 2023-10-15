@@ -26,21 +26,42 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
 }
 const satsConvertor = async (sats, userCurrency) => {
   try {
-    // Convert sats to BTC
-    const btc = sats / 100000000
+    const satsAmount = await getSatsToUSD(sats)
 
-    let convertedSats = 0
-
-    // Convert to BTC to USD
-    const exchangeRate = 26669.855
-    const usdAmount = btc * exchangeRate
-
-    if (Number(usdAmount) > 0) {
-      convertedSats = await currencyConvertor(usdAmount, 'USD', userCurrency)
+    if (Number(satsAmount) > 0) {
+      convertedSats = await currencyConvertor(satsAmount, 'USD', userCurrency)
     }
+
     return Number(convertedSats)
   } catch (error) {
     return error.message
+  }
+}
+
+const getSatsToUSD = async (satsAmount) => {
+  try {
+    // Step 1: Get the latest BTC price in USDT
+    const response = await axios.get(
+      'https://api.binance.com/api/v3/ticker/price',
+      {
+        params: { symbol: 'BTCUSDT' },
+      }
+    )
+
+    if (response.data && response.data.price) {
+      const btcToUSDPrice = parseFloat(response.data.price)
+
+      // Step 2: Convert SATs to BTC
+      const btcAmount = satsAmount / 100000000 // 100,000,000 SATs in 1 BTC
+
+      // Step 3: Calculate the USD value
+      const usdAmount = btcAmount * btcToUSDPrice
+      return usdAmount
+    } else {
+      throw new Error('Unable to fetch BTC price from Binance API')
+    }
+  } catch (error) {
+    throw new Error('Error converting SATs to USD: ' + error.message)
   }
 }
 
