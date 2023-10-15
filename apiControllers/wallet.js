@@ -227,7 +227,7 @@ async function getWalletApiBalance(req, res) {
       success: true,
       data: {
         userId: currentUser._id,
-        lightning: convertedSats,
+        lightning: sats,
         // lightning: sats,
         cusd: Number(celloDollarBalance_),
         // eth: Number(userBalance),
