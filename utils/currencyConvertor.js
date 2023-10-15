@@ -20,7 +20,7 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
 
     return convertedAmount.toString()
   } catch (error) {
-    console.log('====================================')
+    console.log('INSIDE 1====================================')
     console.log(error)
     console.log('====================================')
     // console.log(error.response)
@@ -31,12 +31,17 @@ const satsConvertor = async (sats, userCurrency) => {
   try {
     const satsAmount = await getSatsToUSD(sats)
 
+    let convertedSats
+
     if (Number(satsAmount) > 0) {
       convertedSats = await currencyConvertor(satsAmount, 'USD', userCurrency)
     }
 
     return Number(convertedSats)
   } catch (error) {
+    console.log('INSIDE 2====================================')
+    console.log('ERROR:', error)
+    console.log('====================================')
     return error.message
   }
 }
