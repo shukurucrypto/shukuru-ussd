@@ -213,15 +213,14 @@ async function getWalletApiBalance(req, res) {
       )
     }
 
-    // const convertedSats = await satsConvertor(sats, currentUser.country)
+    const convertedSats = await satsConvertor(sats, currentUser.country)
 
     let total
 
     if (!convertedSats) {
       total = Number(convertedCello) + Number(convertedBusd)
     } else {
-      // total = Number(convertedCello) + Number(convertedBusd) + convertedSats
-      total = Number(convertedCello) + Number(convertedBusd) + sats
+      total = Number(convertedCello) + Number(convertedBusd) + convertedSats
     }
 
     return res.status(200).json({
