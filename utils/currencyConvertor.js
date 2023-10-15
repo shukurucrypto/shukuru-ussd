@@ -78,10 +78,12 @@ const getSatsToUSD = async (satsAmount) => {
       const usdAmount = btcAmount * btcToUSDPrice
       return usdAmount
     } else {
-      throw new Error('Unable to fetch BTC price from Binance API')
+      // throw new Error('Unable to fetch BTC price from Binance API')
+      return 'Unable to fetch BTC price from Binance API'
     }
   } catch (error) {
-    throw new Error('Error converting SATs to USD: ' + error.message)
+    // new Error('Error converting SATs to USD: ' + error.message)
+    return 'Error converting SATs to USD: ' + error.message
   }
 }
 
