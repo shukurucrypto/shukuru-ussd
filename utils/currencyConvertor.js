@@ -14,7 +14,7 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
     amount: Number(amount),
   })
 
-  let convertedAmount = await currencyConverter.convert(amount)
+  let convertedAmount = await currencyConverter.convert(Number(amount))
 
   console.log('====================================')
   console.log(convertedAmount)
