@@ -16,7 +16,7 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
 
   let convertedAmount = await currencyConverter.convert(Number(amount))
 
-  console.log('====================================')
+  console.log('1 ====================================')
   console.log(convertedAmount)
   console.log('====================================')
 
@@ -35,11 +35,19 @@ const satsConvertor = async (sats, userCurrency) => {
   // try {
   const satsAmount = await getSatsToUSD(sats)
 
+  console.log('SATS AMOUNT ====================================')
+  console.log(satsAmount)
+  console.log('====================================')
+
   let convertedSats
 
   if (Number(satsAmount) > 0) {
     convertedSats = await currencyConvertor(satsAmount, 'USD', userCurrency)
   }
+
+  console.log('2 ====================================')
+  console.log(convertedSats)
+  console.log('====================================')
 
   return Number(convertedSats)
   // } catch (error) {
