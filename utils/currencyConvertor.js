@@ -58,29 +58,41 @@ const getSatsToUSD = async (satsAmount) => {
   // try {
   // Step 1: Get the latest BTC price in USDT
   const response = await axios.get(
-    'https://api.binance.com/api/v3/ticker/price',
-    {
-      params: { symbol: 'BTCUSDT' },
-    }
+    // 'https://api.binance.com/api/v3/ticker/price',
+    'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'
+    // {
+    //   params: { symbol: 'BTCUSDT' },
+    // }
   )
 
-  console.log('====================================')
-  console.log(response.data)
-  console.log('====================================')
-
-  if (response.data && response.data.price) {
-    const btcToUSDPrice = parseFloat(response.data.price)
+  if (response.data && response.data.bitcoin) {
+    const btcToUSDPrice = parseFloat(response.data.bitcoin.usd)
 
     // Step 2: Convert SATs to BTC
     const btcAmount = satsAmount / 100000000 // 100,000,000 SATs in 1 BTC
 
     // Step 3: Calculate the USD value
     const usdAmount = btcAmount * btcToUSDPrice
+
     return usdAmount
   } else {
     // throw new Error('Unable to fetch BTC price from Binance API')
     return 'Unable to fetch BTC price from Binance API'
   }
+
+  // if (response.data && response.data.price) {
+  //   const btcToUSDPrice = parseFloat(response.data.price)
+
+  //   // Step 2: Convert SATs to BTC
+  //   const btcAmount = satsAmount / 100000000 // 100,000,000 SATs in 1 BTC
+
+  //   // Step 3: Calculate the USD value
+  //   const usdAmount = btcAmount * btcToUSDPrice
+  //   return usdAmount
+  // } else {
+  //   // throw new Error('Unable to fetch BTC price from Binance API')
+  //   return 'Unable to fetch BTC price from Binance API'
+  // }
   // } catch (error) {
   //   // new Error('Error converting SATs to USD: ' + error.message)
   //   return 'Error converting SATs to USD: ' + error.message
