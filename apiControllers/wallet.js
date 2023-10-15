@@ -215,22 +215,19 @@ async function getWalletApiBalance(req, res) {
 
     const convertedSats = await satsConvertor(sats, currentUser.country)
 
-    // let total
+    let total
 
-    // if (!convertedSats && typeof convertedSats !== Number ) {
-    //   total = Number(convertedCello) + Number(convertedBusd)
-    // } else {
-    //   total = Number(convertedCello) + Number(convertedBusd) + convertedSats
-    // }
-
-    let total = Number(convertedCello) + Number(convertedBusd) + sats
+    if (!convertedSats && typeof convertedSats !== Number) {
+      total = Number(convertedCello) + Number(convertedBusd)
+    } else {
+      total = Number(convertedCello) + Number(convertedBusd) + convertedSats
+    }
 
     return res.status(200).json({
       success: true,
       data: {
         userId: currentUser._id,
-        // lightning: convertedSats,
-        lightning: sats,
+        lightning: convertedSats,
         // lightning: sats,
         cusd: Number(celloDollarBalance_),
         // eth: Number(userBalance),
