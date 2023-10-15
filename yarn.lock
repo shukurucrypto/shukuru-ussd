@@ -3161,10 +3161,10 @@ css-what@^6.1.0:
   resolved "https://registry.yarnpkg.com/css-what/-/css-what-6.1.0.tgz#fb5effcf76f1ddea2c81bdfaa4de44e79bac70f4"
   integrity sha512-HTUrgRJ7r4dsZKU6GjmpfRK1O76h97Z8MfS1G0FozR+oF2kG6Vfe8JE6zwrkbxigziPHinCJ+gCPjA9EaBDtRw==
 
-currency-converter-lt@^2.0.0-beta.0:
-  version "2.0.0-beta.0"
-  resolved "https://registry.yarnpkg.com/currency-converter-lt/-/currency-converter-lt-2.0.0-beta.0.tgz#0435756ad95252c9c23d2204d702338f291d8ce2"
-  integrity sha512-z1eK5ziRQ8TMPMz1ndAOAonARN3pY1FLTfeGTwJKlj507BbBEWUirkLWzZA/AeMBZV46U2qLXAMdOkl5hE2Dag==
+currency-converter-lt@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/currency-converter-lt/-/currency-converter-lt-2.0.0.tgz#915b8c20076ae7fafad6e5f3a105a02e25a82e6b"
+  integrity sha512-XMbtE1bJqnur+vIsMBTqBfzgYyR3DL2nbT3NNZM5JFA9HV7cdjzdKtpL6nmKdD6ctvDzIEArrow8owgcaKjUAA==
   dependencies:
     cheerio latest
     request "^2.88.2"

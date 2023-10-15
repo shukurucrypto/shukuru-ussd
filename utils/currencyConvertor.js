@@ -3,53 +3,51 @@ const CC = require('currency-converter-lt')
 
 const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
   // let convertedAmount = 0
-  try {
-    if (Number(amount) <= 0) {
-      return Number(amount)
-    }
-
-    let currencyConverter = new CC({
-      from: currencyFrom,
-      to: currencyTo,
-      amount: Number(amount),
-    })
-
-    let convertedAmount = await currencyConverter.convert(amount)
-
-    console.log('====================================')
-    console.log(convertedAmount)
-    console.log('====================================')
-
-    // await currencyConverter.convert(Number(amount)).then((response) => {
-    //   convertedAmount = response
-    // })
-
-    return convertedAmount.toString()
-  } catch (error) {
-    console.log('INSIDE 1====================================')
-    console.log(error)
-    console.log('====================================')
-    // console.log(error.response)
-    return error.response
+  // try {
+  if (Number(amount) <= 0) {
+    return Number(amount)
   }
+
+  let currencyConverter = new CC({
+    from: currencyFrom,
+    to: currencyTo,
+    amount: Number(amount),
+  })
+
+  let convertedAmount = await currencyConverter.convert(amount)
+
+  console.log('====================================')
+  console.log(convertedAmount)
+  console.log('====================================')
+
+  // await currencyConverter.convert(Number(amount)).then((response) => {
+  //   convertedAmount = response
+  // })
+
+  return convertedAmount.toString()
+  // } catch (error) {
+  // console.log(error.response)
+  // return error.response
+  // }
 }
+
 const satsConvertor = async (sats, userCurrency) => {
-  try {
-    const satsAmount = await getSatsToUSD(sats)
+  // try {
+  const satsAmount = await getSatsToUSD(sats)
 
-    let convertedSats
+  let convertedSats
 
-    if (Number(satsAmount) > 0) {
-      convertedSats = await currencyConvertor(satsAmount, 'USD', userCurrency)
-    }
-
-    return Number(convertedSats)
-  } catch (error) {
-    console.log('INSIDE 2====================================')
-    console.log('ERROR:', error)
-    console.log('====================================')
-    return error.message
+  if (Number(satsAmount) > 0) {
+    convertedSats = await currencyConvertor(satsAmount, 'USD', userCurrency)
   }
+
+  return Number(convertedSats)
+  // } catch (error) {
+  //   console.log('INSIDE 2====================================')
+  //   console.log('ERROR:', error)
+  //   console.log('====================================')
+  //   return error.message
+  // }
 }
 
 const getSatsToUSD = async (satsAmount) => {
