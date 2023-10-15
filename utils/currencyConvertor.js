@@ -2,7 +2,7 @@ const { default: axios } = require('axios')
 const CC = require('currency-converter-lt')
 
 const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
-  let convertedAmount = 0
+  // let convertedAmount = 0
   try {
     if (Number(amount) <= 0) {
       return Number(amount)
@@ -14,9 +14,15 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
       amount: Number(amount),
     })
 
-    await currencyConverter.convert(Number(amount)).then((response) => {
-      convertedAmount = response
-    })
+    let convertedAmount = await currencyConverter.convert(amount)
+
+    console.log('====================================')
+    console.log(convertedAmount)
+    console.log('====================================')
+
+    // await currencyConverter.convert(Number(amount)).then((response) => {
+    //   convertedAmount = response
+    // })
 
     return convertedAmount.toString()
   } catch (error) {
