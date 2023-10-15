@@ -213,7 +213,15 @@ async function getWalletApiBalance(req, res) {
       )
     }
 
+    console.log('====================================')
+    console.log(sats)
+    console.log('====================================')
+
     const convertedSats = await satsConvertor(sats, currentUser.country)
+
+    console.log('============CONVERTED========================')
+    console.log(convertedSats)
+    console.log('====================================')
 
     let total
 
