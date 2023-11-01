@@ -10,11 +10,8 @@ const AccountSecretsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  bolt: { type: String },
   btc: {
-    type: String,
-    required: true,
-  },
-  btcAddress: {
     type: String,
   },
   deezyAccessKey: {
