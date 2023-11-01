@@ -18,19 +18,17 @@ const { createBitcoinWallet } = require('../functions/createBitcoinWallet.js')
 const AccountSecrets = require('../models/AccountSecrets.js')
 const { createLightningWallet } = require('../lightning/createWallet.js')
 const LightningWallet = require('../models/LightningWallet.js')
-const { getUserCurrency } = require('../functions/getUserCurrency.js')
-const { newSignup } = require('../sockets/sockets.js')
 const { Masa } = require('@masa-finance/masa-sdk')
+const { boltBarePOSTRequest } = require('../helpers/boltRequests.js')
 
 require('dotenv').config()
 
 const provider = new ethers.providers.JsonRpcProvider(celoProviderUrl)
-const redisClient = Redis.createClient()
-const DEFAULT_REDIS_EXPIRATION = 36000
 
 async function createApiUser(req, res) {
   try {
     const { username, phone, email, password, accountType, country } = req.body
+
     let token
 
     const currentUser = await User.findOne({ phoneNumber: phone })
@@ -41,42 +39,39 @@ async function createApiUser(req, res) {
       })
     }
 
+    let data = {
+      name: username,
+      email: email,
+      password: password,
+    }
+
+    // Save the user to bolt here...
+    const boltInstance = await boltBarePOSTRequest(data, '/users')
+
+    if (!boltInstance.success)
+      return res
+        .status(403)
+        .json({ success: false, error: 'Failed to create account' })
+
     // Encrypt the password of the user
     const encryptedPassword = await encrypt(password)
-
-    // Check to see if the user already has a wallet
-    // const { name, walletPin } = await getCreateUserWalletInfo(userText)
-
-    // Lets first encrypt the walletPin
-    // const encryptedWalletPin = await encrypt(walletPin)
 
     const wallet = await ethers.Wallet.createRandom()
     // check if user with this phoneNumber exists
 
     const createdWallet = await new ethers.Wallet(wallet.privateKey, provider)
 
-    // Create a Bitcoin wallet
-    const { address, privateKey } = await createBitcoinWallet()
-
     const encryptedPassKey = await encrypt(wallet.privateKey)
     const encryptedMnemonic = await encrypt(wallet.mnemonic.phrase)
-
-    // Encrypt BTC private Key
-    const encryptedBTCPrivateKey = await encrypt(privateKey.toString())
-
-    // Create lightning wallet for the user
-    const lightningWallet = await createLightningWallet(username)
 
     // // save the wallet to the database
     const user = new User({
       name: username,
-      //   walletPin: encryptedWalletPin,
       email: email,
       password: encryptedPassword,
       phoneNumber: phone,
       accountType: accountType,
       address: createdWallet.address,
-      btcAddress: address.toString(),
       passKey: encryptedPassKey,
       mnemonic: encryptedMnemonic,
       country: country,
@@ -90,30 +85,10 @@ async function createApiUser(req, res) {
       process.env.ENCRYPTION_KEY
     )
 
-    // console.log(lightningWallet)
-
-    // Encrypt lightning admin and in Key
-    const encryptedLightningAdminKey = await encrypt(
-      lightningWallet.wallets[0].adminkey
-    )
-    const encryptedLightningInKey = await encrypt(
-      lightningWallet.wallets[0].inkey
-    )
-
-    // Save the user to lightning address
-    const lightningUserWallet = new LightningWallet({
-      user: savedUser._id,
-      i_id: lightningWallet.id,
-      adminKey: encryptedLightningAdminKey,
-      walletId: lightningWallet.wallets[0].id,
-      inKey: encryptedLightningInKey,
-    })
-
     // Save to user screts Schema
     const userSecrets = new AccountSecrets({
       user: savedUser._id,
       eth: encryptedPassKey,
-      btc: encryptedBTCPrivateKey,
     })
 
     const userTx = new UserTransactions({
@@ -122,49 +97,8 @@ async function createApiUser(req, res) {
 
     // Save to the secrets schema
     await userSecrets.save()
-    await lightningUserWallet.save()
 
     await userTx.save()
-
-    if (savedUser) {
-      // create BTC and USDT assets for the user
-      const btcAsset = new Assets({
-        user: savedUser._id,
-        name: 'Bitcoin',
-        symbol: 'BTC',
-        balance: 0.0,
-        address: {
-          live: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
-          test: '0xC04B0d3107736C32e19F1c62b2aF67BE61d63a05',
-        },
-      })
-      const usdtAsset = new Assets({
-        user: savedUser._id,
-        name: 'Tether',
-        symbol: 'USDT',
-        balance: 0.0,
-        address: {
-          live: '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',
-          test: '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',
-        },
-      })
-
-      const ethAsset = new Assets({
-        user: savedUser._id,
-        name: 'Tether',
-        name: 'Wrapped Ether',
-        symbol: 'WETH',
-        balance: 0.0,
-        address: {
-          live: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
-          test: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
-        },
-      })
-
-      await btcAsset.save()
-      await usdtAsset.save()
-      await ethAsset.save()
-    }
 
     // newSignup(res)
     return res.status(201).json({
@@ -173,6 +107,7 @@ async function createApiUser(req, res) {
         userId: savedUser._id,
         email: savedUser.email,
         token: token,
+        bolt: boltInstance.token,
         phone: savedUser.phoneNumber,
       },
     })
@@ -192,6 +127,19 @@ async function login(req, res) {
       return res.json({ response: 'username or password incorrect' })
     }
 
+    let data = {
+      name: username,
+      password: password,
+    }
+
+    // Save the user to bolt here...
+    const boltInstance = await boltBarePOSTRequest(data, '/auth/login/')
+
+    if (!boltInstance.success)
+      return res
+        .status(403)
+        .json({ success: false, error: 'Failed to create account' })
+
     // Check the encrypted password
     const decryptedPassword = await decrypt(existingUser.password)
 
@@ -210,6 +158,7 @@ async function login(req, res) {
         userId: existingUser._id,
         email: existingUser.email,
         token: token,
+        bolt: boltInstance.token,
         phone: existingUser.phoneNumber,
       },
     })

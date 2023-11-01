@@ -35,6 +35,11 @@ const BUSDABI = require('../abiData/erc20.json')
 const NfcCard = require('../models/NfcCard.js')
 const { telegramOrder } = require('./alerts.js')
 const { sendcUSDKit } = require('../helpers/signer.js')
+const {
+  boltPOSTRequest,
+  boltGETRequest,
+  boltPayInvoice,
+} = require('../helpers/boltRequests.js')
 
 require('dotenv').config()
 
@@ -81,42 +86,27 @@ const decodeInvoiceAPI = async (req, res) => {
   try {
     const { userId, invoice } = req.body
 
-    const currentUser = await User.findById(userId)
-
-    const { inKey: recieverKey } = await LightningWallet.findOne({
-      user: currentUser._id,
-    })
-
-    // decrypt the inKey
-    const keyReciever = await decrypt(recieverKey)
-
-    // Create the invoice from the reciever
     const data = {
-      data: invoice,
+      payment_hash: invoice,
     }
 
-    // const invoiceResponse = await createLightingInvoice(keyReciever, data)
-    const invoiceResponse = await decodeLightningInvoice(keyReciever, data)
+    const boltInstance = await boltGETRequest(data, req.bolt, '/invoice')
 
-    if (invoiceResponse.payment_hash) {
-      const stats = invoiceResponse.amount_msat / 1000
-      // convert stats to readble division here...
-      return res.status(201).json({
-        success: true,
-        data: {
-          hash: invoiceResponse.payment_hash,
-          amount: stats,
-          memo: invoiceResponse.description,
-          date: invoiceResponse.date,
-          expiry: invoiceResponse.expiry,
-        },
-      })
-    } else {
-      return res.status(404).json({
-        success: false,
-        data: 'Failed to create invoice',
-      })
-    }
+    if (!boltInstance.success)
+      return res
+        .status(403)
+        .json({ succes: false, error: 'Failed to read invoice' })
+
+    return res.status(201).json({
+      success: true,
+      data: {
+        hash: boltInstance.response.payment_hash,
+        amount: Number(boltInstance.response.num_satoshis),
+        memo: boltInstance.response.description,
+        date: boltInstance.response.timestamp,
+        expiry: boltInstance.response.expiry,
+      },
+    })
   } catch (error) {
     console.log(error.message)
     return res.status(500).json(error.message)
@@ -127,37 +117,23 @@ const createAPILightningInvoice = async (req, res) => {
   try {
     const { userId, amount, memo } = req.body
 
-    const currentUser = await User.findById(userId)
-
-    const { inKey: recieverKey } = await LightningWallet.findOne({
-      user: currentUser._id,
-    })
-
-    // decrypt the inKey
-    const keyReciever = await decrypt(recieverKey)
-
-    // Create the invoice from the reciever
     const data = {
-      out: false,
-      amount: amount,
-      memo: `${currentUser.name} invoice for payment: ${memo}`,
-      unit: currentUser.country,
+      amount: Number(amount),
+      memo: memo,
     }
 
-    const invoiceResponse = await createLightingInvoice(keyReciever, data)
+    const boltInstance = await boltPOSTRequest(data, req.bolt, '/invoice')
 
-    if (invoiceResponse?.payment_hash) {
-      return res.status(201).json({
-        success: true,
-        data: invoiceResponse.payment_request,
-        request: invoiceResponse.payment_hash,
-      })
-    } else {
-      return res.status(404).json({
-        success: false,
-        data: 'Failed to create invoice',
-      })
-    }
+    if (!boltInstance.success)
+      return res
+        .status(403)
+        .json({ succes: false, error: 'Failed to create invoice' })
+
+    return res.status(201).json({
+      success: true,
+      data: boltInstance.response.payment_request,
+      request: boltInstance.response.payment_request,
+    })
   } catch (error) {
     console.log(error.message)
     return res.status(500).json(error.message)
@@ -531,128 +507,103 @@ const payBTCInvoiceAPI = async (req, res) => {
   try {
     const { from, invoice, amount } = req.body
 
-    const sender = await User.findById(from)
+    const { userId } = req.user
+
+    const sender = await User.findById(userId)
 
     if (!invoice) {
       return res.status(403).json({ response: 'Please enter a valid invoice' })
     }
 
-    const { adminKey: payerKey } = await LightningWallet.findOne({
-      user: sender._id,
+    const data = {
+      payment_hash: invoice,
+    }
+
+    const boltInstance = await boltGETRequest(data, req.bolt, '/invoice/pay')
+
+    if (!boltInstance.success) return res.json(boltInstance)
+
+    console.log('====================================')
+    console.log(invoice)
+    console.log('====================================')
+
+    const activeInvoice = await ActiveInvoice.findOne({
+      hash: invoice,
     })
 
-    // decrypt the inKey
-    const keyPayer = await decrypt(payerKey)
+    if (!activeInvoice) {
+      // Create TX Objects here...
+      const senderTx = await new Transaction({
+        sender: sender._id,
+        receiver: 'lnbcExternal',
+        external: true,
+        currency: sender.country,
+        asset: 'Lightning',
+        amount: amount,
+        txType: 'sent',
+        phoneNumber: 'lnbc77777777777',
+      })
 
-    if (invoice) {
-      // console.log('Invoice valid!')
+      const tx = await senderTx.save()
 
-      const payData = {
-        out: true,
-        bolt11: invoice,
-      }
+      // Check to see if the user has a UserTransactions table
+      const userTx = await UserTransactions.findOne({ user: sender._id })
 
-      //   Sender payment goes
-      const result = await payLightingInvoice(keyPayer, payData)
+      await userTx.transactions.push(tx._id)
 
-      if (result?.payment_hash) {
-        const platformTxInvoice = await createBTCPlatformTxFeeInvoice(
-          sender,
-          amount
-        )
+      await userTx.save()
 
-        const platformFeeTxData = {
-          out: true,
-          bolt11: platformTxInvoice.payment_request,
-        }
-
-        // Sender pays platform fees here
-        await payLightingInvoice(keyPayer, platformFeeTxData)
-
-        const activeInvoice = await ActiveInvoice.findOne({
-          hash: result.payment_hash,
-        })
-
-        if (!activeInvoice) {
-          // Create TX Objects here...
-          const senderTx = await new Transaction({
-            sender: sender._id,
-            receiver: 'lnbcExternal',
-            external: true,
-            currency: sender.country,
-            asset: 'Lightning',
-            amount: amount,
-            txType: 'sent',
-            phoneNumber: 'lnbc77777777777',
-          })
-
-          const tx = await senderTx.save()
-
-          // Check to see if the user has a UserTransactions table
-          const userTx = await UserTransactions.findOne({ user: sender._id })
-
-          await userTx.transactions.push(tx._id)
-
-          await userTx.save()
-
-          return res.status(200).json({
-            success: true,
-            // data: tx,
-          })
-        } else {
-          const reciever = await User.findById(activeInvoice.user)
-
-          // Create TX Objects here...
-          const senderTx = await new Transaction({
-            sender: sender._id,
-            receiver: reciever._id,
-            currency: sender.country,
-            asset: 'Lightning',
-            amount: activeInvoice.amount,
-            txType: 'sent',
-            phoneNumber: reciever.phoneNumber,
-          })
-
-          const recieverTx = await new Transaction({
-            sender: sender._id,
-            receiver: reciever._id,
-            currency: sender.country,
-            asset: 'Lightning',
-            amount: activeInvoice.amount,
-            txType: 'recieved',
-            phoneNumber: sender.phoneNumber,
-          })
-
-          const tx = await senderTx.save()
-
-          const toTx = await recieverTx.save()
-
-          // Check to see if the user has a UserTransactions table
-          const userTx = await UserTransactions.findOne({ user: sender._id })
-
-          const receiverTx = await UserTransactions.findOne({
-            user: reciever._id,
-          })
-
-          await userTx.transactions.push(tx._id)
-
-          await receiverTx.transactions.push(toTx._id)
-
-          await receiverTx.save()
-          await userTx.save()
-
-          return res.status(200).json({
-            success: true,
-            // data: tx,
-          })
-        }
-      }
-    } else {
       return res.status(200).json({
-        success: false,
-        data: `You do not have enough sats to pay out.`,
+        success: true,
+        // data: tx,
       })
     }
+
+    const reciever = await User.findById(activeInvoice.user)
+
+    // Create TX Objects here...
+    const senderTx = await new Transaction({
+      sender: sender._id,
+      receiver: reciever._id,
+      currency: sender.country,
+      asset: 'Lightning',
+      amount: activeInvoice.amount,
+      txType: 'sent',
+      phoneNumber: reciever.phoneNumber,
+    })
+
+    const recieverTx = await new Transaction({
+      sender: sender._id,
+      receiver: reciever._id,
+      currency: sender.country,
+      asset: 'Lightning',
+      amount: activeInvoice.amount,
+      txType: 'recieved',
+      phoneNumber: sender.phoneNumber,
+    })
+
+    const tx = await senderTx.save()
+
+    const toTx = await recieverTx.save()
+
+    // Check to see if the user has a UserTransactions table
+    const userTx = await UserTransactions.findOne({ user: sender._id })
+
+    const receiverTx = await UserTransactions.findOne({
+      user: reciever._id,
+    })
+
+    await userTx.transactions.push(tx._id)
+
+    await receiverTx.transactions.push(toTx._id)
+
+    await receiverTx.save()
+    await userTx.save()
+
+    return res.status(200).json({
+      success: true,
+      // data: tx,
+    })
   } catch (error) {
     console.log(error.message)
     res.status(500).json(error.message)
