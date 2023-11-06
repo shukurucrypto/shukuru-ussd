@@ -8,7 +8,7 @@ const ActiveInvoiceSchema = new mongoose.Schema({
   },
   hash: {
     type: String,
-    // required: true,
+    required: true,
   },
   amount: {
     type: Number,
