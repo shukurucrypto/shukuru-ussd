@@ -1,10 +1,4 @@
 const express = require('express')
-const { getCoinAPI, getQRCode } = require('../apiCalls/getCoin.js')
-const {
-  getInvoice,
-  getUserLightningBalance,
-} = require('../controllers/invoices.js')
-const { markets, createWallet } = require('../controllers/ussd.js')
 const {
   createApiUser,
   login,
@@ -71,7 +65,6 @@ const {
   checkReward,
 } = require('../apiControllers/rewards.js')
 const {
-  telegramOrder,
   sendPushNotification,
   sendUserPush,
 } = require('../apiControllers/alerts.js')
