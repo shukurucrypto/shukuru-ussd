@@ -12,6 +12,12 @@ const {
   verifyCode,
   checkVerify,
   createBTCApiUser,
+  sendOtpCode,
+  verifyOtpCode,
+  resetPassword,
+  sendRawOtpCode,
+  verifyRawOtpCode,
+  resetRawPassword,
 } = require('../apiControllers/auth.js')
 const {
   getWalletApiBalance,
@@ -89,10 +95,18 @@ const apiRouter = express.Router()
 // App routes
 apiRouter.post('/auth/signup', createApiUser)
 apiRouter.post('/auth/btc/signup', createBTCApiUser)
+apiRouter.post('/reset/password', authenticateToken, resetPassword)
 apiRouter.post('/auth/login', login)
 apiRouter.post('/verify', authenticateToken, verifyPhone)
 apiRouter.post('/code', authenticateToken, verifyCode)
+apiRouter.post('/send/otp', authenticateToken, sendOtpCode)
 apiRouter.get('/acc/verify', authenticateToken, checkVerify)
+apiRouter.post('/verify/otp', authenticateToken, verifyOtpCode)
+
+// Forgot password
+apiRouter.post('/send/raw/otp', sendRawOtpCode)
+apiRouter.post('/verify/raw/otp', verifyRawOtpCode)
+apiRouter.post('/reset/raw/password', resetRawPassword)
 
 // Wallet routes
 apiRouter.get('/wallet/:userId', getWalletApiBalance)
