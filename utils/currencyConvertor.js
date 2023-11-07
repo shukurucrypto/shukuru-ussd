@@ -2,7 +2,6 @@ const { default: axios } = require('axios')
 const CC = require('currency-converter-lt')
 
 const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
-  // let convertedAmount = 0
   try {
     if (Number(amount) <= 0) {
       return Number(amount)
@@ -16,10 +15,6 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
 
     let convertedAmount = await currencyConverter.convert(Number(amount))
 
-    // await currencyConverter.convert(Number(amount)).then((response) => {
-    //   convertedAmount = response
-    // })
-
     return convertedAmount.toString()
   } catch (error) {
     console.log(error.response)
@@ -28,63 +23,46 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
 }
 
 const satsConvertor = async (sats, userCurrency) => {
-  // try {
-  const satsAmount = await getSatsToUSD(sats)
+  try {
+    const satsAmount = await getSatsToUSD(sats)
 
-  console.log('SATS AMOUNT ====================================')
-  console.log(satsAmount)
-  console.log('====================================')
+    let convertedSats
 
-  let convertedSats
+    if (Number(satsAmount) > 0) {
+      convertedSats = await currencyConvertor(satsAmount, 'USD', userCurrency)
+    }
 
-  if (Number(satsAmount) > 0) {
-    convertedSats = await currencyConvertor(satsAmount, 'USD', userCurrency)
+    return Number(convertedSats)
+  } catch (error) {
+    return error.message
   }
-
-  // console.log('2 ====================================')
-  // console.log(convertedSats)
-  // console.log('====================================')
-
-  return Number(convertedSats)
-  // } catch (error) {
-  //   console.log('INSIDE 2====================================')
-  //   console.log('ERROR:', error)
-  //   console.log('====================================')
-  //   return error.message
-  // }
 }
 
 const getSatsToUSD = async (satsAmount) => {
-  // try {
-  // Step 1: Get the latest BTC price in USDT
-  const response = await axios.get(
-    'https://api.binance.com/api/v3/ticker/price',
-    {
-      params: { symbol: 'BTCUSDT' },
+  try {
+    // Step 1: Get the latest BTC price in USDT
+    const response = await axios.get(
+      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'
+    )
+
+    if (response.data && response.data.bitcoin) {
+      const btcToUSDPrice = parseFloat(response.data.bitcoin.usd)
+
+      // Step 2: Convert SATs to BTC
+      const btcAmount = satsAmount / 100000000 // 100,000,000 SATs in 1 BTC
+
+      // Step 3: Calculate the USD value
+      const usdAmount = btcAmount * btcToUSDPrice
+
+      return usdAmount
+    } else {
+      // throw new Error('Unable to fetch BTC price from Binance API')
+      return 'Unable to fetch BTC price from Binance API'
     }
-  )
-
-  console.log('====================================')
-  console.log(response.data)
-  console.log('====================================')
-
-  if (response.data && response.data.price) {
-    const btcToUSDPrice = parseFloat(response.data.price)
-
-    // Step 2: Convert SATs to BTC
-    const btcAmount = satsAmount / 100000000 // 100,000,000 SATs in 1 BTC
-
-    // Step 3: Calculate the USD value
-    const usdAmount = btcAmount * btcToUSDPrice
-    return usdAmount
-  } else {
-    // throw new Error('Unable to fetch BTC price from Binance API')
-    return 'Unable to fetch BTC price from Binance API'
+  } catch (error) {
+    // new Error('Error converting SATs to USD: ' + error.message)
+    return 'Error converting SATs to USD: ' + error.message
   }
-  // } catch (error) {
-  //   // new Error('Error converting SATs to USD: ' + error.message)
-  //   return 'Error converting SATs to USD: ' + error.message
-  // }
 }
 
 module.exports = {
