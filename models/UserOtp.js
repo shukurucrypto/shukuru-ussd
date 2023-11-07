@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 
+// This creates an OTP User model
 const UserOtpSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,

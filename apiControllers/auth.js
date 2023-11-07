@@ -23,7 +23,7 @@ const { getUserCurrency } = require('../functions/getUserCurrency.js')
 const { newSignup } = require('../sockets/sockets.js')
 const { Masa } = require('@masa-finance/masa-sdk')
 const transporter = require('../config/emailConfig.js')
-const UserOtp = require('../models/UserOTP.js')
+const UserOtp = require('../models/UserOtp.js')
 
 require('dotenv').config()
 
