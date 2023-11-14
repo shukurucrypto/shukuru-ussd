@@ -143,6 +143,38 @@ const createAPILightningInvoice = async (req, res) => {
       success: true,
       data: boltInstance.response.payment_request,
       request: boltInstance.response.payment_request,
+      r_hash: boltInstance.response.r_hash,
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json(error.message)
+  }
+}
+
+const lookupAPIInvoiceStatus = async (req, res) => {
+  try {
+    const { r_hash } = req.body
+
+    // Re-decode the invoice hash
+    const binaryRHash = Buffer.from(r_hash, 'base64')
+
+    // // Convert binary data to hexadecimal string
+    const hexRHash = binaryRHash.toString('hex')
+
+    const data = {
+      r_hash: hexRHash,
+    }
+
+    const boltInstance = await boltGETRequest(data, req.bolt, '/invoice/lookup')
+
+    if (!boltInstance.success)
+      return res
+        .status(403)
+        .json({ succes: false, error: 'Failed to get invoice info' })
+
+    return res.status(201).json({
+      success: true,
+      data: boltInstance,
     })
   } catch (error) {
     console.log(error.message)
@@ -515,13 +547,15 @@ const nfcPayAPI = async (req, res) => {
 
 const payBTCInvoiceAPI = async (req, res) => {
   try {
-    const { from, invoice, amount } = req.body
+    const { from, invoice, amount, r_hash } = req.body
 
     const { userId } = req.user
 
     if (!invoice) {
       return res.status(403).json({ response: 'Please enter a valid invoice' })
     }
+
+    // Re-docde the r_hash so that it can be read by bolt
 
     const requestData = {
       from,
@@ -530,6 +564,7 @@ const payBTCInvoiceAPI = async (req, res) => {
       amount,
       userId,
       bolt: req.bolt,
+      r_hash,
     }
 
     // Here is the send sats helper...
@@ -1631,4 +1666,5 @@ module.exports = {
   buyUtility,
   checkCeloGas,
   requestForGas,
+  lookupAPIInvoiceStatus,
 }
