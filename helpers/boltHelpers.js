@@ -47,51 +47,79 @@ const boltSendSatsHelper = async (data) => {
       if (!boltInstance.success) return boltInstance
     }
 
-    if (invoice) {
-      const activeInvoice = await ActiveInvoice.findOne({
-        hash: invoice,
+    if (reciever) {
+      // if (invoice) {
+      //   const activeInvoice = await ActiveInvoice.findOne({
+      //     hash: invoice,
+      //   })
+
+      //   reciever = await User.findById(activeInvoice.user._id)
+      // }
+
+      // Create TX Objects here...
+      const senderTx = await new Transaction({
+        sender: sender._id,
+        receiver: reciever._id,
+        currency: sender.country,
+        asset: 'Lightning',
+        amount: amount,
+        txType: 'sent',
+        phoneNumber: reciever.phoneNumber,
       })
 
-      reciever = await User.findById(activeInvoice.user._id)
+      const recieverTx = await new Transaction({
+        sender: sender._id,
+        receiver: reciever._id,
+        currency: sender.country,
+        asset: 'Lightning',
+        amount: amount,
+        txType: 'recieved',
+        phoneNumber: sender.phoneNumber,
+      })
+
+      const tx = await senderTx.save()
+
+      const toTx = await recieverTx.save()
+
+      // Check to see if the user has a UserTransactions table
+      const userTx = await UserTransactions.findOne({ user: sender._id })
+
+      const receiverTx = await UserTransactions.findOne({
+        user: reciever._id,
+      })
+
+      await userTx.transactions.push(tx._id)
+
+      await receiverTx.transactions.push(toTx._id)
+
+      await receiverTx.save()
+      await userTx.save()
+
+      return {
+        success: true,
+        status: 200,
+        tx,
+      }
     }
 
     // Create TX Objects here...
     const senderTx = await new Transaction({
       sender: sender._id,
-      receiver: reciever._id,
+      receiver: 'External',
       currency: sender.country,
       asset: 'Lightning',
       amount: amount,
       txType: 'sent',
-      phoneNumber: reciever.phoneNumber,
-    })
-
-    const recieverTx = await new Transaction({
-      sender: sender._id,
-      receiver: reciever._id,
-      currency: sender.country,
-      asset: 'Lightning',
-      amount: amount,
-      txType: 'recieved',
-      phoneNumber: sender.phoneNumber,
+      phoneNumber: 'External payment',
     })
 
     const tx = await senderTx.save()
 
-    const toTx = await recieverTx.save()
-
     // Check to see if the user has a UserTransactions table
     const userTx = await UserTransactions.findOne({ user: sender._id })
 
-    const receiverTx = await UserTransactions.findOne({
-      user: reciever._id,
-    })
-
     await userTx.transactions.push(tx._id)
 
-    await receiverTx.transactions.push(toTx._id)
-
-    await receiverTx.save()
     await userTx.save()
 
     return {
