@@ -6,7 +6,7 @@ const { boltGETRequest } = require('./boltRequests')
 
 const boltSendSatsHelper = async (data) => {
   try {
-    const { from, to, invoice, amount, userId, bolt } = data
+    const { from, to, invoice, amount, userId, bolt, r_hash } = data
 
     const sender = await User.findById(userId)
 
@@ -16,6 +16,7 @@ const boltSendSatsHelper = async (data) => {
 
     const boltReqData = {
       payment_hash: invoice,
+      r_hash,
     }
 
     // Pay the invoice here..
@@ -26,6 +27,7 @@ const boltSendSatsHelper = async (data) => {
       const inhouseReqData = {
         reciever: to,
         amount,
+        r_hash,
       }
 
       const houseBoltInstance = await boltGETRequest(
