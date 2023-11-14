@@ -53,6 +53,7 @@ const {
   checkCeloGas,
   requestForGas,
   lookupAPIInvoiceStatus,
+  updateLegacyData,
 } = require('../apiControllers/payments.js')
 const accessTokenBearer = require('../middleware/accessTokenBearer.js')
 const {
@@ -154,6 +155,7 @@ apiRouter.post(
 apiRouter.post('/invoice/decode', authenticateAllTokens, decodeInvoiceAPI)
 apiRouter.post('/invoice/pay', authenticateAllTokens, payBTCInvoiceAPI)
 apiRouter.post('/invoice/status', authenticateAllTokens, lookupAPIInvoiceStatus)
+apiRouter.get('/invoice/legacies', authenticateAllTokens, updateLegacyData)
 
 apiRouter.post('/invoice/pay/nfc', authenticateToken, nfcPayAPI)
 apiRouter.post('/invoice/pay/busd/nfc', authenticateToken, nfcPayBUSDAPI)

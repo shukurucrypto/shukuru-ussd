@@ -182,6 +182,21 @@ const lookupAPIInvoiceStatus = async (req, res) => {
   }
 }
 
+const updateLegacyData = async (req, res) => {
+  try {
+    const boltInstance = await boltGETRequest(
+      null,
+      req.bolt,
+      '/invoice/legacies'
+    )
+
+    return res.json(boltInstance)
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json(error.message)
+  }
+}
+
 const getBTCWalletTransactionsAPI = async (req, res) => {
   try {
     const userId = req.params.userId
@@ -1667,4 +1682,5 @@ module.exports = {
   checkCeloGas,
   requestForGas,
   lookupAPIInvoiceStatus,
+  updateLegacyData,
 }
