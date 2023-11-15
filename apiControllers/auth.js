@@ -40,12 +40,13 @@ async function createApiUser(req, res) {
       })
     }
 
+    const generatedEmail = username + '@shukuru.com'
+
     let data = {
       name: username,
-      email: email,
+      email: generatedEmail,
       password: password,
     }
-
     // Save the user to bolt here...
     const boltInstance = await boltBarePOSTRequest(data, '/users')
 
@@ -188,13 +189,37 @@ async function login(req, res) {
       password: password,
     }
 
-    // Save the user to bolt here...
-    const boltInstance = await boltBarePOSTRequest(data, '/auth/login/')
+    let boltInstance
 
-    if (!boltInstance.success)
-      return res
-        .status(403)
-        .json({ success: false, error: 'Failed to create account' })
+    // Check if user exists in bolt backend. If they do just log them in, if they don't create an account for them...
+    const exists = await boltBarePOSTRequest({ username }, '/users/raw')
+
+    if (exists.success) {
+      // The user has a bolt account, we can just log them in from here
+      // Save the user to bolt here...
+      boltInstance = await boltBarePOSTRequest(data, '/auth/login/')
+
+      if (!boltInstance.success)
+        return res
+          .status(403)
+          .json({ success: false, error: 'Failed to create account' })
+    } else {
+      const generatedEmail = username + '@shukuru.com'
+
+      let userData = {
+        name: username,
+        email: generatedEmail,
+        password: password,
+      }
+
+      // Save the user to bolt here...
+      boltInstance = await boltBarePOSTRequest(userData, '/users')
+
+      if (!boltInstance.success)
+        return res
+          .status(403)
+          .json({ success: false, error: 'Failed to create bolt account' })
+    }
 
     // Check the encrypted password
     const decryptedPassword = await decrypt(existingUser.password)
