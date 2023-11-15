@@ -1,7 +1,5 @@
 const express = require('express')
 const mongoose = require('mongoose')
-const socketIO = require('socket.io')
-const socketio = require('socket.io')
 const http = require('http')
 const bodyParser = require('body-parser')
 const socketIOInitializer = require('./events/socket.js')

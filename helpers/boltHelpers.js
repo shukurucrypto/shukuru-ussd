@@ -1,4 +1,3 @@
-const ActiveInvoice = require('../models/ActiveInvoice')
 const Transaction = require('../models/Transaction')
 const User = require('../models/User')
 const UserTransactions = require('../models/UserTransactions')
