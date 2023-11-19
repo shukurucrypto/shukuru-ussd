@@ -40,6 +40,7 @@ async function createApiUser(req, res) {
       })
     }
 
+    // Email generated for bolt backend
     const generatedEmail = username + '@shukuru.com'
 
     let data = {
