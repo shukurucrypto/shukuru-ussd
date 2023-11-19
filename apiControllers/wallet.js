@@ -26,6 +26,7 @@ const AccountSecrets = require('../models/AccountSecrets')
 const ActiveInvoice = require('../models/ActiveInvoice')
 const LightningWallet = require('../models/LightningWallet')
 const NfcCard = require('../models/NfcCard')
+const { boltGETRequest } = require('../helpers/boltRequests')
 require('dotenv').config()
 
 const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
@@ -175,7 +176,7 @@ async function changeUserCurrencyAPI(req, res) {
 
 async function getWalletApiBalance(req, res) {
   try {
-    const userId = req.params.userId
+    const { userId } = req.user
 
     const currentUser = await User.findById(userId)
 
@@ -189,7 +190,6 @@ async function getWalletApiBalance(req, res) {
 
     let convertedCello = 0
     let convertedBusd = 0
-    let sats = await getSatsLightningBalance(phoneNumber)
 
     let celloDollarBalance = await getCelloDollarBalance(phoneNumber)
     celloDollarBalance_ = ethers.utils.formatEther(celloDollarBalance)
@@ -213,6 +213,17 @@ async function getWalletApiBalance(req, res) {
       )
     }
 
+    let sats
+
+    // Call bolt to get the user wallet balances here...
+    const boltInstance = await boltGETRequest(null, req.bolt, '/users')
+
+    if (!boltInstance.success) {
+      sats = 0.0
+    }
+
+    sats = boltInstance.response.wallet.balance
+
     const convertedSats = await satsConvertor(sats, currentUser.country)
 
     let total
@@ -228,10 +239,7 @@ async function getWalletApiBalance(req, res) {
       data: {
         userId: currentUser._id,
         lightning: sats,
-        // lightning: sats,
         cusd: Number(celloDollarBalance_),
-        // eth: Number(userBalance),
-        // usdt: Number(usdtBalance),
         busd: Number(convertedBusd),
         eth: 0,
         usdt: 0,
@@ -556,9 +564,13 @@ async function getBTCWalletApiBalance(req, res) {
       return res.status(404).json({ response: 'User not found' })
     }
 
-    const phoneNumber = currentUser.phoneNumber
+    let sats
+    // Call bolt to get the user wallet balances here...
+    const boltInstance = await boltGETRequest(null, req.bolt, '/users')
 
-    let sats = await getSatsLightningBalance(phoneNumber)
+    if (!boltInstance.success) return (sats = 0.0)
+
+    sats = boltInstance.response.wallet.balance
 
     const convertedSats = await satsConvertor(sats, currentUser.country)
 
