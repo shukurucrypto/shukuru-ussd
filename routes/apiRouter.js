@@ -52,13 +52,18 @@ const {
   buyUtility,
   checkCeloGas,
   requestForGas,
+  lookupAPIInvoiceStatus,
+  updateLegacyData,
 } = require('../apiControllers/payments.js')
 const accessTokenBearer = require('../middleware/accessTokenBearer.js')
 const {
   createActiveInvoice,
   getActiveInvoice,
 } = require('../apiControllers/activeInvoice.js')
-const { authenticateToken } = require('../middleware/authToken.js')
+const {
+  authenticateToken,
+  authenticateAllTokens,
+} = require('../middleware/authToken.js')
 const {
   sendReward,
   claimReward,
@@ -102,8 +107,14 @@ apiRouter.post('/verify/raw/otp', verifyRawOtpCode)
 apiRouter.post('/reset/raw/password', resetRawPassword)
 
 // Wallet routes
-apiRouter.get('/wallet/:userId', getWalletApiBalance)
-apiRouter.get('/wallet/btc/:userId', getBTCWalletApiBalance)
+apiRouter.get('/wallet/:userId', authenticateAllTokens, getWalletApiBalance)
+apiRouter.get(
+  '/wallet/btc/:userId',
+  authenticateAllTokens,
+  getBTCWalletApiBalance
+)
+
+//
 apiRouter.post('/convert', currencyConvertorApi)
 apiRouter.post('/toethers', currencyConvertorToEthersApi)
 apiRouter.get('/btc/txs/:userId', getBTCWalletTransactionsAPI)
@@ -137,17 +148,25 @@ apiRouter.post('/user/country/update', authenticateToken, changeUserCurrencyAPI)
 apiRouter.delete('/user/delete', authenticateToken, deleteUserAccount)
 
 // Payments
-apiRouter.post('/send', authenticateToken, sendLightningApiPayment)
+apiRouter.post('/send', authenticateAllTokens, sendLightningApiPayment)
 apiRouter.post('/send/cusd', authenticateToken, sendApiCeloUSD)
 apiRouter.get('/gas/:userId', checkCeloGas)
 apiRouter.post('/send/busd', authenticateToken, sendApiBUSD)
-apiRouter.post('/invoice/create', accessTokenBearer, createAPILightningInvoice)
-apiRouter.post('/invoice/decode', decodeInvoiceAPI)
-apiRouter.post('/invoice/pay', payBTCInvoiceAPI)
+
+// BTC
+apiRouter.post(
+  '/invoice/create',
+  authenticateAllTokens,
+  createAPILightningInvoice
+)
+apiRouter.post('/invoice/decode', authenticateAllTokens, decodeInvoiceAPI)
+apiRouter.post('/invoice/pay', authenticateAllTokens, payBTCInvoiceAPI)
+apiRouter.post('/invoice/status', authenticateAllTokens, lookupAPIInvoiceStatus)
+apiRouter.get('/invoice/legacies', authenticateAllTokens, updateLegacyData)
+
 apiRouter.post('/invoice/pay/nfc', authenticateToken, nfcPayAPI)
 apiRouter.post('/invoice/pay/busd/nfc', authenticateToken, nfcPayBUSDAPI)
 apiRouter.post('/invoice/status', getInvoiceStatusAPI)
-
 apiRouter.post('/invoice/active/create', createActiveInvoice)
 apiRouter.post('/invoice/active/info', getActiveInvoice)
 
@@ -169,7 +188,7 @@ apiRouter.get('/claim', authenticateToken, claimReward)
 apiRouter.get('/rewards/check', authenticateToken, checkReward)
 
 // Utilities
-apiRouter.post('/utility/pay', authenticateToken, buyUtility)
+apiRouter.post('/utility/pay', authenticateAllTokens, buyUtility)
 apiRouter.post('/gas/request', requestForGas)
 
 apiRouter.post('/push', sendPushNotification)
