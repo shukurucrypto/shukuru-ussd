@@ -1480,41 +1480,7 @@ async function buyUtility(req, res) {
           success: false,
         })
       }
-    } else if (asset === 'BUSD') {
-      const convertedToUSDAmount = await currencyConvertor(
-        amount,
-        sender.country,
-        'USD'
-      )
-      const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
-
-      const amount_ = parsedAmount.toString()
-
-      // Get the current user / payer passkey
-      const dbPrivateKey = sender.passKey
-
-      // Decrypt the passKey
-      const privateKey = await decrypt(dbPrivateKey)
-
-      // payer's wallet
-      const wallet = await new ethers.Wallet(privateKey, provider)
-
-      const busdContract = new ethers.Contract(busdAddress, BUSDABI, wallet)
-
-      const walletBalance = await busdContract.balanceOf(sender.address)
-
-      const convertedBalance = await ethers.utils.formatEther(walletBalance)
-
-      if (Number(convertedBalance) == 0.0) {
-        return res.status(403).json({
-          success: false,
-          response: 'You do not have enough BUSD to complete this transaction',
-        })
-      }
-
-      const tx_ = await busdContract.transfer(adminAddress, amount_)
-
-      txRecipt = await tx_.wait(1)
+      // CUSD
     } else {
       txRecipt = await sendcUSDKit(sender, adminAddress, amount)
 
