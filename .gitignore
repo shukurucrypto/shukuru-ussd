@@ -4,6 +4,9 @@ coverage
 coverage.json
 typechain
 
+yarn.lock
+package-lock.json
+
 #Hardhat files
 cache
 artifacts
