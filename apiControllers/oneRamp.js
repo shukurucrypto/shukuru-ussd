@@ -60,34 +60,26 @@ async function withdrawCUSD(req, res) {
 
     const wallet = await createSigner(user.userId, network) // <-- Change to the asset
 
-    let oneRamp
+    // Initialize oneramp here...
 
-    if (asset === 'cUSD') {
-      // Initialize oneramp here...
+    const oneRamp = new OneRamp(
+      'celo', /// <-- Change to celo
+      oneRampClient,
+      oneRampSecret,
+      celoProvider, /// <--- Change the provider to celo
+      wallet
+    )
 
-      oneRamp = new OneRamp(
-        'celo', /// <-- Change to celo
-        oneRampClient,
-        oneRampSecret,
-        celoProvider, /// <--- Change the provider to celo
-        wallet
-      )
-    } else {
-      // Initialize oneramp here...
-      oneRamp = new OneRamp(
-        'bsc', /// <-- Change the provider to bsc
-        oneRampClient,
-        oneRampSecret,
-        provider, /// <--- Change the provider to bsc main
-        wallet
-      )
-    }
-
-    const { success, response } = await oneRamp.offramp(
+    const oneRampRezz = await oneRamp.offramp(
       'stable',
       Number(amount),
       phoneNumber
     )
+    console.log('====================================')
+    console.log(oneRampRezz)
+    console.log('====================================')
+
+    const { success, response } = oneRampRezz
 
     // if (!success) {
     //   return res
