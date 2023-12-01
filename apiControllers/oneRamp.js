@@ -58,10 +58,6 @@ async function withdrawCUSD(req, res) {
 
     const { amount, tokenAddress, phoneNumber, asset, network } = req.body
 
-    console.log('====================================')
-    console.log(req.body)
-    console.log('====================================')
-
     const wallet = await createSigner(user.userId, network) // <-- Change to the asset
 
     // Initialize oneramp here...
