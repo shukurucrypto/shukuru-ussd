@@ -89,11 +89,11 @@ async function withdrawCUSD(req, res) {
       phoneNumber
     )
 
-    if (!success) {
-      return res
-        .status(401)
-        .json({ success: false, response: 'Transaction failed!' })
-    }
+    // if (!success) {
+    //   return res
+    //     .status(401)
+    //     .json({ success: false, response: 'Transaction failed!' })
+    // }
 
     const newTx = new Transaction({
       sender: user.userId,
