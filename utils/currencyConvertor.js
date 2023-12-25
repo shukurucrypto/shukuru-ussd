@@ -13,6 +13,10 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
       amount: Number(amount),
     })
 
+    console.log('CURRENCY ====================================')
+    console.log(currencyConverter)
+    console.log('====================================')
+
     let convertedAmount = await currencyConverter.convert(Number(amount))
 
     return convertedAmount.toString()
