@@ -60,6 +60,10 @@ const sendcUSDKit = async (sender, receiver, amount) => {
 
     let convertedToUSDAmount
 
+    console.log('====================================')
+    console.log(sender.currency)
+    console.log('====================================')
+
     // This lines will convert the cUSD balance from the user's local currency back to USD
     if (sender.currency === 'USD') {
       convertedToUSDAmount = amount
@@ -70,6 +74,10 @@ const sendcUSDKit = async (sender, receiver, amount) => {
         'USD'
       )
     }
+
+    console.log('====================================')
+    console.log(convertedToUSDAmount)
+    console.log('====================================')
 
     const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
 

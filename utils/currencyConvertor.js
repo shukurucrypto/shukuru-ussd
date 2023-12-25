@@ -7,7 +7,14 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
       return Number(amount)
     }
 
+    console.log('CURRENCY CONVERTOR ====================================')
+    console.log(amount, currencyFrom, currencyTo)
+    console.log('====================================')
+
     if (currencyFrom === currencyTo) {
+      console.log('====================================')
+      console.log('currencyFrom === currencyTo')
+      console.log('====================================')
       return Number(amount)
     }
 
