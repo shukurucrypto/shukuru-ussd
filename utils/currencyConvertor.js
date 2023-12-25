@@ -11,10 +11,6 @@ const currencyConvertorForUtilities = async (
       return Number(amount)
     }
 
-    if (currencyFrom === currencyTo) {
-      return Number(amount)
-    }
-
     let currencyConverter = new CC({
       from: currencyFrom,
       to: currencyTo,
