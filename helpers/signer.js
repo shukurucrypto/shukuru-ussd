@@ -58,12 +58,18 @@ const sendcUSDKit = async (sender, receiver, amount) => {
   try {
     let cUSDtoken = await kit.contracts.getStableToken()
 
+    let convertedToUSDAmount
+
     // This lines will convert the cUSD balance from the user's local currency back to USD
-    const convertedToUSDAmount = await currencyConvertor(
-      amount,
-      sender.country,
-      'USD'
-    )
+    if (sender.currency === 'USD') {
+      convertedToUSDAmount = amount
+    } else {
+      convertedToUSDAmount = await currencyConvertor(
+        amount,
+        sender.country,
+        'USD'
+      )
+    }
 
     const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
 
