@@ -119,9 +119,6 @@ const sendcUSDKit = async (sender, receiver, amount) => {
       return txRecipt
     }
   } catch (error) {
-    console.log('====================================')
-    console.log(error)
-    console.log('====================================')
     return error
   }
 }
