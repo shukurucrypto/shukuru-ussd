@@ -64,6 +64,11 @@ const sendcUSDKit = async (sender, receiver, amount) => {
       sender.country,
       'USD'
     )
+
+    console.log('TO USD ====================================')
+    console.log(convertedToUSDAmount, amount)
+    console.log('====================================')
+
     const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
 
     const amount_ = parsedAmount.toString()
@@ -90,6 +95,10 @@ const sendcUSDKit = async (sender, receiver, amount) => {
     const convertedBalance = await ethers.utils.formatEther(
       walletBalance.toString()
     )
+
+    console.log('====================================')
+    console.log(convertedBalance)
+    console.log('====================================')
 
     if (Number(convertedBalance) <= 0) {
       return 'Insufficent cUSD balance'
