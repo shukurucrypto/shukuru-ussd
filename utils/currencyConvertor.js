@@ -7,17 +7,21 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
       return Number(amount)
     }
 
+    console.log('====================================')
+    console.log(amount, currencyFrom, currencyTo)
+    console.log('====================================')
+
     let currencyConverter = new CC({
       from: currencyFrom,
       to: currencyTo,
       amount: Number(amount),
     })
 
-    console.log('CURRENCY ====================================')
-    console.log(currencyConverter)
-    console.log('====================================')
-
     let convertedAmount = await currencyConverter.convert(Number(amount))
+
+    console.log('CURRENCY ====================================')
+    console.log(convertedAmount)
+    console.log('====================================')
 
     return convertedAmount.toString()
   } catch (error) {
