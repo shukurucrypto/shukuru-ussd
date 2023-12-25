@@ -7,9 +7,9 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
       return Number(amount)
     }
 
-    console.log('====================================')
-    console.log(amount, currencyFrom, currencyTo)
-    console.log('====================================')
+    if (currencyFrom === currencyTo) {
+      return Number(amount)
+    }
 
     let currencyConverter = new CC({
       from: currencyFrom,
@@ -18,10 +18,6 @@ const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
     })
 
     let convertedAmount = await currencyConverter.convert(Number(amount))
-
-    console.log('CURRENCY ====================================')
-    console.log(convertedAmount)
-    console.log('====================================')
 
     return convertedAmount.toString()
   } catch (error) {

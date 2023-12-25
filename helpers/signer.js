@@ -98,10 +98,6 @@ const sendcUSDKit = async (sender, receiver, amount) => {
       walletBalance.toString()
     )
 
-    console.log('====================================')
-    console.log(convertedBalance)
-    console.log('====================================')
-
     if (Number(convertedBalance) <= 0) {
       return 'Insufficent cUSD balance'
     }
