@@ -1482,7 +1482,7 @@ async function buyUtility(req, res) {
       }
       // CUSD
     } else {
-      txRecipt = await sendcUSDKit(sender, adminAddress, amount)
+      txRecipt = await sendcUSDKit(sender, adminAddress, amount, true)
 
       if (!txRecipt.status) {
         return res

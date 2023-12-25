@@ -1,20 +1,52 @@
 const { default: axios } = require('axios')
 const CC = require('currency-converter-lt')
 
-const currencyConvertor = async (amount, currencyFrom, currencyTo) => {
+const currencyConvertorForUtilities = async (
+  amount,
+  currencyFrom,
+  currencyTo
+) => {
   try {
     if (Number(amount) <= 0) {
       return Number(amount)
     }
 
-    console.log('CURRENCY CONVERTOR ====================================')
-    console.log(amount, currencyFrom, currencyTo)
-    console.log('====================================')
+    if (currencyFrom === currencyTo) {
+      return Number(amount)
+    }
+
+    let currencyConverter = new CC({
+      from: currencyFrom,
+      to: currencyTo,
+      amount: Number(amount),
+    })
+
+    let convertedAmount = await currencyConverter.convert(Number(amount))
+
+    return convertedAmount.toString()
+  } catch (error) {
+    console.log(error.response)
+    return error.response
+  }
+}
+
+const currencyConvertor = async (
+  amount,
+  currencyFrom,
+  currencyTo,
+  isUtility
+) => {
+  try {
+    if (Number(amount) <= 0) {
+      return Number(amount)
+    }
+
+    // Convert the utitlity amount to USD
+    if (isUtility) {
+      return await currencyConvertorForUtilities(amount, currencyFrom, 'USD')
+    }
 
     if (currencyFrom === currencyTo) {
-      console.log('====================================')
-      console.log('currencyFrom === currencyTo')
-      console.log('====================================')
       return Number(amount)
     }
 
