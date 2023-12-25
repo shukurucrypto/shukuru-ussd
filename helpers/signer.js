@@ -72,10 +72,6 @@ const sendcUSDKit = async (sender, receiver, amount, isUtility) => {
       )
     }
 
-    console.log('====================================')
-    console.log('convertedToUSDAmount', convertedToUSDAmount)
-    console.log('====================================')
-
     const parsedAmount = await ethers.utils.parseEther(convertedToUSDAmount)
 
     const amount_ = parsedAmount.toString()

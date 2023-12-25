@@ -37,16 +37,6 @@ const currencyConvertor = async (
       return Number(amount)
     }
 
-    console.log('====================================')
-    console.log(
-      'currencyConvertor',
-      amount,
-      currencyFrom,
-      currencyTo,
-      isUtility
-    )
-    console.log('====================================')
-
     // Convert the utitlity amount to USD
     if (isUtility) {
       return await currencyConvertorForUtilities(amount, currencyFrom, 'USD')
