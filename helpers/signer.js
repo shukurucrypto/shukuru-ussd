@@ -74,15 +74,15 @@ const sendcUSDKit = async (sender, receiver, amount) => {
     // Decrypt the passKey
     const privateKey = await decrypt(dbPrivateKey)
 
-    await kit.setFeeCurrency(ContractKit.CeloContract.StableToken)
+    // await kit.setFeeCurrency(ContractKit.CeloContract.StableToken)
 
     // tx object
     await kit.connection.addAccount(privateKey)
 
-    await kit.setFeeCurrency(ContractKit.CeloContract.StableToken)
+    // await kit.setFeeCurrency(ContractKit.CeloContract.StableToken)
 
     // tx object
-    await kit.connection.addAccount(privateKey)
+    // await kit.connection.addAccount(privateKey)
 
     // get wallet balance
     const walletBalance = await cUSDtoken.balanceOf(sender.address)
@@ -91,7 +91,7 @@ const sendcUSDKit = async (sender, receiver, amount) => {
       walletBalance.toString()
     )
 
-    if (Number(convertedBalance) === 0.0 || Number(convertedBalance) === 0) {
+    if (Number(convertedBalance) <= 0) {
       return 'Insufficent cUSD balance'
     }
 
@@ -99,14 +99,14 @@ const sendcUSDKit = async (sender, receiver, amount) => {
     if (receiver.address) {
       const result = await cUSDtoken
         .transfer(receiver.address, amount_)
-        .send({ from: sender.address })
+        .send({ from: sender.address, feeCurrency: cUSDtoken.address })
 
       let txRecipt = await result.waitReceipt()
       return txRecipt
     } else {
       const result = await cUSDtoken
         .transfer(receiver, amount_)
-        .send({ from: sender.address })
+        .send({ from: sender.address, feeCurrency: cUSDtoken.address })
 
       let txRecipt = await result.waitReceipt()
       return txRecipt
