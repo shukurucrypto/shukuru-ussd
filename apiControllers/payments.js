@@ -1216,19 +1216,11 @@ async function sendRawApiCeloUSD(req, res) {
 
     const reciever = await User.findOne({ address: to })
 
-    console.log('RECIVER ====================================')
-    console.log(reciever)
-    console.log('====================================')
-
     if (!reciever) {
       receiverAddress = to
     } else {
       receiverAddress = reciever.address
     }
-
-    console.log('RECIVER ADDRESS ====================================')
-    console.log(receiverAddress)
-    console.log('====================================')
 
     let txRecipt = await sendcUSDKit(sender, receiverAddress, amount)
 
@@ -1298,7 +1290,7 @@ async function sendRawApiCeloUSD(req, res) {
         asset: 'cUSD',
         amount: amount,
         txHash: txRecipt.transactionHash,
-        txType: 'sent',
+        txType: 'External',
         external: true,
       })
 
