@@ -1216,13 +1216,21 @@ async function sendRawApiCeloUSD(req, res) {
 
     const reciever = await User.findOne({ address: to })
 
+    console.log('RECIVER ====================================')
+    console.log(reciever)
+    console.log('====================================')
+
     if (!reciever) {
       receiverAddress = to
     } else {
       receiverAddress = reciever.address
     }
 
-    let txRecipt = await sendcUSDKit(sender, reciever, amount)
+    console.log('RECIVER ADDRESS ====================================')
+    console.log(receiverAddress)
+    console.log('====================================')
+
+    let txRecipt = await sendcUSDKit(sender, receiverAddress, amount)
 
     if (!txRecipt.status) {
       return res
