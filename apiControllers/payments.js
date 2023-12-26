@@ -1206,10 +1206,6 @@ async function sendRawApiCeloUSD(req, res) {
   try {
     const { from, to, amount } = req.body
 
-    console.log('====================================')
-    console.log(req.body)
-    console.log('====================================')
-
     let receiverAddress
 
     const sender = await User.findOne({ address: from })
@@ -1246,12 +1242,12 @@ async function sendRawApiCeloUSD(req, res) {
 
       const recieverTx = await new Transaction({
         sender: sender?._id,
-        receiver: reciever?._id,
+        receiver: reciever ? reciever._id : receiverAddress,
         currency: sender.country,
         asset: 'cUSD',
         amount: amount,
         txHash: txRecipt.transactionHash,
-        txType: 'recieved',
+        txType: 'sent',
         external: true,
         phoneNumber: sender.phoneNumber,
       })
