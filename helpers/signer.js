@@ -58,6 +58,10 @@ const sendcUSDKit = async (sender, receiver, amount, isUtility) => {
   try {
     let cUSDtoken = await kit.contracts.getStableToken()
 
+    console.log('KIT LOG====================================')
+    console.log(sender, receiver, amount, isUtility)
+    console.log('====================================')
+
     let convertedToUSDAmount
 
     // This lines will convert the cUSD balance from the user's local currency back to USD
@@ -120,6 +124,9 @@ const sendcUSDKit = async (sender, receiver, amount, isUtility) => {
       return txRecipt
     }
   } catch (error) {
+    console.log('KIT ERROR ====================================')
+    console.log(error)
+    console.log('====================================')
     return error
   }
 }
