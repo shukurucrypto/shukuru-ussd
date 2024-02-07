@@ -1303,9 +1303,6 @@ async function sendRawApiCeloUSD(req, res) {
       })
     }
   } catch (error) {
-    console.log('====================================')
-    console.log(error)
-    console.log('====================================')
     return res.status(500).json(error.message)
   }
 }

@@ -52,6 +52,43 @@ async function getQuote(req, res) {
   }
 }
 
+async function createDepositTx(req, res) {
+  try {
+    const user = req.user
+
+    const { amount, phone, asset, transferId } = req.body
+
+    const newTx = new Transaction({
+      sender: user.userId,
+      txHash: transferId,
+      asset: asset,
+      amount: amount,
+      currency: user.country,
+      txType: 'Deposit',
+      phoneNumber: phone,
+      external: true,
+    })
+
+    const saved = await newTx.save()
+
+    const userTx = await UserTransactions.findOne({ user: user.userId })
+
+    await userTx.transactions.push(saved._id)
+
+    await userTx.save()
+
+    return res.status(201).json({
+      success: true,
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      response: error,
+    })
+  }
+}
+
 async function withdrawCUSD(req, res) {
   try {
     const user = req.user
@@ -75,9 +112,6 @@ async function withdrawCUSD(req, res) {
       Number(amount),
       phoneNumber
     )
-    console.log('====================================')
-    console.log(oneRampRezz)
-    console.log('====================================')
 
     const { success, response } = oneRampRezz
 
@@ -172,4 +206,5 @@ module.exports = {
   getQuote,
   withdrawCUSD,
   confirmedTxCallback,
+  createDepositTx,
 }
