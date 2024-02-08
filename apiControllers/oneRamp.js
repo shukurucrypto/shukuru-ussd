@@ -52,6 +52,55 @@ async function getQuote(req, res) {
   }
 }
 
+async function offRampEVM(req, res) {
+  try {
+    const { to, amount, chain } = req.body
+
+    const user = req.user
+
+    const sender = await User.findById(user.userId)
+
+    if (chain !== 'celo')
+      return res
+        .status(403)
+        .json({ success: false, response: 'Invalid chain!' })
+
+    let txRecipt = await sendcUSDKit(sender, to, amount)
+
+    if (!txRecipt.status) {
+      return res
+        .status(403)
+        .json({ success: false, response: 'Transaction failed!' })
+    }
+
+    // // Check to see if the user has a UserTransactions table
+    // const userTx = await UserTransactions.findOne({ user: sender._id })
+
+    // // Create TX Objects here...
+    // const senderTx = await new Transaction({
+    //   sender: sender._id,
+    //   currency: sender.country,
+    //   asset: 'cUSD',
+    //   amount: amount,
+    //   txHash: txRecipt.transactionHash,
+    //   txType: 'External',
+    //   external: true,
+    // })
+
+    // const tx = await senderTx.save()
+
+    // await userTx.transactions.push(tx._id)
+
+    // await userTx.save()
+
+    return res.status(201).json({
+      success: true,
+    })
+  } catch (error) {
+    return res.status(500).json(error.message)
+  }
+}
+
 async function createRampTx(req, res) {
   try {
     const user = req.user
@@ -207,4 +256,5 @@ module.exports = {
   withdrawCUSD,
   confirmedTxCallback,
   createRampTx,
+  offRampEVM,
 }
