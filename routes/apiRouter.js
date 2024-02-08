@@ -78,6 +78,7 @@ const {
   withdrawCUSD,
   confirmedTxCallback,
   createDepositTx,
+  createRampTx,
 } = require('../apiControllers/oneRamp.js')
 
 const apiRouter = express.Router()
@@ -197,7 +198,7 @@ apiRouter.post('/push', sendPushNotification)
 // OneRamp
 apiRouter.post('/quote', authenticateToken, getQuote)
 apiRouter.post('/withdraw', authenticateToken, withdrawCUSD)
-apiRouter.post('/deposit', authenticateToken, createDepositTx)
+apiRouter.post('/ramp', authenticateToken, createRampTx)
 
 // Push
 apiRouter.post('/one-push', sendUserPush)

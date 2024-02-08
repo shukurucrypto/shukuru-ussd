@@ -52,11 +52,11 @@ async function getQuote(req, res) {
   }
 }
 
-async function createDepositTx(req, res) {
+async function createRampTx(req, res) {
   try {
     const user = req.user
 
-    const { amount, phone, asset, transferId } = req.body
+    const { amount, phone, asset, transferId, txType } = req.body
 
     const newTx = new Transaction({
       sender: user.userId,
@@ -64,7 +64,7 @@ async function createDepositTx(req, res) {
       asset: asset,
       amount: amount,
       currency: user.country,
-      txType: 'Deposit',
+      txType: txType,
       phoneNumber: phone,
       external: true,
     })
@@ -206,5 +206,5 @@ module.exports = {
   getQuote,
   withdrawCUSD,
   confirmedTxCallback,
-  createDepositTx,
+  createRampTx,
 }
