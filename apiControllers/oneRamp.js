@@ -60,6 +60,12 @@ async function offRampEVM(req, res) {
 
     const sender = await User.findById(user.userId)
 
+    if (!sender) {
+      return res
+        .status(404)
+        .json({ success: false, response: 'User not found!' })
+    }
+
     if (chain !== 'celo')
       return res
         .status(403)
