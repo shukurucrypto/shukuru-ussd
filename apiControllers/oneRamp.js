@@ -9,7 +9,7 @@ const {
   celoProviderUrl,
   mumbaiProvider,
 } = require('../settings/settings')
-const { createSigner, getProvider } = require('../helpers/signer')
+const { createSigner, getProvider, sendcUSDKit } = require('../helpers/signer')
 const Transaction = require('../models/Transaction')
 const { sendPush } = require('./alerts')
 const UserTransactions = require('../models/UserTransactions')
