@@ -177,7 +177,6 @@ const lookupAPIInvoiceStatus = async (req, res) => {
       data: boltInstance,
     })
   } catch (error) {
-    console.log(error.message)
     return res.status(500).json(error.message)
   }
 }
@@ -1625,6 +1624,57 @@ async function sendApiCeloUSD(req, res) {
   }
 }
 
+//
+const createRecieverBoltTransaction = async (req, res) => {
+  try {
+    const { user, amount } = req.body
+
+    const reciever = await User.findOne({ name: user })
+
+    if (!reciever)
+      return res
+        .status(404)
+        .json({ response: 'The User does not have a Shukuru Wallet' })
+
+    const recieverTx = await new Transaction({
+      sender: 'External',
+      receiver: reciever._id,
+      currency: reciever.country,
+      asset: 'Lightning',
+      amount: amount,
+      txType: 'recieved',
+      phoneNumber: reciever.phoneNumber,
+      external: true,
+    })
+    // const senderTx = await new Transaction({
+    //   sender: sender._id,
+    //   currency: sender.country,
+    //   asset: 'cUSD',
+    //   amount: amount,
+    //   txHash: txRecipt.transactionHash,
+    //   txType: 'External',
+    //   external: true,
+    // })
+
+    const toTx = await recieverTx.save()
+
+    const receiverTx = await UserTransactions.findOne({
+      user: reciever._id,
+    })
+
+    await receiverTx.transactions.push(toTx._id)
+
+    await receiverTx.save()
+
+    return res.status(200).json({
+      success: true,
+      data: recieverTx,
+    })
+  } catch (error) {
+    return res.status(500).json(error.message)
+  }
+}
+
 module.exports = {
   sendLightningApiPayment,
   sendApiCeloUSD,
@@ -1648,4 +1698,5 @@ module.exports = {
   requestForGas,
   lookupAPIInvoiceStatus,
   updateLegacyData,
+  createRecieverBoltTransaction,
 }

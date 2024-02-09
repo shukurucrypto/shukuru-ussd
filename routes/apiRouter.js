@@ -54,6 +54,7 @@ const {
   requestForGas,
   lookupAPIInvoiceStatus,
   updateLegacyData,
+  createRecieverBoltTransaction,
 } = require('../apiControllers/payments.js')
 const accessTokenBearer = require('../middleware/accessTokenBearer.js')
 const {
@@ -81,6 +82,7 @@ const {
   createRampTx,
   offRampEVM,
 } = require('../apiControllers/oneRamp.js')
+const { authLndNodeAdmin } = require('../middleware/adminAuth.js')
 
 const apiRouter = express.Router()
 
@@ -205,4 +207,8 @@ apiRouter.post('/off-ramp', authenticateToken, offRampEVM)
 // Push
 apiRouter.post('/one-push', sendUserPush)
 apiRouter.post('/callback', confirmedTxCallback)
+
+// Bolt11
+apiRouter.post('/create-tx', authLndNodeAdmin, createRecieverBoltTransaction)
+
 module.exports = apiRouter

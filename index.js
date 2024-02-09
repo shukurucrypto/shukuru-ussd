@@ -18,6 +18,7 @@ app.use(cors())
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
+
 app.set('io', io)
 app.use('/ussd', ussdRouter)
 app.use('/app', apiRouter)
