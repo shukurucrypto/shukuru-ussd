@@ -167,6 +167,10 @@ const lookupAPIInvoiceStatus = async (req, res) => {
 
     const boltInstance = await boltGETRequest(data, req.bolt, '/invoice/lookup')
 
+    console.log('====================================')
+    console.log('bolt', boltInstance)
+    console.log('====================================')
+
     if (!boltInstance.success)
       return res
         .status(403)
@@ -177,6 +181,9 @@ const lookupAPIInvoiceStatus = async (req, res) => {
       data: boltInstance,
     })
   } catch (error) {
+    console.log('====================================')
+    console.log(error)
+    console.log('====================================')
     return res.status(500).json(error.message)
   }
 }
