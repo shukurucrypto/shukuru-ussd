@@ -156,13 +156,13 @@ const lookupAPIInvoiceStatus = async (req, res) => {
     const { r_hash } = req.body
 
     // Re-decode the invoice hash
-    const binaryRHash = Buffer.from(r_hash, 'base64')
+    // const binaryRHash = Buffer.from(r_hash, 'base64')
 
     // // Convert binary data to hexadecimal string
-    const hexRHash = binaryRHash.toString('hex')
+    // const hexRHash = binaryRHash.toString('hex')
 
     const data = {
-      r_hash: hexRHash,
+      r_hash: r_hash,
     }
 
     const boltInstance = await boltGETRequest(data, req.bolt, '/invoice/lookup')
