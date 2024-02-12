@@ -32,9 +32,9 @@ const getUserLightningBalance = async (req, res) => {
 
 const getInvoice = async (req, res) => {
   try {
-    const { hash } = req.body
+    const { r_hash } = req.body
 
-    const invoice = await Invoices.findOne({ paymentHash: hash })
+    const invoice = await Invoices.findOne({ paymentHash: r_hash })
 
     if (!invoice) {
       return res.send({

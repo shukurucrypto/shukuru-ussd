@@ -26,6 +26,7 @@ const boltSendSatsHelper = async (data) => {
       const inhouseReqData = {
         reciever: to,
         amount,
+        r_hash,
       }
 
       const houseBoltInstance = await boltGETRequest(

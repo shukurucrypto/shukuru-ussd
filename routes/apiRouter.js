@@ -83,6 +83,7 @@ const {
   offRampEVM,
 } = require('../apiControllers/oneRamp.js')
 const { authLndNodeAdmin } = require('../middleware/adminAuth.js')
+const { getInvoice } = require('../controllers/invoices.js')
 
 const apiRouter = express.Router()
 
@@ -166,7 +167,8 @@ apiRouter.post(
 )
 apiRouter.post('/invoice/decode', authenticateAllTokens, decodeInvoiceAPI)
 apiRouter.post('/invoice/pay', authenticateAllTokens, payBTCInvoiceAPI)
-apiRouter.post('/invoice/status', authenticateAllTokens, lookupAPIInvoiceStatus)
+// apiRouter.post('/invoice/status', authenticateAllTokens, lookupAPIInvoiceStatus)
+apiRouter.post('/invoice/status', authenticateAllTokens, getInvoice)
 apiRouter.get('/invoice/legacies', authenticateAllTokens, updateLegacyData)
 
 apiRouter.post('/invoice/pay/nfc', authenticateToken, nfcPayAPI)
