@@ -14,6 +14,7 @@
     "@celo/contractkit": "^2.3.0",
     "@masa-finance/masa-sdk": "^3.3.7",
     "@oneramp/sdk": "^1.0.5",
+    "@onesignal/node-onesignal": "^2.0.1-beta2",
     "@uniswap/sdk": "^3.0.3",
     "@uniswap/sdk-core": "^3.0.2",
     "@uniswap/smart-order-router": "^2.9.3",

@@ -1,7 +1,6 @@
+const { ONESIGNAL_APP_ID } = require('../constants')
 const User = require('../models/User')
-const { default: axios } = require('axios')
-
-const sdk = require('api')('@onesignal/v11.0#18i3iim3olli9343r')
+const axios = require('axios')
 
 require('dotenv').config()
 
@@ -89,7 +88,7 @@ const sendUserPush = async (req, res) => {
         .json({ success: false, response: 'User not found' })
     }
 
-    const result = await sendPush(targetedUser._id, msg, name)
+    const result = await sendPush(targetedUser._id.toString(), msg)
 
     res.status(200).json({ success: true, response: result })
   } catch (error) {
@@ -97,39 +96,46 @@ const sendUserPush = async (req, res) => {
   }
 }
 
-const sendPush = async (userId, msg, name) => {
+const sendPush = async (subId, msg) => {
   try {
+    // Assuming ONESIGNAL_APP_ID is defined elsewhere in your code.
+    // If not, replace ONESIGNAL_APP_ID with the actual App ID string.
     const options = {
       method: 'POST',
-      url: 'https://onesignal.com/api/v1/notifications',
+      url: 'https://api.onesignal.com/notifications',
       headers: {
         accept: 'application/json',
         Authorization: 'Basic MzE1NDBmMjItNzRiOS00MGYwLWE1MDQtNzNkMGE2MzMwOGIy',
         'content-type': 'application/json',
       },
       data: {
-        app_id: 'bdb34439-82ae-4091-bcb3-664874f10810',
+        app_id: ONESIGNAL_APP_ID,
+        // Assuming you want to use 'external_id' to target the notification.
+        // Uncomment and use as needed based on your targeting strategy.
+        // external_id: '645f30dcf686496260b20340',
 
-        include_external_user_ids: [userId],
-        contents: {
-          en: msg,
-        },
-        name,
+        // Set the campaign name dynamically based on the function argument.
+        name: 'Info', // This sets the campaign name.
+        included_segments: ['Subscribed Users', 'Active Users'],
+        external: subId,
+        // Dynamic targeting based on external_id, using the function argument.
+
+        contents: { en: msg }, // The message content, passed via the 'msg' argument.
       },
     }
 
     const result = await axios
       .request(options)
       .then(function (response) {
-        return response.data
+        return response.data // Return the response data on success.
       })
       .catch(function (error) {
-        return error
+        return error // Return the error if the request fails.
       })
 
     return result
   } catch (error) {
-    return error
+    return error // Return the error if an exception occurs.
   }
 }
 

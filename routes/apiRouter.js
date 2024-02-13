@@ -207,7 +207,7 @@ apiRouter.post('/ramp', authenticateToken, createRampTx)
 apiRouter.post('/off-ramp', authenticateToken, offRampEVM)
 
 // Push
-apiRouter.post('/one-push', sendUserPush)
+apiRouter.post('/send-push', authLndNodeAdmin, sendUserPush)
 apiRouter.post('/callback', confirmedTxCallback)
 
 // Bolt11
