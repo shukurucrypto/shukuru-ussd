@@ -1,3 +1,5 @@
+const redisClient = require('../config/redisConfig')
+const { DEFAULT_REDIS_EXPIRATION } = require('../constants')
 const Transaction = require('../models/Transaction')
 const User = require('../models/User')
 const UserTransactions = require('../models/UserTransactions')
@@ -94,6 +96,19 @@ const boltSendSatsHelper = async (data) => {
       await receiverTx.save()
       await userTx.save()
 
+      // Add the reciever's transaction to the reciver's cache transaction
+      await redisClient.set(
+        `userTxs:${reciever._id}`,
+        JSON.stringify(receiverTx.transactions),
+        DEFAULT_REDIS_EXPIRATION
+      )
+
+      await redisClient.set(
+        `userTxs:${sender._id}`,
+        JSON.stringify(userTx.transactions),
+        DEFAULT_REDIS_EXPIRATION
+      )
+
       return {
         success: true,
         status: 200,
@@ -120,6 +135,13 @@ const boltSendSatsHelper = async (data) => {
     await userTx.transactions.push(tx._id)
 
     await userTx.save()
+
+    // Save the transaction to the user's cache
+    await redisClient.set(
+      `userTxs:${sender._id}`,
+      JSON.stringify(userTx.transactions),
+      DEFAULT_REDIS_EXPIRATION
+    )
 
     return {
       success: true,

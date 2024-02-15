@@ -21,6 +21,7 @@ const { createLightningWallet } = require('../lightning/createWallet.js')
 const LightningWallet = require('../models/LightningWallet.js')
 const { Masa } = require('@masa-finance/masa-sdk')
 const { boltBarePOSTRequest } = require('../helpers/boltRequests.js')
+const redisClient = require('../config/redisConfig.js')
 
 require('dotenv').config()
 
@@ -232,6 +233,22 @@ async function login(req, res) {
       { userId: existingUser._id, phoneNumber: existingUser.phoneNumber },
       process.env.ENCRYPTION_KEY
     )
+
+    const user = {
+      _id: existingUser._id,
+      name: existingUser.name,
+      email: existingUser.email,
+      country: existingUser.country,
+      accountType: existingUser.accountType,
+      verified: existingUser.verified,
+      balance: existingUser.balance,
+      btcBalance: existingUser.btcBalance,
+    }
+
+    // Save the user to redis
+    await redisClient.set(`user:${existingUser._id}`, JSON.stringify(user), {
+      EX: 3600,
+    })
 
     return res.status(201).json({
       success: true,

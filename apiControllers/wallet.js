@@ -27,6 +27,7 @@ const ActiveInvoice = require('../models/ActiveInvoice')
 const LightningWallet = require('../models/LightningWallet')
 const NfcCard = require('../models/NfcCard')
 const { boltGETRequest } = require('../helpers/boltRequests')
+const { cacheUserTxs } = require('../redis/txcache.js')
 require('dotenv').config()
 
 const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
@@ -49,6 +50,9 @@ async function getApiProfileTx(req, res) {
       path: 'transactions',
       options: { sort: { date: 'desc' } },
     })
+
+    // await cacheUserTxs(userId, txTo)
+
     return res.status(200).json({
       success: true,
       data: txTo,
@@ -109,9 +113,22 @@ async function getProfile(req, res) {
       return res.status(404).json({ response: 'User not found' })
     }
 
+    // Create a cleaned version of the user object
+    const cleanedUser = {
+      // Include only the non-sensitive data
+      name: currentUser.name,
+      email: currentUser.email,
+      country: currentUser.country,
+      accountType: currentUser.accountType,
+      verified: currentUser.verified,
+      balance: currentUser.balance,
+      btcBalance: currentUser.btcBalance,
+      // Optionally include other fields that are considered safe
+    }
+
     return res.status(200).json({
       success: true,
-      data: currentUser,
+      data: cleanedUser,
     })
   } catch (error) {
     res.status(404).json(error.message)
@@ -164,6 +181,13 @@ async function changeUserCurrencyAPI(req, res) {
     user.country = country
 
     await user.save()
+
+    // Update the user's currency in the cache
+    await redisClient.setex(
+      `user:${userId}`,
+      DEFAULT_REDIS_EXPIRATION,
+      JSON.stringify(user)
+    )
 
     return res.status(201).json({
       success: true,

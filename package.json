@@ -45,7 +45,7 @@
     "otp-generator": "^4.0.1",
     "passport-local": "^1.0.0",
     "qrcode": "^1.5.1",
-    "redis": "^4.6.6",
+    "redis": "^4.6.13",
     "socket.io": "^4.5.4",
     "truncate-eth-address": "^1.0.2",
     "web3": "^1.8.1"

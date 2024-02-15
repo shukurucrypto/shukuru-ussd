@@ -84,6 +84,8 @@ const {
 } = require('../apiControllers/oneRamp.js')
 const { authLndNodeAdmin } = require('../middleware/adminAuth.js')
 const { getInvoice } = require('../controllers/invoices.js')
+const { userCache } = require('../redis/userRedis.js')
+const { getUserTxCache } = require('../redis/txcache.js')
 
 const apiRouter = express.Router()
 
@@ -145,10 +147,10 @@ apiRouter.get(
 )
 
 // Profile
-apiRouter.get('/user/:userId', getProfile)
+apiRouter.get('/user/:userId', userCache, getProfile)
 apiRouter.get('/profile/:phone', getApiProfile)
 apiRouter.get('/profile/name/:name', getApiProfileUsername)
-apiRouter.get('/txs/:userId', getApiProfileTx)
+apiRouter.get('/txs/:userId', getUserTxCache, getApiProfileTx)
 apiRouter.get('/txs/btc/:userId', getApiBTCTxs)
 apiRouter.post('/user/country/update', authenticateToken, changeUserCurrencyAPI)
 apiRouter.delete('/user/delete', authenticateToken, deleteUserAccount)

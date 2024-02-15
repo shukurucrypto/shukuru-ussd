@@ -8,6 +8,7 @@ require('dotenv').config()
 
 const ussdRouter = require('./routes/ussd.js')
 const apiRouter = require('./routes/apiRouter.js')
+const redisClient = require('./config/redisConfig.js')
 
 const app = express()
 const server = http.createServer(app)
@@ -32,6 +33,8 @@ try {
 } catch (e) {
   console.log('could not connect')
 }
+
+redisClient.connect().catch(console.error)
 
 const dbConnection = mongoose.connection
 dbConnection.on('error', (err) => console.log(`Connection error ${err}`))

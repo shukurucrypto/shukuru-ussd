@@ -41,6 +41,8 @@ const {
   boltPayInvoice,
 } = require('../helpers/boltRequests.js')
 const { boltSendSatsHelper } = require('../helpers/boltHelpers.js')
+const redisClient = require('../config/redisConfig.js')
+const { DEFAULT_REDIS_EXPIRATION } = require('../constants/index.js')
 
 require('dotenv').config()
 
@@ -1269,6 +1271,19 @@ async function sendRawApiCeloUSD(req, res) {
       await receiverTx.save()
       await userTx.save()
 
+      // Save the txs to redis
+      await redisClient.set(
+        `userTxs:${sender._id}`,
+        JSON.stringify(userTx.transactions),
+        DEFAULT_REDIS_EXPIRATION
+      )
+
+      await redisClient.set(
+        `userTxs:${reciever._id}`,
+        JSON.stringify(receiverTx.transactions),
+        DEFAULT_REDIS_EXPIRATION
+      )
+
       return res.status(200).json({
         success: true,
         data: txRecipt,
@@ -1294,6 +1309,12 @@ async function sendRawApiCeloUSD(req, res) {
       await userTx.transactions.push(tx._id)
 
       await userTx.save()
+
+      await redisClient.set(
+        `userTxs:${sender._id}`,
+        JSON.stringify(userTx.transactions),
+        DEFAULT_REDIS_EXPIRATION
+      )
 
       return res.status(200).json({
         success: true,
@@ -1613,6 +1634,19 @@ async function sendApiCeloUSD(req, res) {
     await receiverTx.save()
     await userTx.save()
 
+    // Save the userTx to cache here...
+    await redisClient.set(
+      `userTxs:${sender._id}`,
+      JSON.stringify(userTx.transactions),
+      DEFAULT_REDIS_EXPIRATION
+    )
+
+    await redisClient.set(
+      `userTxs:${reciever._id}`,
+      JSON.stringify(receiverTx.transactions),
+      DEFAULT_REDIS_EXPIRATION
+    )
+
     return res.status(200).json({
       success: true,
       data: txRecipt,
@@ -1665,6 +1699,12 @@ const createRecieverBoltTransaction = async (req, res) => {
     await receiverTx.transactions.push(toTx._id)
 
     await receiverTx.save()
+
+    await redisClient.set(
+      `userTxs:${reciever._id}`,
+      JSON.stringify(receiverTx.transactions),
+      DEFAULT_REDIS_EXPIRATION
+    )
 
     return res.status(200).json({
       success: true,

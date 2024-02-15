@@ -13,6 +13,8 @@ const { createSigner, getProvider, sendcUSDKit } = require('../helpers/signer')
 const Transaction = require('../models/Transaction')
 const { sendPush } = require('./alerts')
 const UserTransactions = require('../models/UserTransactions')
+const redisClient = require('../config/redisConfig')
+const { DEFAULT_REDIS_EXPIRATION } = require('../constants')
 
 const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
 const celoProvider = new ethers.providers.JsonRpcProvider(celoProviderUrl)
@@ -131,6 +133,12 @@ async function createRampTx(req, res) {
     await userTx.transactions.push(saved._id)
 
     await userTx.save()
+
+    await redisClient.set(
+      `userTxs:${user._id}`,
+      JSON.stringify(userTx.transactions),
+      DEFAULT_REDIS_EXPIRATION
+    )
 
     return res.status(201).json({
       success: true,
