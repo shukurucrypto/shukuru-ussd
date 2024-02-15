@@ -8,7 +8,10 @@ const userCache = async (req, res, next) => {
 
     if (cachedUser) {
       const user = JSON.parse(cachedUser)
-      return res.status(200).json({ user })
+      return res.status(200).json({
+        success: true,
+        data: user,
+      })
     } else {
       console.log('Cache miss')
       next()
