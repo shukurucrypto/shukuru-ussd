@@ -43,6 +43,7 @@ const {
 const { boltSendSatsHelper } = require('../helpers/boltHelpers.js')
 const redisClient = require('../config/redisConfig.js')
 const { DEFAULT_REDIS_EXPIRATION } = require('../constants/index.js')
+const { cachAllUsertx } = require('../helpers/cachHelpers.js')
 
 require('dotenv').config()
 
@@ -1272,17 +1273,10 @@ async function sendRawApiCeloUSD(req, res) {
       await userTx.save()
 
       // Save the txs to redis
-      await redisClient.set(
-        `userTxs:${sender._id}`,
-        JSON.stringify(userTx.transactions),
-        DEFAULT_REDIS_EXPIRATION
-      )
 
-      await redisClient.set(
-        `userTxs:${reciever._id}`,
-        JSON.stringify(receiverTx.transactions),
-        DEFAULT_REDIS_EXPIRATION
-      )
+      await cachAllUsertx(sender._id)
+
+      await cachAllUsertx(reciever._id)
 
       return res.status(200).json({
         success: true,
@@ -1310,11 +1304,7 @@ async function sendRawApiCeloUSD(req, res) {
 
       await userTx.save()
 
-      await redisClient.set(
-        `userTxs:${sender._id}`,
-        JSON.stringify(userTx.transactions),
-        DEFAULT_REDIS_EXPIRATION
-      )
+      await cachAllUsertx(sender._id)
 
       return res.status(200).json({
         success: true,
@@ -1635,17 +1625,10 @@ async function sendApiCeloUSD(req, res) {
     await userTx.save()
 
     // Save the userTx to cache here...
-    await redisClient.set(
-      `userTxs:${sender._id}`,
-      JSON.stringify(userTx.transactions),
-      DEFAULT_REDIS_EXPIRATION
-    )
 
-    await redisClient.set(
-      `userTxs:${reciever._id}`,
-      JSON.stringify(receiverTx.transactions),
-      DEFAULT_REDIS_EXPIRATION
-    )
+    await cachAllUsertx(sender._id)
+
+    await cachAllUsertx(reciever._id)
 
     return res.status(200).json({
       success: true,
@@ -1700,11 +1683,7 @@ const createRecieverBoltTransaction = async (req, res) => {
 
     await receiverTx.save()
 
-    await redisClient.set(
-      `userTxs:${reciever._id}`,
-      JSON.stringify(receiverTx.transactions),
-      DEFAULT_REDIS_EXPIRATION
-    )
+    await cachAllUsertx(reciever._id)
 
     return res.status(200).json({
       success: true,

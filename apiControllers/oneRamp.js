@@ -15,6 +15,7 @@ const { sendPush } = require('./alerts')
 const UserTransactions = require('../models/UserTransactions')
 const redisClient = require('../config/redisConfig')
 const { DEFAULT_REDIS_EXPIRATION } = require('../constants')
+const { cachAllUsertx } = require('../helpers/cachHelpers')
 
 const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
 const celoProvider = new ethers.providers.JsonRpcProvider(celoProviderUrl)
@@ -134,11 +135,7 @@ async function createRampTx(req, res) {
 
     await userTx.save()
 
-    await redisClient.set(
-      `userTxs:${user._id}`,
-      JSON.stringify(userTx.transactions),
-      DEFAULT_REDIS_EXPIRATION
-    )
+    await cachAllUsertx(user._id)
 
     return res.status(201).json({
       success: true,
