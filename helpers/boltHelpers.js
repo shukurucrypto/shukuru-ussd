@@ -98,7 +98,7 @@ const boltSendSatsHelper = async (data) => {
       await userTx.save()
 
       await cachAllUsertx(sender._id)
-      await cachAllUsertx(reciever._id)
+      //  await cachAllUsertx(reciever._id)
 
       return {
         success: true,

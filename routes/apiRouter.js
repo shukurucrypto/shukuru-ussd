@@ -150,7 +150,7 @@ apiRouter.get(
 apiRouter.get('/user/:userId', userCache, getProfile)
 apiRouter.get('/profile/:phone', getApiProfile)
 apiRouter.get('/profile/name/:name', getApiProfileUsername)
-apiRouter.get('/txs/:userId', getUserTxCache, getApiProfileTx)
+apiRouter.get('/txs/:userId', getApiProfileTx)
 apiRouter.get('/txs/btc/:userId', getApiBTCTxs)
 apiRouter.post('/user/country/update', authenticateToken, changeUserCurrencyAPI)
 apiRouter.delete('/user/delete', authenticateToken, deleteUserAccount)

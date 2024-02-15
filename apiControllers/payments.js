@@ -1276,7 +1276,7 @@ async function sendRawApiCeloUSD(req, res) {
 
       await cachAllUsertx(sender._id)
 
-      await cachAllUsertx(reciever._id)
+      //  await cachAllUsertx(reciever._id)
 
       return res.status(200).json({
         success: true,
@@ -1628,7 +1628,7 @@ async function sendApiCeloUSD(req, res) {
 
     await cachAllUsertx(sender._id)
 
-    await cachAllUsertx(reciever._id)
+    //  await cachAllUsertx(reciever._id)
 
     return res.status(200).json({
       success: true,
@@ -1683,7 +1683,7 @@ const createRecieverBoltTransaction = async (req, res) => {
 
     await receiverTx.save()
 
-    await cachAllUsertx(reciever._id)
+    //  await cachAllUsertx(reciever._id)
 
     return res.status(200).json({
       success: true,
