@@ -243,6 +243,7 @@ async function login(req, res) {
       verified: existingUser.verified,
       balance: existingUser.balance,
       btcBalance: existingUser.btcBalance,
+      address: existingUser.address,
     }
 
     // Save the user to redis
