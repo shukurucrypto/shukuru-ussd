@@ -22,7 +22,6 @@ const LightningWallet = require('../models/LightningWallet.js')
 const { Masa } = require('@masa-finance/masa-sdk')
 const { boltBarePOSTRequest } = require('../helpers/boltRequests.js')
 const redisClient = require('../config/redisConfig.js')
-const nodemailer = require('nodemailer')
 const { sendUserOTPEmailCode } = require('../helpers/verifyHelpers.js')
 
 require('dotenv').config()
