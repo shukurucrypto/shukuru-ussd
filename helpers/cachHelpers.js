@@ -1,4 +1,5 @@
 const redisClient = require('../config/redisConfig')
+const { DEFAULT_REDIS_EXPIRATION } = require('../constants')
 const UserTransactions = require('../models/UserTransactions')
 
 const cachAllUsertx = async (userId) => {
