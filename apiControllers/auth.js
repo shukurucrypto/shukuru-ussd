@@ -371,6 +371,22 @@ async function sendOtpCode(req, res) {
     const { userId } = req.user
     const { email } = req.body
 
+    const user = await User.findById(userId)
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        response: 'User not found',
+      })
+    }
+
+    if (user.email != email) {
+      return res.status(403).json({
+        success: false,
+        response: 'Invalid email',
+      })
+    }
+
     const transporter = nodemailer.createTransport({
       host: `smtp.gmail.com`,
       port: 465,
