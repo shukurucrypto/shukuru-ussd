@@ -1,5 +1,6 @@
 const redisClient = require('../config/redisConfig')
 const nodemailer = require('nodemailer')
+const otpGenerator = require('otp-generator')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -16,7 +17,7 @@ const sendUserOTPEmailCode = async (email, userId) => {
   })
 
   const otp = await otpGenerator.generate(6, {
-    upperCaseAlphabets: false,
+    upperCaseAlphabets: true,
     specialChars: false,
   })
 

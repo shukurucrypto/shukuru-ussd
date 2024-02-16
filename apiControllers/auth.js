@@ -10,7 +10,6 @@ const {
   truncateAddress,
 } = require('../regex/ussdRegex.js')
 const jwt = require('jsonwebtoken')
-const otpGenerator = require('otp-generator')
 
 const passport = require('passport-local')
 const sendSMS = require('../SMS/smsFunctions.js')
