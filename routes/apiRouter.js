@@ -106,10 +106,13 @@ apiRouter.post('/reset/password', authenticateToken, resetPassword)
 apiRouter.post('/auth/login', login)
 apiRouter.post('/verify', authenticateToken, verifyPhone)
 apiRouter.post('/code', authenticateToken, verifyCode)
-apiRouter.post('/send/otp', authenticateToken, sendOtpCode)
 apiRouter.get('/acc/verify', authenticateToken, checkVerify)
+
+// OTP routes
+apiRouter.post('/send/otp', authenticateToken, sendOtpCode)
 apiRouter.post('/verify/otp', authenticateToken, verifyOtpCode)
 
+// Email routes
 apiRouter.put('/email', authenticateToken, updateEmail)
 
 // Forgot password
