@@ -921,10 +921,6 @@ const sendLightningApiPayment = async (req, res) => {
 
     const result = await boltSendSatsHelper(requestData)
 
-    console.log('====================================')
-    console.log('RESULT', result)
-    console.log('====================================')
-
     return res.json(result)
   } catch (error) {
     console.log(error.message)
