@@ -919,7 +919,15 @@ const sendLightningApiPayment = async (req, res) => {
       bolt: req.bolt,
     }
 
+    console.log('====================================')
+    console.log('REQUEST DATA', requestData)
+    console.log('====================================')
+
     const result = await boltSendSatsHelper(requestData)
+
+    console.log('====================================')
+    console.log('RESULT', result)
+    console.log('====================================')
 
     return res.json(result)
   } catch (error) {

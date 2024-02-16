@@ -1,3 +1,4 @@
+const redisClient = require('../config/redisConfig')
 const UserTransactions = require('../models/UserTransactions')
 
 const cachAllUsertx = async (userId) => {
