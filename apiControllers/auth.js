@@ -245,6 +245,7 @@ async function login(req, res) {
       balance: existingUser.balance,
       btcBalance: existingUser.btcBalance,
       address: existingUser.address,
+      phoneNumber: existingUser.phoneNumber,
     }
 
     // Save the user to redis
@@ -585,6 +586,7 @@ async function verifyOtpCode(req, res) {
       balance: user.balance,
       btcBalance: user.btcBalance,
       address: user.address,
+      phoneNumber: user.phoneNumber,
     }
 
     await redisClient.set(`user:${userId}`, JSON.stringify(cleanedUser), {
