@@ -52,9 +52,10 @@ async function createApiUser(req, res) {
     const boltInstance = await boltBarePOSTRequest(data, '/users')
 
     if (!boltInstance.success)
-      return res
-        .status(403)
-        .json({ success: false, error: 'Failed to create account' })
+      return res.status(403).json({
+        success: false,
+        error: 'Failed to create account ' + boltInstance.response.data.error,
+      })
 
     // Encrypt the password of the user
     const encryptedPassword = await encrypt(password)
