@@ -12,6 +12,7 @@ const {
   sendRawOtpCode,
   verifyRawOtpCode,
   resetRawPassword,
+  updateEmail,
 } = require('../apiControllers/auth.js')
 const {
   getWalletApiBalance,
@@ -108,6 +109,8 @@ apiRouter.post('/code', authenticateToken, verifyCode)
 apiRouter.post('/send/otp', authenticateToken, sendOtpCode)
 apiRouter.get('/acc/verify', authenticateToken, checkVerify)
 apiRouter.post('/verify/otp', authenticateToken, verifyOtpCode)
+
+apiRouter.put('/email', authenticateToken, updateEmail)
 
 // Forgot password
 apiRouter.post('/send/raw/otp', sendRawOtpCode)

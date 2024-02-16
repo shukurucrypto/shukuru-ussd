@@ -605,6 +605,57 @@ async function verifyOtpCode(req, res) {
   }
 }
 
+async function updateEmail(req, res) {
+  try {
+    const { userId } = req.user
+
+    const { email } = req.body
+
+    // Try to find an existing UserOTP record for the user
+    // const existingOTP = await UserOtp.findOne({ user: userId })
+
+    const user = await User.findById(userId)
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        response: 'User not found',
+      })
+    }
+
+    user.email = email
+
+    await user.save()
+
+    const cleanedUser = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      country: user.country,
+      accountType: user.accountType,
+      verified: user.verified,
+      balance: user.balance,
+      btcBalance: user.btcBalance,
+      address: user.address,
+      phoneNumber: user.phoneNumber,
+    }
+
+    await redisClient.set(`user:${userId}`, JSON.stringify(cleanedUser), {
+      EX: 3600,
+    })
+
+    return res.status(201).json({
+      success: true,
+      response: 'Email updated',
+    })
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      response: error.message,
+    })
+  }
+}
+
 async function checkVerify(req, res) {
   try {
     const { userId } = req.user
@@ -856,4 +907,5 @@ module.exports = {
   sendRawOtpCode,
   verifyRawOtpCode,
   resetRawPassword,
+  updateEmail,
 }
