@@ -623,6 +623,15 @@ async function updateEmail(req, res) {
       })
     }
 
+    const emailOccupied = await User.findOne({ email })
+
+    if (emailOccupied) {
+      return res.status(403).json({
+        success: false,
+        response: 'Email already in use',
+      })
+    }
+
     user.email = email
 
     await user.save()
