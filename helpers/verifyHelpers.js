@@ -16,10 +16,12 @@ const sendUserOTPEmailCode = async (email, userId) => {
     debug: true,
   })
 
-  const otp = await otpGenerator.generate(6, {
+  const generatedOTP = await otpGenerator.generate(6, {
     upperCaseAlphabets: true,
     specialChars: false,
   })
+
+  const otp = generatedOTP.toLocaleUpperCase()
 
   // Send the otp code to the user email
   transporter.sendMail({
