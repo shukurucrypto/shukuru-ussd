@@ -210,28 +210,15 @@ async function getWalletApiBalance(req, res) {
 
     const phoneNumber = currentUser.phoneNumber
 
-    const busdContract = new ethers.Contract(busdAddress, BUSDABI, provider)
-
     let convertedCello = 0
-    let convertedBusd = 0
 
     let celloDollarBalance = await getCelloDollarBalance(phoneNumber)
     celloDollarBalance_ = ethers.utils.formatEther(celloDollarBalance)
-
-    const busdWalletBalance = await busdContract.balanceOf(currentUser.address)
 
     // IMPORTANT LINES ------- Coversion lines
     if (Number(celloDollarBalance_) > 0) {
       convertedCello = await currencyConvertor(
         celloDollarBalance_,
-        'USD',
-        currentUser.country
-      )
-    }
-
-    if (Number(busdWalletBalance) > 0) {
-      convertedBusd = await currencyConvertor(
-        ethers.utils.formatEther(busdWalletBalance.toString()),
         'USD',
         currentUser.country
       )
@@ -253,9 +240,9 @@ async function getWalletApiBalance(req, res) {
     let total
 
     if (!convertedSats && typeof convertedSats !== Number) {
-      total = Number(convertedCello) + Number(convertedBusd)
+      total = Number(convertedCello)
     } else {
-      total = Number(convertedCello) + Number(convertedBusd) + convertedSats
+      total = Number(convertedCello) + convertedSats
     }
 
     return res.status(200).json({
@@ -264,7 +251,7 @@ async function getWalletApiBalance(req, res) {
         userId: currentUser._id,
         lightning: sats,
         cusd: Number(celloDollarBalance_),
-        busd: Number(convertedBusd),
+        busd: 0,
         eth: 0,
         usdt: 0,
         total: total,
