@@ -553,7 +553,7 @@ async function verifyOtpCode(req, res) {
     if (!existingOTP) {
       return res.status(401).json({
         success: false,
-        response: 'Bad request',
+        response: 'OTP expired',
       })
     }
 
