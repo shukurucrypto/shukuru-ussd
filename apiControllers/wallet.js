@@ -28,6 +28,7 @@ const LightningWallet = require('../models/LightningWallet')
 const NfcCard = require('../models/NfcCard')
 const { boltGETRequest } = require('../helpers/boltRequests')
 const { cacheUserTxs } = require('../redis/txcache.js')
+const redisClient = require('../config/redisConfig.js')
 require('dotenv').config()
 
 const provider = new ethers.providers.JsonRpcProvider(bscProviderURL)
@@ -126,6 +127,8 @@ async function getProfile(req, res) {
       btcBalance: currentUser.btcBalance,
       // Optionally include other fields that are considered safe
     }
+
+    await redisClient.set(`user:${userId}`, JSON.stringify(cleanedUser))
 
     return res.status(200).json({
       success: true,

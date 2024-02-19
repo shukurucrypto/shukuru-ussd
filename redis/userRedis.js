@@ -14,17 +14,6 @@ const userCache = async (req, res, next) => {
         data: user,
       })
     } else {
-      const currentUser = await User.findById(userId)
-
-      if (!currentUser) {
-        return res.status(404).json({
-          success: false,
-          message: 'User not found',
-        })
-      }
-
-      await redisClient.set(`user:${userId}`, JSON.stringify(currentUser))
-
       next()
     }
   } catch (error) {
