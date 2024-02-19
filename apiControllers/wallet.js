@@ -122,6 +122,7 @@ async function getProfile(req, res) {
       accountType: currentUser.accountType,
       verified: currentUser.verified,
       balance: currentUser.balance,
+      address: currentUser.address,
       btcBalance: currentUser.btcBalance,
       // Optionally include other fields that are considered safe
     }

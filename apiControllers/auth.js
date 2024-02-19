@@ -117,13 +117,7 @@ async function createApiUser(req, res) {
       phoneNumber: savedUser.phoneNumber,
     }
 
-    await redisClient.set(
-      `user:${savedUser._id}`,
-      JSON.stringify(cleanedUser),
-      {
-        EX: 3600,
-      }
-    )
+    await redisClient.set(`user:${savedUser._id}`, JSON.stringify(cleanedUser))
 
     // Send the user an OTP to verify their email
     sendUserOTPEmailCode(savedUser.email, savedUser._id)
@@ -273,9 +267,7 @@ async function login(req, res) {
     }
 
     // Save the user to redis
-    await redisClient.set(`user:${existingUser._id}`, JSON.stringify(user), {
-      EX: 3600,
-    })
+    await redisClient.set(`user:${existingUser._id}`, JSON.stringify(user))
 
     return res.status(201).json({
       success: true,

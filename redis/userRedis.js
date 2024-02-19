@@ -1,4 +1,5 @@
 const redisClient = require('../config/redisConfig')
+const User = require('../models/User')
 
 const userCache = async (req, res, next) => {
   const { userId } = req.params
@@ -13,7 +14,17 @@ const userCache = async (req, res, next) => {
         data: user,
       })
     } else {
-      console.log('Cache miss')
+      const currentUser = await User.findById(userId)
+
+      if (!currentUser) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found',
+        })
+      }
+
+      await redisClient.set(`user:${userId}`, 3600, JSON.stringify(currentUser))
+
       next()
     }
   } catch (error) {
