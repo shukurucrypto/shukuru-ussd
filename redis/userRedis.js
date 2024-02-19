@@ -23,7 +23,7 @@ const userCache = async (req, res, next) => {
         })
       }
 
-      await redisClient.set(`user:${userId}`, 3600, JSON.stringify(currentUser))
+      await redisClient.set(`user:${userId}`, JSON.stringify(currentUser))
 
       next()
     }
