@@ -52,8 +52,6 @@ async function getApiProfileTx(req, res) {
       options: { sort: { date: 'desc' } },
     })
 
-    // await cacheUserTxs(userId, txTo)
-
     return res.status(200).json({
       success: true,
       data: txTo,

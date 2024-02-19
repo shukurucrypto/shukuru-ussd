@@ -11,11 +11,6 @@ const cachAllUsertx = async (userId) => {
   })
 
   // Add the reciever's transaction to the reciver's cache transaction
-  await redisClient.set(
-    `userTxs:${userId}`,
-    JSON.stringify(transactions),
-    DEFAULT_REDIS_EXPIRATION
-  )
 }
 
 module.exports = {

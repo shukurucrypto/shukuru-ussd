@@ -38,12 +38,8 @@ const { sendcUSDKit } = require('../helpers/signer.js')
 const {
   boltPOSTRequest,
   boltGETRequest,
-  boltPayInvoice,
 } = require('../helpers/boltRequests.js')
 const { boltSendSatsHelper } = require('../helpers/boltHelpers.js')
-const redisClient = require('../config/redisConfig.js')
-const { DEFAULT_REDIS_EXPIRATION } = require('../constants/index.js')
-const { cachAllUsertx } = require('../helpers/cachHelpers.js')
 
 require('dotenv').config()
 
@@ -1274,9 +1270,7 @@ async function sendRawApiCeloUSD(req, res) {
 
       // Save the txs to redis
 
-      await cachAllUsertx(sender._id)
-
-      //  await cachAllUsertx(reciever._id)
+      //  await (reciever._id)
 
       return res.status(200).json({
         success: true,
@@ -1303,8 +1297,6 @@ async function sendRawApiCeloUSD(req, res) {
       await userTx.transactions.push(tx._id)
 
       await userTx.save()
-
-      await cachAllUsertx(sender._id)
 
       return res.status(200).json({
         success: true,
@@ -1625,8 +1617,6 @@ async function sendApiCeloUSD(req, res) {
     await userTx.save()
 
     // Save the userTx to cache here...
-
-    await cachAllUsertx(sender._id)
 
     //  await cachAllUsertx(reciever._id)
 

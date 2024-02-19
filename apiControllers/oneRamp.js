@@ -135,8 +135,6 @@ async function createRampTx(req, res) {
 
     await userTx.save()
 
-    await cachAllUsertx(user._id)
-
     return res.status(201).json({
       success: true,
     })
