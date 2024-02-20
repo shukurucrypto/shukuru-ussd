@@ -116,8 +116,10 @@ const sendPush = async (subId, msg) => {
 
         // Set the campaign name dynamically based on the function argument.
         name: 'Info', // This sets the campaign name.
-        included_segments: ['Subscribed Users'],
-        external: subId,
+        // included_segments: [''],
+        // external: subId,
+        // include_aliases: { external_id: [subId] },
+        include_external_user_ids: [subId],
         // Dynamic targeting based on external_id, using the function argument.
 
         contents: { en: msg }, // The message content, passed via the 'msg' argument.
