@@ -439,7 +439,7 @@ async function sendRawOtpCode(req, res) {
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>Password Reset</title>
+            <title>Your Requested OTP Code</title>
         </head>
         <body style="font-family: Arial, sans-serif; text-align: center; background-color: #facc14; color: #000; margin: 0; padding: 24px;">
 
@@ -451,16 +451,16 @@ async function sendRawOtpCode(req, res) {
                 <tr>
                     <td style="padding: 20px;">
                         <h1 style="font-size: 24px; color: #000;">Password Reset</h1>
-                        <p style="font-size: 16px; color: #333;">You have requested to reset your password. Use the following OTP code:</p>
+                        <p style="font-size: 16px; color: #333;">You have requested to an OTP code for your Shukuru Wallet account:</p>
                         <div style="background-color: #facc14; padding: 10px; border-radius: 5px; margin: 20px 0;">
                             <p style="font-size: 20px; color: #000; font-weight: bold;">OTP: ${otp}</p>
                         </div>
-                        <p style="font-size: 12px; color: #333;">Please enter the OTP code in your app to reset your password. If you didn't request this, you can safely ignore this email.</p>
+                        <p style="font-size: 12px; color: #333;">Your requested OTP Code is here. If you didn't request this, you can safely ignore this email.</p>
                     </td>
                 </tr>
             </table>
 
-            <p style="font-size: 12px; margin-top: 12px;">This email was sent to you by Shukuru. &copy; 2023. All rights reserved.</p>
+            <p style="font-size: 12px; margin-top: 12px;">This email was sent to you by Shukuru. &copy; 2024. All rights reserved.</p>
 
         </body>
         </html>
