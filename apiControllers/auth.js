@@ -432,8 +432,8 @@ async function sendRawOtpCode(req, res) {
     const info = await transporter.sendMail({
       from: '"Jovan from Shukuru 🟡" <jovanmwesigwa79@gmail.com>', // sender address
       to: email, // list of receivers
-      subject: 'Reset Password ✔', // Subject line
-      text: 'Your OTP password reset code is ' + otp, // plain text body
+      subject: 'Shukuru Verification OTP Code ✔', // Subject line
+      text: 'Your OTP code is ' + otp, // plain text body
       html: `
         <!DOCTYPE html>
         <html>
